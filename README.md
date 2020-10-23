@@ -1,7 +1,7 @@
 # BEAM
 ## How to import project to Android Studio
 1. Download Git
-2. Make sure you've connected to your github account in Android Studio. 
+2. Make sure you've connected to your github account in Android Studio. File>Settings>Version Control>Github
 3. Click File>New>Project From Version Control>Github and choose the beam repository
 4. Voilà
 ## Important

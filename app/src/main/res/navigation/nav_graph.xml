@@ -1,18 +1,12 @@
 <?xml version="1.0" encoding="utf-8"?>
 <navigation xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:app="http://schemas.android.com/apk/res-auto" android:id="@+id/nav_graph"
-    app:startDestination="@id/login_dest">
+    app:startDestination="@id/main_dest">
 
     <fragment
         android:id="@+id/login_dest"
         android:name="com.example.beam.ui.LoginFragment"
-        android:label="login_fragment" >
-        <action
-            android:id="@+id/action_login_success"
-            app:destination="@id/main_dest"
-            app:popUpTo="@id/login_dest"
-            app:popUpToInclusive="true" />
-    </fragment>
+        android:label="login_fragment" />
     <fragment
         android:id="@+id/main_dest"
         android:name="com.example.beam.ui.MainFragment"

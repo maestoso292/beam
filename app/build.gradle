@@ -24,6 +24,7 @@ android {
 }
 
 dependencies {
+    // DON'T REMOVE ANY OF THESE
     implementation fileTree(dir: "libs", include: ["*.jar"])
     implementation 'androidx.appcompat:appcompat:1.2.0'
     implementation 'androidx.constraintlayout:constraintlayout:2.0.2'

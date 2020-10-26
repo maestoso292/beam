@@ -16,6 +16,7 @@ import android.view.MenuItem;
 
 import com.example.beam.R;
 
+import java.util.Arrays;
 import java.util.concurrent.TimeUnit;
 
 public class MainActivity extends AppCompatActivity {
@@ -36,7 +37,11 @@ public class MainActivity extends AppCompatActivity {
             @Override
             public void onDestinationChanged(@NonNull NavController controller, @NonNull NavDestination destination, @Nullable Bundle arguments) {
                 // Refresh the overflow menu every time destination changes
-                invalidateOptionsMenu();
+                if (Arrays.asList(R.id.login_dest, R.id.main_dest).contains(destination)) {
+                    invalidateOptionsMenu();
+
+
+                }
             }
         });
     }

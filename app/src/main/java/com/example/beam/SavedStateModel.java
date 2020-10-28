@@ -9,14 +9,16 @@ import com.example.beam.ui.LoginFragment;
 public class SavedStateModel extends ViewModel {
     // TODO SavedStateHandle needs to persist after death
     private SavedStateHandle savedStateHandle;
-     /*
-    SavedStateModel(SavedStateHandle savedStateHandle) {
-        this.savedStateHandle = savedStateHandle;
+    SavedStateModel() {
+        super();
     }
-    */
-
-    public void setSavedStateHandle(SavedStateHandle savedStateHandle) {
+    public SavedStateModel(SavedStateHandle savedStateHandle) {
+        super();
         this.savedStateHandle = savedStateHandle;
+        if (!this.savedStateHandle.contains(LoginFragment.LOGIN_SUCCESSFUL)) {
+            this.savedStateHandle.set(LoginFragment.LOGIN_SUCCESSFUL, false);
+        }
+
     }
 
     public LiveData<Boolean> getAuthentication() {

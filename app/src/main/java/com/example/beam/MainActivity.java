@@ -4,6 +4,9 @@ import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
 import androidx.appcompat.app.AppCompatActivity;
 import androidx.appcompat.widget.Toolbar;
+import androidx.lifecycle.Observer;
+import androidx.lifecycle.SavedStateHandle;
+import androidx.lifecycle.ViewModelProvider;
 import androidx.navigation.NavController;
 import androidx.navigation.NavDestination;
 import androidx.navigation.Navigation;
@@ -11,6 +14,7 @@ import androidx.navigation.fragment.NavHostFragment;
 import androidx.navigation.ui.NavigationUI;
 
 import android.os.Bundle;
+import android.util.Log;
 import android.view.Menu;
 import android.view.MenuItem;
 
@@ -22,6 +26,7 @@ import java.util.concurrent.TimeUnit;
 public class MainActivity extends AppCompatActivity {
 
     private NavController navController;
+    private SavedStateModel savedStateModel;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -36,14 +41,15 @@ public class MainActivity extends AppCompatActivity {
         navController.addOnDestinationChangedListener(new NavController.OnDestinationChangedListener() {
             @Override
             public void onDestinationChanged(@NonNull NavController controller, @NonNull NavDestination destination, @Nullable Bundle arguments) {
+                invalidateOptionsMenu();
                 // Refresh the overflow menu every time destination changes
                 if (Arrays.asList(R.id.login_dest, R.id.main_dest).contains(destination)) {
-                    invalidateOptionsMenu();
-
 
                 }
             }
         });
+
+        savedStateModel = new ViewModelProvider(this).get(SavedStateModel.class);
     }
 
     @Override
@@ -65,6 +71,9 @@ public class MainActivity extends AppCompatActivity {
 
     @Override
     public boolean onOptionsItemSelected(@NonNull MenuItem item) {
+        if (item.getItemId() == R.id.stmg_else) {
+            savedStateModel.setAuthentication(false);
+        }
         // Returns destination corresponding to id of item
         return NavigationUI.onNavDestinationSelected(item, Navigation.findNavController(this, R.id.nav_host_fragment))
                 || super.onOptionsItemSelected(item);

@@ -27,15 +27,15 @@ public class MainFragment extends Fragment {
     private MainFragmentAdapter adapter;
 
     private SavedStateModel savedStateModel;
+    private NavController navController;
 
     @Override
     public void onCreate(@Nullable Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
 
-        final NavController navController = NavHostFragment.findNavController(this);
+        navController = NavHostFragment.findNavController(this);
         savedStateModel = new ViewModelProvider(requireActivity()).get(SavedStateModel.class);
-        savedStateModel.setSavedStateHandle(new SavedStateHandle());
-
+        /*
         savedStateModel.getAuthentication().observe(requireActivity(), new Observer<Boolean>() {
             @Override
             public void onChanged(Boolean isAuthenticated) {
@@ -45,6 +45,7 @@ public class MainFragment extends Fragment {
                 }
             }
         });
+         */
         /*
         NavBackStackEntry navBackStackEntry = navController.getCurrentBackStackEntry();
         SavedStateHandle savedStateHandle = navBackStackEntry.getSavedStateHandle();
@@ -64,30 +65,29 @@ public class MainFragment extends Fragment {
     @Nullable
     @Override
     public View onCreateView(@NonNull LayoutInflater inflater, @Nullable ViewGroup container, @Nullable Bundle savedInstanceState) {
-
         return inflater.inflate(R.layout.main_fragment, container, false);
     }
 
     @Override
     public void onViewCreated(@NonNull View view, @Nullable Bundle savedInstanceState) {
         super.onViewCreated(view, savedInstanceState);
-        /*
+
         // TODO SavedStateModel should store User class (?) in final product
-        savedStateModel = new ViewModelProvider(requireActivity()).get(SavedStateModel.class);
-        final NavController navController = Navigation.findNavController(view);
-        savedStateModel.getUser().observe(getViewLifecycleOwner(), new Observer<String>() {
+        /*
+        if (!savedStateModel.getAuthentication().getValue()) {
+            navController.navigate(R.id.login_dest);
+        }
+
+         */
+        savedStateModel.getAuthentication().observe(requireActivity(), new Observer<Boolean>() {
             @Override
-            public void onChanged(String user) {
-                if (user != null) {
-                    // TODO
-                }
-                else {
+            public void onChanged(Boolean isAuthenticated) {
+                if (!isAuthenticated) {
                     navController.navigate(R.id.login_dest);
+                    Log.d("Navigation", "Navigated to login");
                 }
             }
         });
-
-         */
 
         pager = view.findViewById(R.id.main_pager);
         tabLayout = view.findViewById(R.id.main_tab_layout);

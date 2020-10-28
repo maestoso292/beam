@@ -20,8 +20,8 @@ public class MainFragmentAdapter extends FragmentStateAdapter {
         tabHeadings.add("Stats");
 
         fragmentList = new ArrayList<>(3);
-        fragmentList.add(0, new DailyFragment());
-        fragmentList.add(1, new WeeklyFragment());
+        fragmentList.add(0, new TodayFragment());
+        fragmentList.add(1, new ScheduleFragment());
         fragmentList.add(2, new StatsFragment());
     }
 

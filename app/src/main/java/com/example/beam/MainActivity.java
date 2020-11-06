@@ -44,7 +44,6 @@ public class MainActivity extends AppCompatActivity {
                 invalidateOptionsMenu();
                 // Refresh the overflow menu every time destination changes
                 if (Arrays.asList(R.id.login_dest, R.id.main_dest).contains(destination)) {
-
                 }
             }
         });

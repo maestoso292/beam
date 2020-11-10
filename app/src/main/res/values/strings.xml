@@ -1,3 +1,4 @@
 <resources>
     <string name="app_name">beam</string>
+    <string name="ble_not_supported">App not supported.</string>
 </resources>

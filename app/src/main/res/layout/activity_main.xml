@@ -1,4 +1,5 @@
 <?xml version="1.0" encoding="utf-8"?>
+<!-- TODO DON'T TOUCH -->
 <androidx.constraintlayout.widget.ConstraintLayout xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:app="http://schemas.android.com/apk/res-auto"
     xmlns:tools="http://schemas.android.com/tools"
@@ -7,15 +8,16 @@
     tools:context=".MainActivity">
 
     <Button
+        android:id="@+id/button_peripheral"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
         app:layout_constraintTop_toTopOf="parent"
-        android:id="@+id/open_server"
-        android:layout_width="match_parent"
-        android:layout_height="wrap_content"
-        android:text="OPEN SERVER" />
+        android:text="Peripheral/Server Activity" />
     <Button
-        android:id="@+id/connect_server"
+        android:id="@+id/button_central"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
-        app:layout_constraintTop_toBottomOf="@+id/open_server" />
+        app:layout_constraintTop_toBottomOf="@+id/button_peripheral"
+        android:text="Central/Client Activity"/>
 
 </androidx.constraintlayout.widget.ConstraintLayout>

@@ -17,6 +17,7 @@ import android.os.Bundle;
 import android.os.ParcelUuid;
 import android.view.View;
 import android.widget.Button;
+import android.widget.Toast;
 
 import androidx.appcompat.app.AppCompatActivity;
 
@@ -67,7 +68,9 @@ public class PeripheralActivity extends AppCompatActivity {
         buttonOpenServer.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View view) {
-                openGattServer();
+                if (bluetoothGattServer == null) {
+                    openGattServer();
+                }
             }
         });
 
@@ -89,23 +92,27 @@ public class PeripheralActivity extends AppCompatActivity {
             return;
         }
 
-        bluetoothLeAdvertiser = bluetoothAdapter.getBluetoothLeAdvertiser();
-        bluetoothGattServer = bluetoothManager.openGattServer(this, bluetoothGattServerCallback);
-
         initialiseServer();
         startAdvertising();
+
+        String value = bluetoothGattServer
+                .getService(BeamServiceProfile.SERVICE_UUID)
+                .getCharacteristic(BeamServiceProfile.CHARACTERISTIC_TOKEN_UUID)
+                .getStringValue(0);
+        Toast.makeText(this, "Value in Characteristic: " + value, Toast.LENGTH_SHORT).show();
     }
 
     private void initialiseServer() {
+        bluetoothGattServer = bluetoothManager.openGattServer(this, bluetoothGattServerCallback);
         BluetoothGattService bluetoothGattService = new BluetoothGattService(BeamServiceProfile.SERVICE_UUID,
                 BluetoothGattService.SERVICE_TYPE_PRIMARY);
-
         bluetoothGattService.addCharacteristic(BeamServiceProfile.CHARACTERISTIC_TOKEN);
-
         bluetoothGattServer.addService(bluetoothGattService);
+        bluetoothGattService.getCharacteristic(BeamServiceProfile.CHARACTERISTIC_TOKEN_UUID).setValue("Test String");
     }
 
     private void startAdvertising() {
+        bluetoothLeAdvertiser = bluetoothAdapter.getBluetoothLeAdvertiser();
         if (bluetoothLeAdvertiser == null) {
             return;
         }
@@ -123,5 +130,16 @@ public class PeripheralActivity extends AppCompatActivity {
                 .build();
 
         bluetoothLeAdvertiser.startAdvertising(settings, data, advertiseCallback);
+    }
+
+    @Override
+    protected void onPause() {
+        super.onPause();
+        if (bluetoothLeAdvertiser != null) {
+            bluetoothLeAdvertiser.stopAdvertising(advertiseCallback);
+        }
+        if (bluetoothGattServer != null) {
+            bluetoothGattServer.close();
+        }
     }
 }

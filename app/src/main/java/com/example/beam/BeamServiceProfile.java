@@ -1,7 +1,6 @@
 package com.example.beam;
 
 import android.bluetooth.BluetoothGattCharacteristic;
-import android.bluetooth.BluetoothGattService;
 
 import java.util.UUID;
 
@@ -11,7 +10,9 @@ public class BeamServiceProfile {
     // TOKEN is just a label I gave to the characteristic. No particular meaning
     public static final UUID CHARACTERISTIC_TOKEN_UUID = UUID.fromString("83711855-5e89-4224-930a-7adf6e3e4239");
 
-    public static BluetoothGattCharacteristic CHARACTERISTIC_TOKEN = new BluetoothGattCharacteristic(CHARACTERISTIC_TOKEN_UUID,
+    public static final BluetoothGattCharacteristic CHARACTERISTIC_TOKEN = new BluetoothGattCharacteristic(CHARACTERISTIC_TOKEN_UUID,
             BluetoothGattCharacteristic.PROPERTY_READ | BluetoothGattCharacteristic.PROPERTY_WRITE | BluetoothGattCharacteristic.PROPERTY_NOTIFY,
             BluetoothGattCharacteristic.PERMISSION_READ);
+
+    private static String token;
 }

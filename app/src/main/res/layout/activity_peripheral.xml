@@ -6,4 +6,11 @@
     android:layout_height="match_parent"
     tools:context=".PeripheralActivity">
 
+    <Button
+        android:id="@+id/button_open_server"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        app:layout_constraintTop_toTopOf="parent"
+        android:text="Open Server" />
+
 </androidx.constraintlayout.widget.ConstraintLayout>

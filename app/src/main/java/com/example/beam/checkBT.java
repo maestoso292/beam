@@ -2,13 +2,18 @@ package com.example.beam;
 
 import android.app.Activity;
 import android.bluetooth.BluetoothAdapter;
+import android.content.BroadcastReceiver;
+import android.content.Context;
 import android.content.Intent;
+import android.widget.ExpandableListView;
+import android.widget.Toast;
 
 /**
  * Check the device Bluetooth's status
  * and enables Bluetooth if it's off
+ *  and other utilities
  */
-public class checkBT {
+public class checkBT  {
 
     /**
      * Check the status of Bluetooth
@@ -27,4 +32,5 @@ public class checkBT {
         Intent enableIntent = new Intent(BluetoothAdapter.ACTION_REQUEST_ENABLE);
         activity.startActivityForResult(enableIntent, MainActivity.REQUEST_ENABLE_BT);
     }
+
 }

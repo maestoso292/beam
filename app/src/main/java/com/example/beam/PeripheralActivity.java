@@ -34,8 +34,8 @@ public class PeripheralActivity extends AppCompatActivity {
         @Override
         public void onCharacteristicReadRequest(BluetoothDevice device, int requestId, int offset, BluetoothGattCharacteristic characteristic) {
             byte[] characteristicValue = bluetoothGattServer
-                    .getService(BeamServiceProfile.SERVICE_UUID)
-                    .getCharacteristic(BeamServiceProfile.CHARACTERISTIC_TOKEN_UUID)
+                    .getService(BeamProfile.SERVICE_UUID)
+                    .getCharacteristic(BeamProfile.CHARACTERISTIC_TOKEN_UUID)
                     .getValue();
             bluetoothGattServer.sendResponse(device, requestId, BluetoothGatt.GATT_SUCCESS, offset, characteristicValue);
         }
@@ -94,18 +94,15 @@ public class PeripheralActivity extends AppCompatActivity {
         startAdvertising();
 
         String value = bluetoothGattServer
-                .getService(BeamServiceProfile.SERVICE_UUID)
-                .getCharacteristic(BeamServiceProfile.CHARACTERISTIC_TOKEN_UUID)
+                .getService(BeamProfile.SERVICE_UUID)
+                .getCharacteristic(BeamProfile.CHARACTERISTIC_TOKEN_UUID)
                 .getStringValue(0);
     }
 
     private void initialiseServer() {
         bluetoothGattServer = bluetoothManager.openGattServer(this, bluetoothGattServerCallback);
-        BluetoothGattService bluetoothGattService = new BluetoothGattService(BeamServiceProfile.SERVICE_UUID,
-                BluetoothGattService.SERVICE_TYPE_PRIMARY);
-        bluetoothGattService.addCharacteristic(BeamServiceProfile.CHARACTERISTIC_TOKEN);
-        bluetoothGattServer.addService(bluetoothGattService);
-        bluetoothGattService.getCharacteristic(BeamServiceProfile.CHARACTERISTIC_TOKEN_UUID).setValue("Test String");
+        BluetoothGattService bluetoothGattService = BeamProfile.getBeamService();
+        bluetoothGattService.getCharacteristic(BeamProfile.CHARACTERISTIC_TOKEN_UUID).setValue("Test String");
     }
 
 
@@ -125,7 +122,7 @@ public class PeripheralActivity extends AppCompatActivity {
 
         AdvertiseData data = new AdvertiseData.Builder()
                 .setIncludeDeviceName(true)
-                .addServiceUuid(new ParcelUuid(BeamServiceProfile.SERVICE_UUID))
+                .addServiceUuid(new ParcelUuid(BeamProfile.SERVICE_UUID))
                 .build();
 
         bluetoothLeAdvertiser.startAdvertising(settings, data, advertiseCallback);

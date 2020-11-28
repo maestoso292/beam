@@ -34,7 +34,7 @@ public class CentralActivity extends AppCompatActivity {
     // In milliseconds
     private static final long SCAN_PERIOD = 10000;
 
-    private boolean isScanning;
+    private boolean isScanning = false;
     private Handler handler = new Handler();
 
     private BluetoothManager bluetoothManager;
@@ -113,25 +113,58 @@ public class CentralActivity extends AppCompatActivity {
     @RequiresApi(api = Build.VERSION_CODES.LOLLIPOP)
     private void startLeScan21() {
         ScanFilter scanFilter = new ScanFilter.Builder()
-                .setServiceUuid(new ParcelUuid(BeamServiceProfile.SERVICE_UUID))
+                .setServiceUuid(new ParcelUuid(BeamProfile.SERVICE_UUID))
                 .build();
 
         ScanSettings settings = new ScanSettings.Builder()
                 .setScanMode(ScanSettings.SCAN_MODE_BALANCED)
                 .build();
-        Toast.makeText(getApplicationContext(), "Scan21 started", Toast.LENGTH_SHORT).show();
         // TODO Scanning frequency should follow startLeScan18()
+        if (!isScanning) {
+            // Stops scanning after a pre-defined scan period.
+            handler.postDelayed(new Runnable() {
+                @Override
+                public void run() {
+                    isScanning = false;
+                    stopLeScan21();
+                }
+            }, SCAN_PERIOD);
+
+            isScanning = true;
+            bluetoothAdapter.getBluetoothLeScanner()
+                    .startScan(Collections.singletonList(scanFilter), settings, scanCallback);
+            Toast.makeText(getApplicationContext(), "Scan21 started", Toast.LENGTH_SHORT).show();
+        }
+        else {
+            isScanning = false;
+            stopLeScan21();
+        }
+        /*
         bluetoothAdapter.getBluetoothLeScanner()
                 .startScan(Collections.singletonList(scanFilter), settings, scanCallback);
+
+         */
     }
 
     @RequiresApi(api = Build.VERSION_CODES.LOLLIPOP)
     private void stopLeScan21() {
         bluetoothAdapter.getBluetoothLeScanner().stopScan(scanCallback);
+        Toast.makeText(getApplicationContext(), "Scan21 stopped", Toast.LENGTH_SHORT).show();
     }
 
     private void connectToGattServer(BluetoothDevice device) {
         bluetoothGatt = device.connectGatt(this, true, gattCallback);
+    }
+
+    @Override
+    protected void onPause() {
+        super.onPause();
+        if (isBelowAPI21()) {
+
+        }
+        else {
+            stopLeScan21();
+        }
     }
 
     @RequiresApi(api = Build.VERSION_CODES.JELLY_BEAN_MR2)
@@ -192,8 +225,8 @@ public class CentralActivity extends AppCompatActivity {
             Log.d(TAG, "onServicesDiscovered");
 
             for (BluetoothGattService service : gatt.getServices()) {
-                if (BeamServiceProfile.SERVICE_UUID.equals(service.getUuid())) {
-                    gatt.readCharacteristic(service.getCharacteristic(BeamServiceProfile.CHARACTERISTIC_TOKEN_UUID));
+                if (BeamProfile.SERVICE_UUID.equals(service.getUuid())) {
+                    gatt.readCharacteristic(service.getCharacteristic(BeamProfile.CHARACTERISTIC_TOKEN_UUID));
                 }
             }
         }
@@ -202,7 +235,7 @@ public class CentralActivity extends AppCompatActivity {
         public void onCharacteristicRead(BluetoothGatt gatt, BluetoothGattCharacteristic characteristic, int status) {
             super.onCharacteristicRead(gatt, characteristic, status);
             Log.d(TAG, "onCharacteristicRead - UUID: " + characteristic.getUuid().toString());
-            if (BeamServiceProfile.CHARACTERISTIC_TOKEN_UUID.equals(characteristic.getUuid())) {
+            if (BeamProfile.CHARACTERISTIC_TOKEN_UUID.equals(characteristic.getUuid())) {
                 final String value = characteristic.getStringValue(0);
                 Toast.makeText(getApplicationContext(), "Characteristic Value: " + value, Toast.LENGTH_SHORT).show();
             }

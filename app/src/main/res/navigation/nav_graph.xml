@@ -1,29 +1,38 @@
 <?xml version="1.0" encoding="utf-8"?>
 <navigation xmlns:android="http://schemas.android.com/apk/res/android"
-    xmlns:app="http://schemas.android.com/apk/res-auto" android:id="@+id/nav_graph"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    xmlns:tools="http://schemas.android.com/tools"
+    android:id="@+id/nav_graph"
     app:startDestination="@id/main_dest">
 
     <fragment
         android:id="@+id/login_dest"
         android:name="com.example.beam.ui.LoginFragment"
-        android:label="login_fragment" />
+        android:label="login_fragment"
+        tools:layout="@layout/login_fragment"/>
     <fragment
         android:id="@+id/main_dest"
         android:name="com.example.beam.ui.MainFragment"
-        android:label="main_fragment" >
+        android:label="main_fragment"
+        tools:layout="@layout/main_fragment">
         <action
             android:id="@+id/action_go_to_settings"
             app:destination="@id/settings_dest" />
         <action
             android:id="@+id/action_logout"
             app:destination="@id/login_dest" />
+        <action
+            android:id="@+id/action_detailed_stats"
+            app:destination="@id/detailed_stats_dest" />
     </fragment>
     <fragment
         android:id="@+id/settings_dest"
         android:name="com.example.beam.ui.SettingsFragment"
-        android:label="settings_fragment" >
-        <action
-            android:id="@+id/action_logout"
-            app:destination="@id/login_dest" />
-    </fragment>
+        android:label="settings_fragment"
+        tools:layout="@layout/settings_fragment"/>
+    <fragment
+        android:id="@+id/detailed_stats_dest"
+        android:name="com.example.beam.ui.DetailedStatsFragment"
+        android:label="detailed_stats_fragment"
+        tools:layout="@layout/detailed_stats_fragment" />
 </navigation>

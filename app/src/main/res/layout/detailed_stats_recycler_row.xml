@@ -10,7 +10,7 @@
         android:layout_height="match_parent" >
 
         <ImageView
-            android:id="@+id/today_recycler_row_status"
+            android:id="@+id/detailed_stats_recycler_row_status"
             android:layout_width="wrap_content"
             android:layout_height="match_parent"
             app:layout_constraintRight_toRightOf="parent"
@@ -21,25 +21,25 @@
             android:src="@drawable/ic_done"/>
 
         <TextView
-            android:id="@+id/today_recycler_row_module_name"
+            android:id="@+id/detailed_stats_recycler_row_module_name"
             android:layout_width="0dp"
             android:layout_height="wrap_content"
             app:layout_constraintTop_toTopOf="parent"
             app:layout_constraintLeft_toLeftOf="parent"
-            app:layout_constraintRight_toLeftOf="@+id/today_recycler_row_status"
+            app:layout_constraintRight_toLeftOf="@+id/detailed_stats_recycler_row_status"
             android:padding="10dp"/>
 
         <TextView
-            android:id="@+id/today_recycler_row_time"
+            android:id="@+id/detailed_stats_recycler_row_time"
             android:layout_width="0dp"
             android:layout_height="wrap_content"
-            app:layout_constraintTop_toBottomOf="@+id/today_recycler_row_module_name"
+            app:layout_constraintTop_toBottomOf="@+id/detailed_stats_recycler_row_module_name"
             app:layout_constraintLeft_toLeftOf="parent"
             android:padding="10dp"/>
 
         <View
             style="@style/HorizontalDivider"
-            app:layout_constraintTop_toBottomOf="@id/today_recycler_row_time"
+            app:layout_constraintTop_toBottomOf="@id/detailed_stats_recycler_row_time"
             app:layout_constraintLeft_toLeftOf="parent"/>
 
     </androidx.constraintlayout.widget.ConstraintLayout>

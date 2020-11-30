@@ -7,6 +7,7 @@ import android.widget.ImageView;
 import android.widget.TextView;
 
 import androidx.annotation.NonNull;
+import androidx.navigation.Navigation;
 import androidx.recyclerview.widget.RecyclerView;
 
 import com.example.beam.R;
@@ -25,6 +26,13 @@ public class TodayRecyclerAdapter extends RecyclerView.Adapter<TodayRecyclerAdap
             status = itemView.findViewById(R.id.today_recycler_row_status);
             moduleName = itemView.findViewById(R.id.today_recycler_row_module_name);
             sessionTime = itemView.findViewById(R.id.today_recycler_row_time);
+
+            itemView.setOnClickListener(new View.OnClickListener() {
+                @Override
+                public void onClick(View view) {
+                    Navigation.findNavController(view).navigate(R.id.action_detailed_stats);
+                }
+            });
         }
     }
 

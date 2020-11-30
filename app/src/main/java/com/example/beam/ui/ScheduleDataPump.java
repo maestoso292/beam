@@ -1,7 +1,7 @@
 package com.example.beam.ui;
 
 import java.util.ArrayList;
-import java.util.HashMap;
+import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.concurrent.ThreadLocalRandom;
 
@@ -19,8 +19,8 @@ public class ScheduleDataPump {
 
     public static final String[] days = {"Monday", "Tuesday", "Wednesday", "Thursday", "Friday", "Saturday", "Sunday"};
 
-    public static HashMap<String, List<TestModule>> getData() {
-        HashMap<String, List<TestModule>> expandableListData = new HashMap<>(5);
+    public static LinkedHashMap<String, List<TestModule>> getData() {
+        LinkedHashMap<String, List<TestModule>> expandableListData = new LinkedHashMap<>(5);
         for (String day : days) {
             int size = ThreadLocalRandom.current().nextInt(0, 5);
             ArrayList<TestModule> sessions = new ArrayList<>(size);

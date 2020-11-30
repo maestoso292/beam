@@ -11,7 +11,6 @@
         app:layout_constraintTop_toTopOf="parent"
         android:indicatorRight="?android:attr/expandableListPreferredItemIndicatorRight"
         android:divider="@android:color/darker_gray"
-        android:childDivider="@android:color/darker_gray"
-        android:dividerHeight="0.5dp"/>
+        android:dividerHeight="1dp"/>
 
 </androidx.constraintlayout.widget.ConstraintLayout>

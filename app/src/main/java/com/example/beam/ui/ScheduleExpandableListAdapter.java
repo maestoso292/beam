@@ -7,15 +7,17 @@ import android.view.ViewGroup;
 import android.widget.BaseExpandableListAdapter;
 import android.widget.TextView;
 
+import androidx.navigation.Navigation;
+
 import com.example.beam.R;
 
 import java.util.ArrayList;
-import java.util.HashMap;
+import java.util.LinkedHashMap;
 import java.util.List;
 
 public class ScheduleExpandableListAdapter extends BaseExpandableListAdapter {
     private Context context;
-    private HashMap<String, List<ScheduleDataPump.TestModule>> expandableListData;
+    private LinkedHashMap<String, List<ScheduleDataPump.TestModule>> expandableListData;
     private List<String> expandableGroupNames;
 
     ScheduleExpandableListAdapter(Context context) {
@@ -78,6 +80,12 @@ public class ScheduleExpandableListAdapter extends BaseExpandableListAdapter {
         }
         ((TextView) view.findViewById(R.id.schedule_expandable_child_name)).setText(session.name);
         ((TextView) view.findViewById(R.id.schedule_expandable_child_time)).setText(session.time);
+        view.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View view) {
+                Navigation.findNavController(view).navigate(R.id.action_detailed_stats);
+            }
+        });
         return view;
     }
 

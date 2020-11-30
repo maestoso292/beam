@@ -13,23 +13,23 @@ import androidx.recyclerview.widget.RecyclerView;
 
 import com.example.beam.R;
 
-public class StatsFragment extends Fragment {
+public class DetailedStatsFragment extends Fragment {
     RecyclerView recyclerView;
-    StatsRecyclerAdapter recyclerAdapter;
+    DetailedStatsRecyclerAdapter recyclerAdapter;
 
     @Nullable
     @Override
     public View onCreateView(@NonNull LayoutInflater inflater, @Nullable ViewGroup container, @Nullable Bundle savedInstanceState) {
-        return inflater.inflate(R.layout.stats_fragment, container, false);
+        return inflater.inflate(R.layout.detailed_stats_fragment, container, false);
     }
 
     @Override
     public void onViewCreated(@NonNull View view, @Nullable Bundle savedInstanceState) {
         super.onViewCreated(view, savedInstanceState);
 
-        recyclerView = view.findViewById(R.id.stats_recycler);
+        recyclerView = view.findViewById(R.id.detailed_stats_recycler);
         recyclerView.setLayoutManager(new LinearLayoutManager(getContext()));
-        recyclerAdapter = new StatsRecyclerAdapter();
+        recyclerAdapter = new DetailedStatsRecyclerAdapter();
         recyclerView.setAdapter(recyclerAdapter);
     }
 }

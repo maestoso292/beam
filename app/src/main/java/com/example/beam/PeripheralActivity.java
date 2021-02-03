@@ -33,6 +33,7 @@ public class PeripheralActivity extends AppCompatActivity {
     private final BluetoothGattServerCallback bluetoothGattServerCallback = new BluetoothGattServerCallback() {
         @Override
         public void onCharacteristicReadRequest(BluetoothDevice device, int requestId, int offset, BluetoothGattCharacteristic characteristic) {
+            Toast.makeText(getApplicationContext(), "Characteristic read request", Toast.LENGTH_SHORT).show();
             byte[] characteristicValue = bluetoothGattServer
                     .getService(BeamProfile.SERVICE_UUID)
                     .getCharacteristic(BeamProfile.CHARACTERISTIC_TOKEN_UUID)
@@ -50,59 +51,55 @@ public class PeripheralActivity extends AppCompatActivity {
 
         Button buttonOpenServer = findViewById(R.id.button_open_server);
 
-        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.LOLLIPOP) {
-            advertiseCallback = new AdvertiseCallback() {
-                @Override
-                public void onStartSuccess(AdvertiseSettings settingsInEffect) {
-                    super.onStartSuccess(settingsInEffect);
-                }
-
-                @Override
-                public void onStartFailure(int errorCode) {
-                    super.onStartFailure(errorCode);
-                    finish();
-                }
-            };
+        bluetoothManager = (BluetoothManager) getSystemService(BLUETOOTH_SERVICE);
+        bluetoothAdapter = bluetoothManager.getAdapter();
+        if (bluetoothAdapter == null) {
+            Toast.makeText(this, "No bluetooth adapter available", Toast.LENGTH_SHORT).show();
         }
 
         buttonOpenServer.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View view) {
                 if (bluetoothGattServer == null) {
+                    Toast.makeText(getApplicationContext(), "Not open", Toast.LENGTH_SHORT).show();
                     if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.LOLLIPOP) {
                         openGattServer();
                     }
                     else {
-
+                        Toast.makeText(getApplicationContext(), "Not supported", Toast.LENGTH_SHORT).show();
                     }
+                }
+                else {
+                    Toast.makeText(getApplicationContext(), "Already open", Toast.LENGTH_SHORT).show();
                 }
             }
         });
-
-        bluetoothManager = (BluetoothManager) getSystemService(BLUETOOTH_SERVICE);
-        bluetoothAdapter = bluetoothManager.getAdapter();
     }
 
     @RequiresApi(api = Build.VERSION_CODES.LOLLIPOP)
     private void openGattServer() {
         if (!bluetoothAdapter.isMultipleAdvertisementSupported()) {
-            finish();
-            return;
+            Toast.makeText(getApplicationContext(), "Multiple advertising not supported", Toast.LENGTH_SHORT).show();
         }
 
         initialiseServer();
         startAdvertising();
 
+        /*
         String value = bluetoothGattServer
                 .getService(BeamProfile.SERVICE_UUID)
                 .getCharacteristic(BeamProfile.CHARACTERISTIC_TOKEN_UUID)
                 .getStringValue(0);
+
+         */
     }
 
     private void initialiseServer() {
+        Toast.makeText(this, "Opening server", Toast.LENGTH_SHORT).show();
         bluetoothGattServer = bluetoothManager.openGattServer(this, bluetoothGattServerCallback);
         BluetoothGattService bluetoothGattService = BeamProfile.getBeamService();
         bluetoothGattService.getCharacteristic(BeamProfile.CHARACTERISTIC_TOKEN_UUID).setValue("Test String");
+        bluetoothGattServer.addService(bluetoothGattService);
     }
 
 
@@ -120,12 +117,29 @@ public class PeripheralActivity extends AppCompatActivity {
                 .setTxPowerLevel(AdvertiseSettings.ADVERTISE_TX_POWER_LOW)
                 .build();
 
-        AdvertiseData data = new AdvertiseData.Builder()
+        AdvertiseData advertiseData = new AdvertiseData.Builder()
                 .setIncludeDeviceName(true)
                 .addServiceUuid(new ParcelUuid(BeamProfile.SERVICE_UUID))
                 .build();
 
-        bluetoothLeAdvertiser.startAdvertising(settings, data, advertiseCallback);
+        AdvertiseData scanResponseData = new AdvertiseData.Builder()
+                .addServiceUuid(new ParcelUuid(BeamProfile.SERVICE_UUID))
+                .setIncludeTxPowerLevel(true)
+                .build();
+
+        advertiseCallback = new AdvertiseCallback() {
+            @Override
+            public void onStartSuccess(AdvertiseSettings settingsInEffect) {
+                super.onStartSuccess(settingsInEffect);
+            }
+
+            @Override
+            public void onStartFailure(int errorCode) {
+                super.onStartFailure(errorCode);
+            }
+        };
+
+        bluetoothLeAdvertiser.startAdvertising(settings, advertiseData, scanResponseData, advertiseCallback);
         Toast.makeText(this, "Started Advertising", Toast.LENGTH_SHORT).show();
     }
 
@@ -134,8 +148,6 @@ public class PeripheralActivity extends AppCompatActivity {
         super.onPause();
         if (bluetoothLeAdvertiser != null && Build.VERSION.SDK_INT >= Build.VERSION_CODES.LOLLIPOP) {
             bluetoothLeAdvertiser.stopAdvertising(advertiseCallback);
-        }
-        if (bluetoothGattServer != null) {
             bluetoothGattServer.close();
         }
     }

@@ -1,11 +1,11 @@
 package com.example.beam;
 
+import android.Manifest;
 import android.bluetooth.BluetoothAdapter;
 import android.bluetooth.BluetoothDevice;
 import android.bluetooth.BluetoothGatt;
 import android.bluetooth.BluetoothGattCallback;
 import android.bluetooth.BluetoothGattCharacteristic;
-import android.bluetooth.BluetoothGattService;
 import android.bluetooth.BluetoothManager;
 import android.bluetooth.BluetoothProfile;
 import android.bluetooth.le.BluetoothLeScanner;
@@ -16,12 +16,12 @@ import android.bluetooth.le.ScanSettings;
 import android.os.Build;
 import android.os.Bundle;
 import android.os.Handler;
-import android.os.ParcelUuid;
 import android.util.Log;
 import android.view.View;
 import android.widget.Button;
 import android.widget.Toast;
 
+import androidx.annotation.NonNull;
 import androidx.annotation.RequiresApi;
 import androidx.appcompat.app.AppCompatActivity;
 
@@ -52,6 +52,19 @@ public class CentralActivity extends AppCompatActivity {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_central);
 
+        bluetoothManager = (BluetoothManager) getSystemService(BLUETOOTH_SERVICE);
+        bluetoothAdapter = bluetoothManager.getAdapter();
+
+        if (isBelowAPI21()) {
+            initialiseScanCallback18();
+        } else {
+            initialiseScanCallback21();
+        }
+
+        if (!isBelowAPI23()) {
+            requestPermissions(new String[]{Manifest.permission.ACCESS_FINE_LOCATION}, 1);
+        }
+
         Button buttonScan = findViewById(R.id.button_scan_for_device);
         Button buttonConnect = findViewById(R.id.button_connect_to_server);
         buttonScan.setOnClickListener(new View.OnClickListener() {
@@ -71,21 +84,29 @@ public class CentralActivity extends AppCompatActivity {
                 if (deviceList.size() > 0) {
                     connectToGattServer(deviceList.get(0));
                 }
+                else {
+                    Toast.makeText(getApplicationContext(), "No devices connected", Toast.LENGTH_SHORT).show();
+                }
             }
         });
 
-        bluetoothManager = (BluetoothManager) getSystemService(BLUETOOTH_SERVICE);
-        bluetoothAdapter = bluetoothManager.getAdapter();
 
-        if (isBelowAPI21()) {
-            initialiseScanCallback18();
-        } else {
-            initialiseScanCallback21();
+    }
+
+    @Override
+    public void onRequestPermissionsResult(int requestCode, @NonNull String[] permissions, @NonNull int[] grantResults) {
+        if (requestCode == 1) {
+            Toast.makeText(this, "Location enabled", Toast.LENGTH_SHORT).show();
         }
+        super.onRequestPermissionsResult(requestCode, permissions, grantResults);
     }
 
     private boolean isBelowAPI21() {
         return Build.VERSION.SDK_INT < Build.VERSION_CODES.LOLLIPOP;
+    }
+
+    private boolean isBelowAPI23() {
+        return Build.VERSION.SDK_INT < Build.VERSION_CODES.M;
     }
 
     @RequiresApi(api = Build.VERSION_CODES.JELLY_BEAN_MR2)
@@ -113,7 +134,7 @@ public class CentralActivity extends AppCompatActivity {
     @RequiresApi(api = Build.VERSION_CODES.LOLLIPOP)
     private void startLeScan21() {
         ScanFilter scanFilter = new ScanFilter.Builder()
-                .setServiceUuid(new ParcelUuid(BeamProfile.SERVICE_UUID))
+                //.setServiceUuid(new ParcelUuid(BeamProfile.SERVICE_UUID))
                 .build();
 
         ScanSettings settings = new ScanSettings.Builder()
@@ -154,6 +175,8 @@ public class CentralActivity extends AppCompatActivity {
 
     private void connectToGattServer(BluetoothDevice device) {
         bluetoothGatt = device.connectGatt(this, true, gattCallback);
+        Toast.makeText(this, "Connecting to " + bluetoothGatt.getDevice().getName(), Toast.LENGTH_SHORT).show();
+        bluetoothGatt.readCharacteristic(BeamProfile.getTokenCharacteristic());
     }
 
     @Override
@@ -223,22 +246,24 @@ public class CentralActivity extends AppCompatActivity {
         @Override
         public void onServicesDiscovered(BluetoothGatt gatt, int status) {
             Log.d(TAG, "onServicesDiscovered");
-
+            /*
             for (BluetoothGattService service : gatt.getServices()) {
                 if (BeamProfile.SERVICE_UUID.equals(service.getUuid())) {
                     gatt.readCharacteristic(service.getCharacteristic(BeamProfile.CHARACTERISTIC_TOKEN_UUID));
                 }
             }
+
+             */
         }
 
         @Override
         public void onCharacteristicRead(BluetoothGatt gatt, BluetoothGattCharacteristic characteristic, int status) {
-            super.onCharacteristicRead(gatt, characteristic, status);
-            Log.d(TAG, "onCharacteristicRead - UUID: " + characteristic.getUuid().toString());
+            Toast.makeText(getApplicationContext(), "Reading characteristic", Toast.LENGTH_SHORT).show();
             if (BeamProfile.CHARACTERISTIC_TOKEN_UUID.equals(characteristic.getUuid())) {
                 final String value = characteristic.getStringValue(0);
                 Toast.makeText(getApplicationContext(), "Characteristic Value: " + value, Toast.LENGTH_SHORT).show();
             }
+            super.onCharacteristicRead(gatt, characteristic, status);
         }
 
         @Override

@@ -47,7 +47,7 @@ public class CentralService extends Service {
     private final BluetoothGattCallback GattCallback = new BluetoothGattCallback() {
         @Override
         /**
-         * Indicates that the central has connected or disconnected with a central
+         * Indicates that the central has connected or disconnected with a peripheral
          */
         public void onConnectionStateChange(BluetoothGatt gatt, int status, int newState) {
             String intentAction;
@@ -217,7 +217,7 @@ public class CentralService extends Service {
         }
 
         /**
-         * Enables or disables notification on a give characteristic.
+         * Enables or disables notification on a given characteristic.
          *
          * @param characteristic Characteristic to act on.
          * @param enabled If true, enable notification.  False otherwise.

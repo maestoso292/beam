@@ -10,11 +10,17 @@ import android.widget.Button;
 import android.content.pm.PackageManager;
 import android.widget.Toast;
 
+import com.google.firebase.auth.FirebaseAuth;
+import com.google.firebase.auth.FirebaseUser;
+
 
 // TODO DON'T TOUCH ANYTHING HERE FOR NOW
 public class MainActivity extends AppCompatActivity {
     Button buttonPeripheral;
     Button buttonCentral;
+    FirebaseUser currentUser;
+    FirebaseAuth mAuth;
+    Button logoutButton;
 
     public static final int REQUEST_ENABLE_BT = 1;
 
@@ -22,6 +28,21 @@ public class MainActivity extends AppCompatActivity {
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_main);
+
+        /**
+         * For logout button
+         */
+        mAuth = FirebaseAuth.getInstance();
+        currentUser = mAuth.getCurrentUser();
+        logoutButton = (Button)findViewById(R.id.logout);
+        logoutButton.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View view) {
+                FirebaseAuth.getInstance().signOut();
+                redirectToLoginActivity();
+            }
+        });
+
 
         /**
          * Check if the device supports BLE
@@ -47,5 +68,22 @@ public class MainActivity extends AppCompatActivity {
                 startActivity(new Intent(view.getContext(), CentralActivity.class));
             }
         });
+    }
+
+    /**
+     * Redirect user to loginActivity on start
+     */
+    @Override
+    protected void onStart() {
+        super.onStart();
+        if(currentUser==null)
+        {
+            redirectToLoginActivity();
+        }
+    }
+
+    private void redirectToLoginActivity() {
+        Intent loginIntent = new Intent(MainActivity.this,LoginActivity.class);
+        startActivity(loginIntent);
     }
 }

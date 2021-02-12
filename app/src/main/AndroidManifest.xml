@@ -15,6 +15,7 @@
         android:theme="@style/AppTheme">
         <activity android:name=".CentralActivity"></activity>
         <activity android:name=".PeripheralActivity" />
+        <activity android:name=".LoginActivity" />
         <activity android:name=".MainActivity">
             <intent-filter>
                 <action android:name="android.intent.action.MAIN" />

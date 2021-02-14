@@ -29,6 +29,7 @@ public class MainActivity extends AppCompatActivity {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_main);
 
+
         /**
          * For logout button
          */
@@ -42,7 +43,6 @@ public class MainActivity extends AppCompatActivity {
                 redirectToLoginActivity();
             }
         });
-
 
         /**
          * Check if the device supports BLE
@@ -70,15 +70,32 @@ public class MainActivity extends AppCompatActivity {
         });
     }
 
-    /**
-     * Redirect user to loginActivity on start
-     */
     @Override
     protected void onStart() {
         super.onStart();
         if(currentUser==null)
         {
             redirectToLoginActivity();
+        }
+        else{
+            /**
+             * Determining whether user is student or lecturer
+             */
+            String email = currentUser.getEmail();
+            assert email != null;
+            if (email.contains("nottingham.student")) {
+                Toast.makeText(this, "Student", Toast.LENGTH_SHORT).show();
+            }
+
+            else if (email.contains("nottingham.lecturer")) {
+                Toast.makeText(this, "Lecturer", Toast.LENGTH_SHORT).show();
+            }
+
+            else {
+                Toast.makeText(this, "Invalid credentials", Toast.LENGTH_SHORT).show();
+                FirebaseAuth.getInstance().signOut();
+                redirectToLoginActivity();
+            }
         }
     }
 

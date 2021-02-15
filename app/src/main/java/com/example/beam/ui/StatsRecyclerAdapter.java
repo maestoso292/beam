@@ -11,16 +11,24 @@ import androidx.recyclerview.widget.RecyclerView;
 
 import com.example.beam.R;
 
+import java.util.ArrayList;
+import java.util.Collections;
+import java.util.List;
+import java.util.Map;
+
 public class StatsRecyclerAdapter extends RecyclerView.Adapter<StatsRecyclerAdapter.StatsRecyclerViewHolder> {
+    private List<String> userModuleCodes;
+    private Map<String, String> userModules;
+
     public static class StatsRecyclerViewHolder extends RecyclerView.ViewHolder {
+        TextView moduleCode;
         TextView moduleName;
-        TextView modulePercentage;
 
         public StatsRecyclerViewHolder(@NonNull View itemView) {
             super(itemView);
 
+            moduleCode = itemView.findViewById(R.id.stats_recycler_row_module_code);
             moduleName = itemView.findViewById(R.id.stats_recycler_row_module_name);
-            modulePercentage = itemView.findViewById(R.id.stats_recycler_row_module_percentage);
 
             itemView.setOnClickListener(new View.OnClickListener() {
                 @Override
@@ -41,12 +49,19 @@ public class StatsRecyclerAdapter extends RecyclerView.Adapter<StatsRecyclerAdap
 
     @Override
     public void onBindViewHolder(@NonNull StatsRecyclerViewHolder holder, int position) {
-        holder.moduleName.setText("Sample Module Name");
-        holder.modulePercentage.setText("Sample Module Percentage");
+        String moduleCode = userModuleCodes.get(position);
+        holder.moduleCode.setText(moduleCode);
+        holder.moduleName.setText(userModules.get(moduleCode));
     }
 
     @Override
     public int getItemCount() {
-        return 4;
+        return userModules.size();
+    }
+
+    public void setUserModules(Map<String, String> userModules) {
+        this.userModules = userModules;
+        userModuleCodes = new ArrayList<>(userModules.keySet());
+        Collections.sort(userModuleCodes);
     }
 }

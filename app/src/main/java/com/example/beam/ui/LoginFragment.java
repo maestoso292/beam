@@ -1,30 +1,35 @@
 package com.example.beam.ui;
 
 import android.os.Bundle;
+import android.text.TextUtils;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
 import android.widget.Button;
+import android.widget.EditText;
+import android.widget.Toast;
 
 import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
 import androidx.fragment.app.Fragment;
-import androidx.lifecycle.MutableLiveData;
-import androidx.lifecycle.SavedStateHandle;
-import androidx.lifecycle.ViewModelProvider;
-import androidx.navigation.Navigation;
 import androidx.navigation.fragment.NavHostFragment;
 
 import com.example.beam.R;
-import com.example.beam.SavedStateModel;
+import com.google.android.gms.tasks.OnCompleteListener;
+import com.google.android.gms.tasks.Task;
+import com.google.firebase.auth.AuthResult;
+import com.google.firebase.auth.FirebaseAuth;
+import com.google.firebase.auth.FirebaseUser;
 
 public class LoginFragment extends Fragment {
     public static String LOGIN_SUCCESSFUL = "LOGIN_SUCCESSFUL";
 
-    private SavedStateModel savedStateModel;
-    private SavedStateHandle savedStateHandle;
+    private FirebaseUser currentUser;
+    private FirebaseAuth mAuth;
 
-    private Button button;
+    private EditText emailEditText;
+    private EditText passwordEditText;
+    private Button LoginButton;
 
     @Nullable
     @Override
@@ -35,15 +40,11 @@ public class LoginFragment extends Fragment {
     @Override
     public void onViewCreated(@NonNull View view, @Nullable Bundle savedInstanceState) {
         super.onViewCreated(view, savedInstanceState);
-        savedStateModel = new ViewModelProvider(requireActivity()).get(SavedStateModel.class);
-        /*
-        savedStateHandle = Navigation.findNavController(view)
-                .getPreviousBackStackEntry().getSavedStateHandle();
-        //savedStateHandle.set(LOGIN_SUCCESSFUL, false);
-         */
-
-        button = view.findViewById(R.id.login_button);
-        button.setOnClickListener(new View.OnClickListener() {
+        mAuth = FirebaseAuth.getInstance();
+        emailEditText = view.findViewById(R.id.login_email);
+        passwordEditText = view.findViewById(R.id.login_password);
+        LoginButton = view.findViewById(R.id.login_button);
+        LoginButton.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View view) {
                 login();
@@ -53,8 +54,33 @@ public class LoginFragment extends Fragment {
 
     // TODO Authenticate user
     private void login(){
-        // savedStateHandle.set(LOGIN_SUCCESSFUL, true);
-        savedStateModel.setAuthentication(true);
-        NavHostFragment.findNavController(this).popBackStack();
+        String username = emailEditText.getText().toString().trim();
+        String password = passwordEditText.getText().toString().trim();
+        if(TextUtils.isEmpty(username) || TextUtils.isEmpty(password)) {
+            Toast.makeText(getContext(), "Username and password required", Toast.LENGTH_SHORT).show();
+        }
+        else {
+            mAuth.signInWithEmailAndPassword(username, password)
+                    .addOnCompleteListener(new OnCompleteListener<AuthResult>() {
+                        @Override
+                        public void onComplete(@NonNull Task<AuthResult> task) {
+                            if (task.isSuccessful()) {
+                                NavHostFragment.findNavController(LoginFragment.this).popBackStack();
+                            }
+                            else {
+                                Toast.makeText(getContext(), "Error: " + task.getException(),Toast.LENGTH_SHORT).show();
+                            }
+                        }
+                    });
+        }
+    }
+
+    @Override
+    public void onResume() {
+        super.onResume();
+        currentUser = mAuth.getCurrentUser();
+        if (currentUser!=null) {
+            NavHostFragment.findNavController(this).popBackStack();
+        }
     }
 }

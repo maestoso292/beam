@@ -4,23 +4,22 @@
     android:orientation="vertical"
     android:layout_width="match_parent"
     android:layout_height="wrap_content">
-
     <TextView
-        android:id="@+id/stats_recycler_row_module_name"
+        android:id="@+id/stats_recycler_row_module_code"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
         android:padding="10dp"
         android:textStyle="bold"/>
 
     <TextView
-        android:id="@+id/stats_recycler_row_module_percentage"
+        android:id="@+id/stats_recycler_row_module_name"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
         android:padding="10dp"/>
 
     <View
         style="@style/HorizontalDivider"
-        app:layout_constraintTop_toBottomOf="@id/stats_recycler_row_module_percentage"
+        app:layout_constraintTop_toBottomOf="@id/stats_recycler_row_module_name"
         app:layout_constraintLeft_toLeftOf="parent"/>
 
 

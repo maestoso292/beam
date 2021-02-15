@@ -9,41 +9,48 @@ import android.widget.TextView;
 
 import androidx.navigation.Navigation;
 
+import com.example.beam.DaySchedule;
 import com.example.beam.R;
+import com.example.beam.Session;
 
-import java.util.ArrayList;
-import java.util.LinkedHashMap;
-import java.util.List;
+import java.util.HashMap;
+import java.util.Map;
 
 public class ScheduleExpandableListAdapter extends BaseExpandableListAdapter {
+    private static final String[] days = {"Monday", "Tuesday", "Wednesday", "Thursday", "Friday", "Saturday", "Sunday"};
     private Context context;
-    private LinkedHashMap<String, List<ScheduleDataPump.TestModule>> expandableListData;
-    private List<String> expandableGroupNames;
+    private Map<String, DaySchedule> dayScheduleMap;
+    private Map<String, String> userModules;
 
     ScheduleExpandableListAdapter(Context context) {
-        expandableListData = ScheduleDataPump.getData();
-        expandableGroupNames = new ArrayList<>(expandableListData.keySet());
         this.context = context;
+        dayScheduleMap = new HashMap<>();
+        userModules = new HashMap<>();
     }
 
     @Override
     public int getGroupCount() {
-        return expandableListData.size();
+        return days.length;
     }
 
     @Override
     public int getChildrenCount(int groupPosition) {
-        return expandableListData.get(expandableGroupNames.get(groupPosition)).size();
+        if (dayScheduleMap.containsKey(days[groupPosition].toLowerCase())) {
+            return dayScheduleMap.get(days[groupPosition].toLowerCase()).getNumSessions();
+        }
+        else {
+            return 0;
+        }
     }
 
     @Override
     public Object getGroup(int groupPosition) {
-        return expandableGroupNames.get(groupPosition);
+        return days[groupPosition];
     }
 
     @Override
     public Object getChild(int groupPosition, int childPosition) {
-        return expandableListData.get(expandableGroupNames.get(groupPosition)).get(childPosition);
+        return dayScheduleMap.get(days[groupPosition].toLowerCase()).daySessions.get(childPosition);
     }
 
     @Override
@@ -67,19 +74,22 @@ public class ScheduleExpandableListAdapter extends BaseExpandableListAdapter {
             view = LayoutInflater.from(context)
                     .inflate(R.layout.schedule_expandable_parent, viewGroup, false);
         }
-        ((TextView) view.findViewById(R.id.schedule_expandable_parent_name)).setText(expandableGroupNames.get(i));
+        ((TextView) view.findViewById(R.id.schedule_expandable_parent_name)).setText(days[i]);
         return view;
     }
 
     @Override
     public View getChildView(int i, int i1, boolean b, View view, ViewGroup viewGroup) {
-        ScheduleDataPump.TestModule session = expandableListData.get(expandableGroupNames.get(i)).get(i1);
+        Session session = dayScheduleMap.get(days[i].toLowerCase()).daySessions.get(i1);
         if (view == null) {
             view = LayoutInflater.from(context)
                     .inflate(R.layout.schedule_expandable_child, viewGroup, false);
         }
-        ((TextView) view.findViewById(R.id.schedule_expandable_child_name)).setText(session.name);
-        ((TextView) view.findViewById(R.id.schedule_expandable_child_time)).setText(session.time);
+        ((TextView) view.findViewById(R.id.schedule_expandable_child_code)).setText(session.moduleCode);
+        ((TextView) view.findViewById(R.id.schedule_expandable_child_name)).setText(userModules.containsKey(session.moduleCode) ? userModules.get(session.moduleCode) : "Sample");
+        ((TextView) view.findViewById(R.id.schedule_expandable_child_type)).setText(session.sessionType);
+        String time = session.timeBegin + " - " + session.timeEnd;
+        ((TextView) view.findViewById(R.id.schedule_expandable_child_time)).setText(time);
         view.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View view) {
@@ -92,5 +102,13 @@ public class ScheduleExpandableListAdapter extends BaseExpandableListAdapter {
     @Override
     public boolean isChildSelectable(int i, int i1) {
         return true;
+    }
+
+    public void setDayScheduleMap(Map<String, DaySchedule> dayScheduleMap) {
+        this.dayScheduleMap = dayScheduleMap;
+    }
+
+    public void setUserModules(Map<String, String> userModules) {
+        this.userModules = userModules;
     }
 }

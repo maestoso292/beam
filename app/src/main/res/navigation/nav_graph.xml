@@ -20,7 +20,11 @@
             app:destination="@id/settings_dest" />
         <action
             android:id="@+id/action_logout"
-            app:destination="@id/login_dest" />
+            app:destination="@id/login_dest"
+            app:enterAnim="@anim/nav_default_enter_anim"
+            app:exitAnim="@anim/nav_default_exit_anim"
+            app:popEnterAnim="@anim/nav_default_pop_enter_anim"
+            app:popExitAnim="@anim/nav_default_pop_exit_anim" />
         <action
             android:id="@+id/action_detailed_stats"
             app:destination="@id/detailed_stats_dest" />

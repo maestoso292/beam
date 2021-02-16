@@ -1,6 +1,7 @@
 package com.example.beam.ui;
 
 import android.os.Bundle;
+import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
@@ -8,6 +9,7 @@ import android.view.ViewGroup;
 import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
 import androidx.fragment.app.Fragment;
+import androidx.lifecycle.Observer;
 import androidx.lifecycle.ViewModelProvider;
 import androidx.navigation.NavController;
 import androidx.navigation.fragment.NavHostFragment;
@@ -15,11 +17,15 @@ import androidx.viewpager2.widget.ViewPager2;
 
 import com.example.beam.BeamViewModel;
 import com.example.beam.R;
+import com.example.beam.models.BeamUser;
+import com.example.beam.models.Session;
 import com.google.android.material.tabs.TabLayout;
 import com.google.firebase.auth.FirebaseAuth;
 import com.google.firebase.auth.FirebaseUser;
 import com.google.firebase.database.DatabaseReference;
 import com.google.firebase.database.FirebaseDatabase;
+
+import java.util.Map;
 
 public class MainFragment extends Fragment {
     private ViewPager2 pager;
@@ -32,6 +38,9 @@ public class MainFragment extends Fragment {
 
     private NavController navController;
     private BeamViewModel beamViewModel;
+
+    private BeamUser userDetails;
+    private Map<String, String> userModules;
 
     @Override
     public void onCreate(@Nullable Bundle savedInstanceState) {
@@ -57,6 +66,7 @@ public class MainFragment extends Fragment {
         adapter = new MainFragmentAdapter(this);
 
         pager.setAdapter(adapter);
+
         /*
         TabLayoutMediator tabLayoutMediator = new TabLayoutMediator(tabLayout, pager, new TabLayoutMediator.TabConfigurationStrategy() {
             @Override
@@ -78,20 +88,39 @@ public class MainFragment extends Fragment {
             navController.navigate(R.id.login_dest);
         }
         else {
-            beamViewModel.initialLoad();
+            // Manual timetable insertion
+            /*
+            List<Session> sessions = new ArrayList<>();
+            Map<String, List<Session>> map = new HashMap<>();
+            sessions.add(new Session("COMP1000", "Lecture", "1000", "1200"));
+            map.put("COMP1000", sessions);
+            Calendar calendar = Calendar.getInstance();
+            String date = String.format("%04d%02d%02d", calendar.get(Calendar.YEAR), calendar.get(Calendar.MONTH), calendar.get(Calendar.DAY_OF_MONTH)+3);
+            for (Map.Entry<String, List<Session>> entry : map.entrySet()) {
+                for(Session session : entry.getValue()) {
+                    mDatabase.child("timetableTest").child(date).child(entry.getKey()).push().setValue(session);
+                }
+            }
+
+             */
+
+            beamViewModel.getUserDetails().observe(getViewLifecycleOwner(), new Observer<BeamUser>() {
+                @Override
+                public void onChanged(BeamUser beamUser) {
+                    Log.d("BeamViewModel", beamUser.toString());
+                    userDetails = beamUser;
+                    beamViewModel.getUserModules().observe(getViewLifecycleOwner(), new Observer<Map<String, String>>() {
+                        @Override
+                        public void onChanged(Map<String, String> userModules) {
+                        }
+                    });
+                    beamViewModel.getUserWeeklyTimetable().observe(getViewLifecycleOwner(), new Observer<Map<String, Map<String, Map<String, Session>>>>() {
+                        @Override
+                        public void onChanged(Map<String, Map<String, Map<String, Session>>> userWeeklyTimetable) {
+                        }
+                    });
+                }
+            });
         }
     }
-
-    public static class Module {
-        public String sessionType;
-        public String timeBegin;
-        public String timeEnd;
-
-        public Module(String sessionType, String timeStart, String timeEnd) {
-            this.sessionType = sessionType;
-            this.timeBegin = timeStart;
-            this.timeEnd = timeEnd;
-        }
-    }
-
 }

@@ -7,6 +7,10 @@ import androidx.lifecycle.LiveData;
 import androidx.lifecycle.MutableLiveData;
 import androidx.lifecycle.ViewModel;
 
+import com.example.beam.models.BeamUser;
+import com.example.beam.models.Lecturer;
+import com.example.beam.models.Session;
+import com.example.beam.models.Student;
 import com.google.firebase.auth.FirebaseAuth;
 import com.google.firebase.auth.FirebaseUser;
 import com.google.firebase.database.DataSnapshot;
@@ -17,6 +21,8 @@ import com.google.firebase.database.GenericTypeIndicator;
 import com.google.firebase.database.ValueEventListener;
 
 import java.util.ArrayList;
+import java.util.Calendar;
+import java.util.Collections;
 import java.util.HashMap;
 import java.util.LinkedHashMap;
 import java.util.List;
@@ -24,132 +30,47 @@ import java.util.Map;
 
 public class BeamViewModel extends ViewModel {
     private final static String LOG_TAG = "BeamViewModel";
-    private static final String[] days = {"monday", "tuesday", "wednesday", "thursday", "friday", "saturday", "sunday"};
 
     private FirebaseUser currentUser;
     private DatabaseReference mDatabase;
 
-    private MutableLiveData<List<String>> userModuleCodes;
+    private MutableLiveData<BeamUser> userDetails;
     private MutableLiveData<Map<String, String>> userModules;
-    private MutableLiveData<Map<String, DaySchedule>> userSchedule;
+    private MutableLiveData<Map<String, Map<String, Map<String, Session>>>> userWeeklyTimetable;
 
     public BeamViewModel() {
         currentUser = FirebaseAuth.getInstance().getCurrentUser();
         mDatabase = FirebaseDatabase.getInstance().getReference();
     }
 
-    public LiveData<List<String>> getUserModuleCodes() {
-        if (userModuleCodes == null) {
-            userModuleCodes = new MutableLiveData<>();
-            loadUserModuleCodes();
+    public LiveData<Map<String, Map<String, Map<String, Session>>>> getUserWeeklyTimetable() {
+        if (userWeeklyTimetable == null) {
+            userWeeklyTimetable = new MutableLiveData<>();
+            loadUserWeeklyTimetable();
         }
-        return userModuleCodes;
+        return userWeeklyTimetable;
     }
 
-    public LiveData<Map<String, String>> getUserModules() {
-        if (userModules == null) {
-            userModules = new MutableLiveData<>();
-            loadUserModuleCodes();
+    private void loadUserWeeklyTimetable() {
+        final Map<String, Map<String, Map<String, Session>>> tempMap = new HashMap<>();
+        userWeeklyTimetable.setValue(tempMap);
+        List<String> dates = new ArrayList<>();
+        List<String> modules = new ArrayList<>(userDetails.getValue().modules.values());
+        Calendar calendar = Calendar.getInstance();
+        calendar.set(Calendar.DAY_OF_WEEK, Calendar.MONDAY);
+        for (int i = 0; i < 5; i++) {
+            dates.add(String.format("%04d%02d%02d", calendar.get(Calendar.YEAR), calendar.get(Calendar.MONTH), calendar.get(Calendar.DAY_OF_MONTH)+i));
         }
-        return userModules;
-    }
-
-    public LiveData<Map<String, DaySchedule>> getUserSchedule() {
-        if (userSchedule == null) {
-            userSchedule = new MutableLiveData<>();
-            loadUserSchedule();
-        }
-        return userSchedule;
-    }
-
-    public void initialLoad() {
-        if (currentUser != null) {
-            loadUserModuleCodes();
-        }
-    }
-
-    private void loadUserModuleCodes() {
-        if (userModuleCodes == null) {
-            userModuleCodes = new MutableLiveData<>();
-        }
-        mDatabase.child("student").child(currentUser.getUid()).child("modules").addValueEventListener(new ValueEventListener() {
-            @Override
-            public void onDataChange(@NonNull DataSnapshot snapshot) {
-                GenericTypeIndicator<Map<String, String>> t = new GenericTypeIndicator<Map<String, String>>() {};
-                userModuleCodes.setValue(new ArrayList<>(snapshot.getValue(t).values()));
-                Log.d(LOG_TAG, "Module Codes: " + userModuleCodes.getValue());
-                loadUserModules();
-                loadUserSchedule();
-            }
-
-            @Override
-            public void onCancelled(@NonNull DatabaseError error) {
-                Log.e(LOG_TAG, "Error: " + error);
-            }
-        });
-    }
-
-    private void loadUserModules() {
-        if (userModules == null) {
-            userModules = new MutableLiveData<>();
-        }
-        final Map<String, String> temp = new HashMap<>();
-        for (final String moduleCode : userModuleCodes.getValue()) {
-            mDatabase.child("modules").child(moduleCode).child("name").addListenerForSingleValueEvent(new ValueEventListener() {
-                @Override
-                public void onDataChange(@NonNull DataSnapshot snapshot) {
-                    temp.put(moduleCode, snapshot.getValue(String.class));
-                    userModules.setValue(temp);
-                    Log.d(LOG_TAG,"Module List: " + temp.toString());
-                }
-
-                @Override
-                public void onCancelled(@NonNull DatabaseError error) {
-                    Log.e(LOG_TAG, "Error: " + error);
-                }
-            });
-        }
-    }
-
-    private void loadUserSchedule() {
-        if (userSchedule == null) {
-            userSchedule = new MutableLiveData<>();
-        }
-        final Map<String, DaySchedule> dayScheduleTemp = new LinkedHashMap<>();
-        userSchedule.setValue(dayScheduleTemp);
-        for (final String day : days) {
-            userSchedule.getValue().put(day, new DaySchedule());
-            /*
-            mDatabase.child("timetable").child(day).addListenerForSingleValueEvent(new ValueEventListener() {
-                @Override
-                public void onDataChange(@NonNull DataSnapshot snapshot) {
-                    GenericTypeIndicator<Map<String, Map<String, Session>>> t = new GenericTypeIndicator<Map<String, Map<String, Session>>>() {};
-                    if (snapshot.getValue(t) != null) {
-                        Log.d(LOG_TAG, snapshot.getValue().toString());
-
-                    }
-                }
-
-                @Override
-                public void onCancelled(@NonNull DatabaseError error) {
-
-                }
-            });
-
-             */
-
-            final Map<String, List<Session>> moduleSessionsTemp = new HashMap<>();
-            for (final String moduleCode : userModuleCodes.getValue()) {
-                mDatabase.child("timetable").child(day).child(moduleCode).addListenerForSingleValueEvent(new ValueEventListener() {
+        for (final String date : dates) {
+            tempMap.put(date, new HashMap<String, Map<String, Session>>());
+            for(final String module : modules) {
+                mDatabase.child("timetableTest").child(date).child(module).addListenerForSingleValueEvent(new ValueEventListener() {
                     @Override
                     public void onDataChange(@NonNull DataSnapshot snapshot) {
                         GenericTypeIndicator<Map<String, Session>> t = new GenericTypeIndicator<Map<String, Session>>() {};
-                        if (snapshot.getValue(t) != null) {
-                            List<Session> sessionsTemp = new ArrayList<>(snapshot.getValue(t).values());
-                            moduleSessionsTemp.put(moduleCode, sessionsTemp);
-                            userSchedule.getValue().get(day).addModuleSessions(moduleCode, sessionsTemp);
-                            Log.d(LOG_TAG + "Session", userSchedule.getValue().toString());
-                        }
+                        Map<String, Session> sessionMap = snapshot.getValue(t);
+                        tempMap.get(date).put(module, sessionMap);
+                        userWeeklyTimetable.setValue(tempMap);
                     }
                     @Override
                     public void onCancelled(@NonNull DatabaseError error) {
@@ -160,4 +81,57 @@ public class BeamViewModel extends ViewModel {
         }
     }
 
+    public LiveData<BeamUser> getUserDetails() {
+        if (userDetails == null) {
+            userDetails = new MutableLiveData<>();
+            loadUserDetails();
+        }
+        return userDetails;
+    }
+
+    private void loadUserDetails() {
+        mDatabase.child("users").child(currentUser.getUid()).addValueEventListener(new ValueEventListener() {
+            @Override
+            public void onDataChange(@NonNull DataSnapshot snapshot) {
+                if (snapshot.child("role").getValue(String.class).equals("Student")) {
+                    userDetails.setValue(snapshot.getValue(Student.class));
+                }
+                else {
+                    userDetails.setValue(snapshot.getValue(Lecturer.class));
+                }
+            }
+            @Override
+            public void onCancelled(@NonNull DatabaseError error) {
+                Log.e(LOG_TAG, "Error Loading User Details: " + error);
+            }
+        });
+    }
+
+    public LiveData<Map<String, String>> getUserModules() {
+        if (userModules == null) {
+            userModules = new MutableLiveData<>();
+            loadUserModules();
+        }
+        return userModules;
+    }
+
+    private void loadUserModules() {
+        List<String> moduleCodes = new ArrayList<>(userDetails.getValue().modules.values());
+        Collections.sort(moduleCodes);
+        userModules.setValue(new LinkedHashMap<String, String>());
+        final Map<String, String> tempModules = new LinkedHashMap<>();
+        for (final String moduleCode : moduleCodes) {
+            mDatabase.child("modules").child(moduleCode).child("name").addListenerForSingleValueEvent(new ValueEventListener() {
+                @Override
+                public void onDataChange(@NonNull DataSnapshot snapshot) {
+                    tempModules.put(moduleCode, snapshot.getValue(String.class));
+                    userModules.setValue(tempModules);
+                }
+                @Override
+                public void onCancelled(@NonNull DatabaseError error) {
+                    Log.e(LOG_TAG, "Error Loading User Modules: " + error);
+                }
+            });
+        }
+    }
 }

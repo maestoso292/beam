@@ -9,23 +9,33 @@ import android.widget.TextView;
 
 import androidx.navigation.Navigation;
 
-import com.example.beam.DaySchedule;
 import com.example.beam.R;
-import com.example.beam.Session;
+import com.example.beam.models.Session;
 
+import java.util.ArrayList;
+import java.util.Calendar;
+import java.util.Collections;
 import java.util.HashMap;
+import java.util.List;
 import java.util.Map;
 
 public class ScheduleExpandableListAdapter extends BaseExpandableListAdapter {
     private static final String[] days = {"Monday", "Tuesday", "Wednesday", "Thursday", "Friday", "Saturday", "Sunday"};
+    private static List<String> dates;
     private Context context;
-    private Map<String, DaySchedule> dayScheduleMap;
+    private Map<String, Map<String, Map<String, Session>>> userWeeklyTimetable;
     private Map<String, String> userModules;
 
     ScheduleExpandableListAdapter(Context context) {
         this.context = context;
-        dayScheduleMap = new HashMap<>();
+        userWeeklyTimetable = new HashMap<>();
         userModules = new HashMap<>();
+        dates = new ArrayList<>();
+        Calendar calendar = Calendar.getInstance();
+        calendar.set(Calendar.DAY_OF_WEEK, Calendar.MONDAY);
+        for (int i = 0; i < 7; i++) {
+            dates.add(String.format("%04d%02d%02d", calendar.get(Calendar.YEAR), calendar.get(Calendar.MONTH), calendar.get(Calendar.DAY_OF_MONTH)+i));
+        }
     }
 
     @Override
@@ -35,8 +45,18 @@ public class ScheduleExpandableListAdapter extends BaseExpandableListAdapter {
 
     @Override
     public int getChildrenCount(int groupPosition) {
-        if (dayScheduleMap.containsKey(days[groupPosition].toLowerCase())) {
-            return dayScheduleMap.get(days[groupPosition].toLowerCase()).getNumSessions();
+        if (userWeeklyTimetable.containsKey(dates.get(groupPosition))) {
+            //Log.d("ScheduleFragment", userWeeklyTimetable.get(dates.get(groupPosition)).toString());
+            int num = 0;
+            for (Map.Entry<String, Map<String, Session>> entry : userWeeklyTimetable.get(dates.get(groupPosition)).entrySet()) {
+                if (entry.getValue() != null) {
+                    num += entry.getValue().size();
+                }
+                else {
+                    num += 0;
+                }
+            }
+            return num;
         }
         else {
             return 0;
@@ -50,7 +70,12 @@ public class ScheduleExpandableListAdapter extends BaseExpandableListAdapter {
 
     @Override
     public Object getChild(int groupPosition, int childPosition) {
-        return dayScheduleMap.get(days[groupPosition].toLowerCase()).daySessions.get(childPosition);
+        List<Session> sessions = new ArrayList<>();
+        for(Map.Entry<String, Map<String, Session>> entry: userWeeklyTimetable.get(dates.get(groupPosition)).entrySet()) {
+            sessions.addAll(entry.getValue().values());
+        }
+        Collections.sort(sessions);
+        return sessions.get(childPosition);
     }
 
     @Override
@@ -80,13 +105,21 @@ public class ScheduleExpandableListAdapter extends BaseExpandableListAdapter {
 
     @Override
     public View getChildView(int i, int i1, boolean b, View view, ViewGroup viewGroup) {
-        Session session = dayScheduleMap.get(days[i].toLowerCase()).daySessions.get(i1);
+        List<Session> sessions = new ArrayList<>();
+
+        for(Map.Entry<String, Map<String, Session>> entry: userWeeklyTimetable.get(dates.get(i)).entrySet()) {
+            if (entry.getValue() != null) {
+                sessions.addAll(entry.getValue().values());
+            }
+        }
+        Collections.sort(sessions);
+        Session session = sessions.get(i1);
         if (view == null) {
             view = LayoutInflater.from(context)
                     .inflate(R.layout.schedule_expandable_child, viewGroup, false);
         }
         ((TextView) view.findViewById(R.id.schedule_expandable_child_code)).setText(session.moduleCode);
-        ((TextView) view.findViewById(R.id.schedule_expandable_child_name)).setText(userModules.containsKey(session.moduleCode) ? userModules.get(session.moduleCode) : "Sample");
+        ((TextView) view.findViewById(R.id.schedule_expandable_child_name)).setText(userModules.get(session.moduleCode));
         ((TextView) view.findViewById(R.id.schedule_expandable_child_type)).setText(session.sessionType);
         String time = session.timeBegin + " - " + session.timeEnd;
         ((TextView) view.findViewById(R.id.schedule_expandable_child_time)).setText(time);
@@ -104,8 +137,8 @@ public class ScheduleExpandableListAdapter extends BaseExpandableListAdapter {
         return true;
     }
 
-    public void setDayScheduleMap(Map<String, DaySchedule> dayScheduleMap) {
-        this.dayScheduleMap = dayScheduleMap;
+    public void setUserWeeklyTimetable(Map<String, Map<String, Map<String, Session>>> userWeeklyTimetable) {
+        this.userWeeklyTimetable = userWeeklyTimetable;
     }
 
     public void setUserModules(Map<String, String> userModules) {

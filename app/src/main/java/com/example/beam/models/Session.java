@@ -1,4 +1,4 @@
-package com.example.beam;
+package com.example.beam.models;
 
 public class Session implements Comparable<Session> {
     public String moduleCode;
@@ -6,24 +6,25 @@ public class Session implements Comparable<Session> {
     public String timeBegin;
     public String timeEnd;
 
-    public Session(String sessionType, String timeBegin, String timeEnd) {
-        this.sessionType = sessionType;
-        this.timeBegin = timeBegin;
-        this.timeEnd = timeEnd;
-    }
+
 
     public Session() {
 
     }
 
-    public void setModuleCode(String moduleCode) {
+    public Session(String moduleCode, String sessionType, String timeBegin, String timeEnd) {
         this.moduleCode = moduleCode;
+        this.sessionType = sessionType;
+        this.timeBegin = timeBegin;
+        this.timeEnd = timeEnd;
     }
+
 
     @Override
     public String toString() {
         return "Session{" +
-                "sessionType='" + sessionType + '\'' +
+                "moduleCode='" + moduleCode + '\'' +
+                ", sessionType='" + sessionType + '\'' +
                 ", timeBegin='" + timeBegin + '\'' +
                 ", timeEnd='" + timeEnd + '\'' +
                 '}';

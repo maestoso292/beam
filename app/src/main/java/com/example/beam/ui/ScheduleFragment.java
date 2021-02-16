@@ -1,6 +1,7 @@
 package com.example.beam.ui;
 
 import android.os.Bundle;
+import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
@@ -13,8 +14,8 @@ import androidx.lifecycle.Observer;
 import androidx.lifecycle.ViewModelProvider;
 
 import com.example.beam.BeamViewModel;
-import com.example.beam.DaySchedule;
 import com.example.beam.R;
+import com.example.beam.models.Session;
 
 import java.util.HashMap;
 import java.util.Map;
@@ -34,18 +35,20 @@ public class ScheduleFragment extends Fragment {
     public void onViewCreated(@NonNull View view, @Nullable Bundle savedInstanceState) {
         super.onViewCreated(view, savedInstanceState);
 
+
         expandableListView = view.findViewById(R.id.schedule_expandable);
         expandableListAdapter = new ScheduleExpandableListAdapter(getContext());
-        expandableListAdapter.setDayScheduleMap(new HashMap<String, DaySchedule>());
+        expandableListAdapter.setUserWeeklyTimetable(new HashMap<String, Map<String, Map<String, Session>>>());
         expandableListAdapter.setUserModules(new HashMap<String, String>());
         expandableListView.setAdapter(expandableListAdapter);
 
         beamViewModel = new ViewModelProvider(getActivity()).get(BeamViewModel.class);
-        beamViewModel.getUserSchedule().observe(getViewLifecycleOwner(), new Observer<Map<String, DaySchedule>>() {
+        beamViewModel.getUserWeeklyTimetable().observe(getViewLifecycleOwner(), new Observer<Map<String, Map<String, Map<String, Session>>>>() {
             @Override
-            public void onChanged(Map<String, DaySchedule> dayScheduleMap) {
-                expandableListAdapter.setDayScheduleMap(dayScheduleMap);
+            public void onChanged(Map<String, Map<String, Map<String, Session>>> userWeeklyTimetable) {
+                expandableListAdapter.setUserWeeklyTimetable(userWeeklyTimetable);
                 expandableListAdapter.notifyDataSetChanged();
+                Log.d("ScheduleFragment", "Timetable loaded");
             }
         });
         beamViewModel.getUserModules().observe(getViewLifecycleOwner(), new Observer<Map<String, String>>() {
@@ -55,5 +58,6 @@ public class ScheduleFragment extends Fragment {
                 expandableListAdapter.notifyDataSetChanged();
             }
         });
+
     }
 }

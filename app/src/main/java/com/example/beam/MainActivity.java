@@ -13,6 +13,7 @@ import java.util.Map;
 
 public class MainActivity extends AppCompatActivity {
     HashMap<View, Animator> animHashMap;
+
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);

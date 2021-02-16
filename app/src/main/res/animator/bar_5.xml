@@ -7,19 +7,19 @@
         android:duration="400"
         android:startOffset="2525"
         android:valueType="floatType"
-        android:valueTo="2200"/>
+        android:valueTo="2200" />
     <objectAnimator
         android:propertyName="scaleY"
         android:duration="75"
         android:startOffset="2525"
         android:valueType="floatType"
         android:valueFrom="1"
-        android:valueTo="1.45"/>
+        android:valueTo="1.45" />
     <objectAnimator
         android:propertyName="alpha"
         android:duration="150"
         android:startOffset="2700"
         android:valueType="floatType"
         android:valueFrom="1"
-        android:valueTo="0"/>
+        android:valueTo="0" />
 </set>

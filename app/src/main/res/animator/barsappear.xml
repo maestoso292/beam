@@ -6,13 +6,12 @@
         android:propertyName="alpha"
         android:valueType="floatType"
         android:valueFrom="1"
-        android:valueTo="0"
-        />
+        android:valueTo="0" />
     <objectAnimator
         android:startOffset="2375"
         android:duration="150"
         android:propertyName="alpha"
         android:valueType="floatType"
         android:valueFrom="0"
-        android:valueTo="1"/>
+        android:valueTo="1" />
 </set>

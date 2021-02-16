@@ -1,14 +1,12 @@
 <?xml version="1.0" encoding="utf-8"?>
-<MotionScene
-    xmlns:android="http://schemas.android.com/apk/res/android"
+<MotionScene xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:motion="http://schemas.android.com/apk/res-auto">
 
     <Transition
         motion:constraintSetEnd="@+id/end"
         motion:constraintSetStart="@id/start"
         motion:duration="2100"
-        motion:autoTransition="animateToEnd">
-    </Transition>
+        motion:autoTransition="animateToEnd"></Transition>
 
 
     <ConstraintSet android:id="@+id/start">
@@ -17,7 +15,7 @@
         </Constraint>
     </ConstraintSet>
 
-    <ConstraintSet android:id="@+id/end"
-        motion:deriveConstraintsFrom="@+id/start">
-    </ConstraintSet>
+    <ConstraintSet
+        android:id="@+id/end"
+        motion:deriveConstraintsFrom="@+id/start"></ConstraintSet>
 </MotionScene>

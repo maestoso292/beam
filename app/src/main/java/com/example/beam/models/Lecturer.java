@@ -3,8 +3,8 @@ package com.example.beam.models;
 import java.util.Map;
 
 public class Lecturer extends BeamUser{
-    public String faculty;
-    public String position;
+    private String faculty;
+    private String position;
 
     public Lecturer() {
         super();

@@ -3,7 +3,7 @@ package com.example.beam.models;
 import java.util.Map;
 
 public class Student extends BeamUser{
-    public String programme;
+    private String programme;
 
     public Student() {
         super();

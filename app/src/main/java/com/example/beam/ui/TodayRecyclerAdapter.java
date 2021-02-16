@@ -11,10 +11,14 @@ import androidx.navigation.Navigation;
 import androidx.recyclerview.widget.RecyclerView;
 
 import com.example.beam.R;
+import com.example.beam.models.Session;
 
+import java.util.List;
 import java.util.concurrent.ThreadLocalRandom;
 
 public class TodayRecyclerAdapter extends RecyclerView.Adapter<TodayRecyclerAdapter.TodayRecyclerViewHolder> {
+    private List<Session> userTodayTimetable;
+
     public static class TodayRecyclerViewHolder extends RecyclerView.ViewHolder {
         ImageView status;
         TextView moduleName;
@@ -36,6 +40,10 @@ public class TodayRecyclerAdapter extends RecyclerView.Adapter<TodayRecyclerAdap
         }
     }
 
+    public void setUserTodayTimetable(List<Session> userTodayTimetable) {
+        this.userTodayTimetable = userTodayTimetable;
+    }
+
     @NonNull
     @Override
     public TodayRecyclerViewHolder onCreateViewHolder(@NonNull ViewGroup parent, int viewType) {
@@ -53,6 +61,6 @@ public class TodayRecyclerAdapter extends RecyclerView.Adapter<TodayRecyclerAdap
 
     @Override
     public int getItemCount() {
-        return 4;
+        return userTodayTimetable.size();
     }
 }

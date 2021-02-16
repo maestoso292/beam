@@ -1,7 +1,6 @@
 package com.example.beam.ui;
 
 import android.os.Bundle;
-import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
@@ -9,7 +8,6 @@ import android.view.ViewGroup;
 import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
 import androidx.fragment.app.Fragment;
-import androidx.lifecycle.Observer;
 import androidx.lifecycle.ViewModelProvider;
 import androidx.navigation.NavController;
 import androidx.navigation.fragment.NavHostFragment;
@@ -18,7 +16,6 @@ import androidx.viewpager2.widget.ViewPager2;
 import com.example.beam.BeamViewModel;
 import com.example.beam.R;
 import com.example.beam.models.BeamUser;
-import com.example.beam.models.Session;
 import com.google.android.material.tabs.TabLayout;
 import com.google.firebase.auth.FirebaseAuth;
 import com.google.firebase.auth.FirebaseUser;
@@ -104,23 +101,7 @@ public class MainFragment extends Fragment {
 
              */
 
-            beamViewModel.getUserDetails().observe(getViewLifecycleOwner(), new Observer<BeamUser>() {
-                @Override
-                public void onChanged(BeamUser beamUser) {
-                    Log.d("BeamViewModel", beamUser.toString());
-                    userDetails = beamUser;
-                    beamViewModel.getUserModules().observe(getViewLifecycleOwner(), new Observer<Map<String, String>>() {
-                        @Override
-                        public void onChanged(Map<String, String> userModules) {
-                        }
-                    });
-                    beamViewModel.getUserWeeklyTimetable().observe(getViewLifecycleOwner(), new Observer<Map<String, Map<String, Map<String, Session>>>>() {
-                        @Override
-                        public void onChanged(Map<String, Map<String, Map<String, Session>>> userWeeklyTimetable) {
-                        }
-                    });
-                }
-            });
+
         }
     }
 }

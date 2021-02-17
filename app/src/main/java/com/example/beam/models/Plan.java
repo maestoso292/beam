@@ -12,4 +12,20 @@ public class Plan {
         this.name = name;
         this.modules = modules;
     }
+
+    public String getName() {
+        return name;
+    }
+
+    public void setName(String name) {
+        this.name = name;
+    }
+
+    public Map<String, String> getModules() {
+        return modules;
+    }
+
+    public void setModules(Map<String, String> modules) {
+        this.modules = modules;
+    }
 }

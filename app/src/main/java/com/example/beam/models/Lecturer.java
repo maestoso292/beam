@@ -28,4 +28,20 @@ public class Lecturer extends BeamUser{
                 ", modules=" + modules +
                 '}';
     }
+
+    public String getFaculty() {
+        return faculty;
+    }
+
+    public void setFaculty(String faculty) {
+        this.faculty = faculty;
+    }
+
+    public String getPosition() {
+        return position;
+    }
+
+    public void setPosition(String position) {
+        this.position = position;
+    }
 }

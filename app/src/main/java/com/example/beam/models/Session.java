@@ -34,4 +34,52 @@ public class Session implements Comparable<Session> {
     public int compareTo(Session session) {
         return this.timeBegin.compareTo(session.timeBegin);
     }
+
+    public String getModuleID() {
+        return moduleID;
+    }
+
+    public void setModuleID(String moduleID) {
+        this.moduleID = moduleID;
+    }
+
+    public String getSessionID() {
+        return sessionID;
+    }
+
+    public void setSessionID(String sessionID) {
+        this.sessionID = sessionID;
+    }
+
+    public String getSessionType() {
+        return sessionType;
+    }
+
+    public void setSessionType(String sessionType) {
+        this.sessionType = sessionType;
+    }
+
+    public String getTimeBegin() {
+        return timeBegin;
+    }
+
+    public void setTimeBegin(String timeBegin) {
+        this.timeBegin = timeBegin;
+    }
+
+    public String getTimeEnd() {
+        return timeEnd;
+    }
+
+    public void setTimeEnd(String timeEnd) {
+        this.timeEnd = timeEnd;
+    }
+
+    public String getStatus() {
+        return status;
+    }
+
+    public void setStatus(String status) {
+        this.status = status;
+    }
 }

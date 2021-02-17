@@ -13,4 +13,12 @@ public class TimeTable extends Session{
         super(moduleID, sessionID, sessionType, timeBegin, timeEnd, status)
         this.date = date;
     }
+
+    public String getDate() {
+        return date;
+    }
+
+    public void setDate(String date) {
+        this.date = date;
+    }
 }

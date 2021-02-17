@@ -14,4 +14,28 @@ public class Record {
         this.sessionID = sessionID;
         this.studentsAttended = studentsAttended;
     }
+
+    public String getModuleID() {
+        return moduleID;
+    }
+
+    public void setModuleID(String moduleID) {
+        this.moduleID = moduleID;
+    }
+
+    public String getSessionID() {
+        return sessionID;
+    }
+
+    public void setSessionID(String sessionID) {
+        this.sessionID = sessionID;
+    }
+
+    public Map<String, String> getStudentsAttended() {
+        return studentsAttended;
+    }
+
+    public void setStudentsAttended(Map<String, String> studentsAttended) {
+        this.studentsAttended = studentsAttended;
+    }
 }

@@ -3,8 +3,8 @@ package com.example.beam.models;
 import java.util.Map;
 
 public class Lecturer extends BeamUser{
-    public String faculty;
-    public String position;
+    private String faculty;
+    private String position;
 
     public Lecturer() {
         super();
@@ -27,5 +27,21 @@ public class Lecturer extends BeamUser{
                 ", role='" + role + '\'' +
                 ", modules=" + modules +
                 '}';
+    }
+
+    public String getFaculty() {
+        return faculty;
+    }
+
+    public void setFaculty(String faculty) {
+        this.faculty = faculty;
+    }
+
+    public String getPosition() {
+        return position;
+    }
+
+    public void setPosition(String position) {
+        this.position = position;
     }
 }

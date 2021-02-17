@@ -21,11 +21,11 @@ public class Lecturer extends BeamUser{
         return "Lecturer{" +
                 "faculty='" + faculty + '\'' +
                 ", position='" + position + '\'' +
-                ", email='" + email + '\'' +
-                ", firstName='" + firstName + '\'' +
-                ", lastName='" + lastName + '\'' +
-                ", role='" + role + '\'' +
-                ", modules=" + modules +
+                ", email='" + getEmail() + '\'' +
+                ", firstName='" + getFirstName() + '\'' +
+                ", lastName='" + getLastName() + '\'' +
+                ", role='" + getRole() + '\'' +
+                ", modules=" + getModules() +
                 '}';
     }
 

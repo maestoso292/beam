@@ -59,7 +59,7 @@ public class BeamViewModel extends ViewModel {
         final Map<String, Map<String, Map<String, Session>>> tempMap = new HashMap<>();
         userWeeklyTimetable.setValue(tempMap);
         List<String> dates = new ArrayList<>();
-        List<String> modules = new ArrayList<>(userDetails.getValue().modules.values());
+        List<String> modules = new ArrayList<>(userDetails.getValue().getModules().values());
         Calendar calendar = Calendar.getInstance();
         calendar.set(Calendar.DAY_OF_WEEK, Calendar.MONDAY);
         for (int i = 0; i < 5; i++) {
@@ -120,7 +120,7 @@ public class BeamViewModel extends ViewModel {
     }
 
     private void loadUserModules() {
-        List<String> moduleCodes = new ArrayList<>(userDetails.getValue().modules.values());
+        List<String> moduleCodes = new ArrayList<>(userDetails.getValue().getModules().values());
         Collections.sort(moduleCodes);
         userModules.setValue(new LinkedHashMap<String, String>());
         final Map<String, String> tempModules = new LinkedHashMap<>();

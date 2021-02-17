@@ -18,11 +18,11 @@ public class Student extends BeamUser{
     public String toString() {
         return "Student{" +
                 "programme='" + programme + '\'' +
-                ", email='" + email + '\'' +
-                ", firstName='" + firstName + '\'' +
-                ", lastName='" + lastName + '\'' +
-                ", role='" + role + '\'' +
-                ", modules=" + modules +
+                ", email='" + getEmail() + '\'' +
+                ", firstName='" + getFirstName() + '\'' +
+                ", lastName='" + getLastName() + '\'' +
+                ", role='" + getRole() + '\'' +
+                ", modules=" + getModules() +
                 '}';
     }
 

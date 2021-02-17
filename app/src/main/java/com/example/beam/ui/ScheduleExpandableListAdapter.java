@@ -119,10 +119,10 @@ public class ScheduleExpandableListAdapter extends BaseExpandableListAdapter {
             view = LayoutInflater.from(context)
                     .inflate(R.layout.schedule_expandable_child, viewGroup, false);
         }
-        ((TextView) view.findViewById(R.id.schedule_expandable_child_code)).setText(session.moduleCode);
-        ((TextView) view.findViewById(R.id.schedule_expandable_child_name)).setText(userModules.get(session.moduleCode));
-        ((TextView) view.findViewById(R.id.schedule_expandable_child_type)).setText(session.sessionType);
-        String time = session.timeBegin + " - " + session.timeEnd;
+        ((TextView) view.findViewById(R.id.schedule_expandable_child_code)).setText(session.getModuleID());
+        ((TextView) view.findViewById(R.id.schedule_expandable_child_name)).setText(userModules.get(session.getModuleID()));
+        ((TextView) view.findViewById(R.id.schedule_expandable_child_type)).setText(session.getSessionType());
+        String time = session.getTimeBegin() + " - " + session.getTimeEnd();
         ((TextView) view.findViewById(R.id.schedule_expandable_child_time)).setText(time);
         view.setOnClickListener(new View.OnClickListener() {
             @Override

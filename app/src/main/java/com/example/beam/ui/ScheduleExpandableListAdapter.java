@@ -1,6 +1,7 @@
 package com.example.beam.ui;
 
 import android.content.Context;
+import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
@@ -106,7 +107,6 @@ public class ScheduleExpandableListAdapter extends BaseExpandableListAdapter {
     @Override
     public View getChildView(int i, int i1, boolean b, View view, ViewGroup viewGroup) {
         List<Session> sessions = new ArrayList<>();
-
         for(Map.Entry<String, Map<String, Session>> entry: userWeeklyTimetable.get(dates.get(i)).entrySet()) {
             if (entry.getValue() != null) {
                 sessions.addAll(entry.getValue().values());
@@ -114,6 +114,7 @@ public class ScheduleExpandableListAdapter extends BaseExpandableListAdapter {
         }
         Collections.sort(sessions);
         Session session = sessions.get(i1);
+        Log.d("BeamList", sessions.get(i1).toString());
         if (view == null) {
             view = LayoutInflater.from(context)
                     .inflate(R.layout.schedule_expandable_child, viewGroup, false);
@@ -143,5 +144,11 @@ public class ScheduleExpandableListAdapter extends BaseExpandableListAdapter {
 
     public void setUserModules(Map<String, String> userModules) {
         this.userModules = userModules;
+    }
+
+    @Override
+    public void notifyDataSetChanged() {
+        super.notifyDataSetChanged();
+        Log.d("ScheduleFragment", "Dataset changed");
     }
 }

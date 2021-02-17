@@ -43,6 +43,10 @@ public class BeamViewModel extends ViewModel {
         mDatabase = FirebaseDatabase.getInstance().getReference();
     }
 
+    public void loadUser() {
+        currentUser = FirebaseAuth.getInstance().getCurrentUser();
+    }
+
     public LiveData<Map<String, Map<String, Map<String, Session>>>> getUserWeeklyTimetable() {
         if (userWeeklyTimetable == null) {
             userWeeklyTimetable = new MutableLiveData<>();

@@ -19,6 +19,7 @@ import androidx.navigation.ui.NavigationUI;
 import com.example.beam.models.BeamUser;
 import com.example.beam.models.Session;
 import com.google.firebase.auth.FirebaseAuth;
+import com.google.firebase.auth.FirebaseUser;
 
 import java.util.Arrays;
 import java.util.Map;
@@ -27,6 +28,9 @@ public class MainActivity extends AppCompatActivity {
 
     private NavController navController;
     private BeamViewModel beamViewModel;
+
+    private FirebaseAuth mAuth;
+    private FirebaseUser currentUser;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -48,22 +52,12 @@ public class MainActivity extends AppCompatActivity {
             }
         });
 
+        mAuth = FirebaseAuth.getInstance();
+        currentUser = mAuth.getCurrentUser();
         beamViewModel = new ViewModelProvider(this).get(BeamViewModel.class);
-        beamViewModel.getUserDetails().observe(this, new Observer<BeamUser>() {
-            @Override
-            public void onChanged(BeamUser beamUser) {
-                beamViewModel.getUserModules().observe(MainActivity.this, new Observer<Map<String, String>>() {
-                    @Override
-                    public void onChanged(Map<String, String> userModules) {
-                    }
-                });
-                beamViewModel.getUserWeeklyTimetable().observe(MainActivity.this, new Observer<Map<String, Map<String, Map<String, Session>>>>() {
-                    @Override
-                    public void onChanged(Map<String, Map<String, Map<String, Session>>> userWeeklyTimetable) {
-                    }
-                });
-            }
-        });
+        if (currentUser != null) {
+            beamViewModel.loadUser();
+        }
     }
 
     @Override
@@ -90,5 +84,33 @@ public class MainActivity extends AppCompatActivity {
         }
         // Returns destination corresponding to id of item
         return NavigationUI.onNavDestinationSelected(item, Navigation.findNavController(this, R.id.nav_host_fragment));
+    }
+
+    @Override
+    protected void onResume() {
+        super.onResume();
+        if (currentUser == null) {
+            navController.navigate(R.id.login_dest);
+        }
+        else {
+            if (currentUser != null) {
+                beamViewModel.loadUser();
+                beamViewModel.getUserDetails().observe(this, new Observer<BeamUser>() {
+                    @Override
+                    public void onChanged(BeamUser beamUser) {
+                        beamViewModel.getUserModules().observe(MainActivity.this, new Observer<Map<String, String>>() {
+                            @Override
+                            public void onChanged(Map<String, String> userModules) {
+                            }
+                        });
+                        beamViewModel.getUserWeeklyTimetable().observe(MainActivity.this, new Observer<Map<String, Map<String, Map<String, Session>>>>() {
+                            @Override
+                            public void onChanged(Map<String, Map<String, Map<String, Session>>> userWeeklyTimetable) {
+                            }
+                        });
+                    }
+                });
+            }
+        }
     }
 }

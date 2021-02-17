@@ -85,6 +85,7 @@ public class MainFragment extends Fragment {
             navController.navigate(R.id.login_dest);
         }
         else {
+
             // Manual timetable insertion
             /*
             List<Session> sessions = new ArrayList<>();
@@ -100,8 +101,6 @@ public class MainFragment extends Fragment {
             }
 
              */
-
-
         }
     }
 }

@@ -13,6 +13,14 @@ public class Module {
         this.students = students;
     }
 
+    @Override
+    public String toString() {
+        return "Module{" +
+                "name='" + name + '\'' +
+                ", students='" + students +
+                '}';
+    }
+
     public String getName() {
         return name;
     }

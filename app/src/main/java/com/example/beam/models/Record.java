@@ -15,6 +15,15 @@ public class Record {
         this.studentsAttended = studentsAttended;
     }
 
+    @Override
+    public String toString() {
+        return "Record{" +
+                "moduleID='" + moduleID + '\'' +
+                "sessionID='" + sessionID + '\'' +
+                ", studentsAttended='" + studentsAttended +
+                '}';
+    }
+
     public String getModuleID() {
         return moduleID;
     }

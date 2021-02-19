@@ -22,7 +22,7 @@ public class Session implements Comparable<Session> {
     @Override
     public String toString() {
         return "Session{" +
-                "moduleCode='" + moduleCode + '\'' +
+                "moduleCode='" + moduleID + '\'' +
                 ", sessionType='" + sessionType + '\'' +
                 ", timeBegin='" + timeBegin + '\'' +
                 ", timeEnd='" + timeEnd + '\'' +

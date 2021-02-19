@@ -21,21 +21,39 @@
             android:src="@drawable/ic_done"/>
 
         <TextView
-            android:id="@+id/today_recycler_row_module_name"
+            android:id="@+id/today_recycler_row_module_code"
             android:layout_width="0dp"
             android:layout_height="wrap_content"
             app:layout_constraintTop_toTopOf="parent"
             app:layout_constraintLeft_toLeftOf="parent"
             app:layout_constraintRight_toLeftOf="@+id/today_recycler_row_status"
-            android:padding="10dp"/>
+            android:padding="5dp"/>
+
+        <TextView
+            android:id="@+id/today_recycler_row_module_name"
+            android:layout_width="0dp"
+            android:layout_height="wrap_content"
+            app:layout_constraintTop_toBottomOf="@id/today_recycler_row_module_code"
+            app:layout_constraintLeft_toLeftOf="parent"
+            app:layout_constraintRight_toLeftOf="@+id/today_recycler_row_status"
+            android:padding="5dp"/>
+
+        <TextView
+            android:id="@+id/today_recycler_row_session_type"
+            android:layout_width="0dp"
+            android:layout_height="wrap_content"
+            app:layout_constraintTop_toBottomOf="@id/today_recycler_row_module_name"
+            app:layout_constraintLeft_toLeftOf="parent"
+            app:layout_constraintRight_toLeftOf="@+id/today_recycler_row_status"
+            android:padding="5dp"/>
 
         <TextView
             android:id="@+id/today_recycler_row_time"
             android:layout_width="0dp"
             android:layout_height="wrap_content"
-            app:layout_constraintTop_toBottomOf="@+id/today_recycler_row_module_name"
+            app:layout_constraintTop_toBottomOf="@+id/today_recycler_row_session_type"
             app:layout_constraintLeft_toLeftOf="parent"
-            android:padding="10dp"/>
+            android:padding="5dp"/>
 
         <View
             style="@style/HorizontalDivider"

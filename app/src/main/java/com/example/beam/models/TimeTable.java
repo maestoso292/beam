@@ -1,7 +1,5 @@
 package com.example.beam.models;
 
-import java.util.Map;
-
 public class TimeTable extends Session{
     private String date;
 

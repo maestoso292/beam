@@ -8,16 +8,22 @@ import android.view.ViewGroup;
 import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
 import androidx.fragment.app.Fragment;
+import androidx.lifecycle.Observer;
 import androidx.lifecycle.ViewModelProvider;
 import androidx.recyclerview.widget.LinearLayoutManager;
 import androidx.recyclerview.widget.RecyclerView;
 
 import com.example.beam.BeamViewModel;
 import com.example.beam.R;
+import com.example.beam.models.BeamUser;
 import com.example.beam.models.Session;
 
 import java.util.ArrayList;
 import java.util.Calendar;
+import java.util.Collections;
+import java.util.HashMap;
+import java.util.List;
+import java.util.Map;
 
 public class TodayFragment extends Fragment {
     private RecyclerView recyclerView;
@@ -38,7 +44,7 @@ public class TodayFragment extends Fragment {
         recyclerView = view.findViewById(R.id.today_recycler);
         recyclerViewAdapter = new TodayRecyclerAdapter();
         recyclerViewAdapter.setUserTodayTimetable(new ArrayList<Session>());
-        //recyclerViewAdapter.setUserModules(new HashMap<String, String>());
+        recyclerViewAdapter.setUserModules(new HashMap<String, String>());
         recyclerView.setAdapter(recyclerViewAdapter);
         recyclerView.setLayoutManager(new LinearLayoutManager(getContext()));
 
@@ -46,35 +52,36 @@ public class TodayFragment extends Fragment {
         final String date = String.format("%04d%02d%02d", calendar.get(Calendar.YEAR), calendar.get(Calendar.MONTH), calendar.get(Calendar.DAY_OF_MONTH));
 
         beamViewModel = new ViewModelProvider(getActivity()).get(BeamViewModel.class);
-        /*
-        beamViewModel.getUserModules().observe(getViewLifecycleOwner(), new Observer<Map<String, String>>() {
+        beamViewModel.getUserDetails().observe(getViewLifecycleOwner(), new Observer<BeamUser>() {
             @Override
-            public void onChanged(Map<String, String> userModules) {
-                recyclerViewAdapter.setUserModules(userModules);
-                recyclerViewAdapter.notifyDataSetChanged();
-            }
-        });
+            public void onChanged(BeamUser beamUser) {
+                beamViewModel.getUserModules().observe(getViewLifecycleOwner(), new Observer<Map<String, String>>() {
+                    @Override
+                    public void onChanged(Map<String, String> userModules) {
+                        recyclerViewAdapter.setUserModules(userModules);
+                        recyclerViewAdapter.notifyDataSetChanged();
+                    }
+                });
+                beamViewModel.getUserWeeklyTimetable().observe(getViewLifecycleOwner(), new Observer<Map<String, Map<String, Map<String, Session>>>>() {
+                    @Override
+                    public void onChanged(Map<String, Map<String, Map<String, Session>>> userWeeklyTimetable) {
+                        if (userWeeklyTimetable.containsKey(date)) {
+                            List<Session> sessions = new ArrayList<>();
 
-         */
-        /*
-        beamViewModel.getUserWeeklyTimetable().observe(getViewLifecycleOwner(), new Observer<Map<String, Map<String, Map<String, Session>>>>() {
-            @Override
-            public void onChanged(Map<String, Map<String, Map<String, Session>>> userWeeklyTimetable) {
-                if (userWeeklyTimetable.containsKey(date)) {
-                    List<Session> sessions = new ArrayList<>();
-
-                    for(Map.Entry<String, Map<String, Session>> entry: userWeeklyTimetable.get(date).entrySet()) {
-                        if (entry.getValue() != null) {
-                            sessions.addAll(entry.getValue().values());
+                            for(Map.Entry<String, Map<String, Session>> entry: userWeeklyTimetable.get(date).entrySet()) {
+                                if (entry.getValue() != null) {
+                                    sessions.addAll(entry.getValue().values());
+                                }
+                            }
+                            Collections.sort(sessions);
+                            recyclerViewAdapter.setUserTodayTimetable(sessions);
+                            recyclerViewAdapter.notifyDataSetChanged();
                         }
                     }
-                    Collections.sort(sessions);
-                    recyclerViewAdapter.setUserTodayTimetable(sessions);
-                    recyclerViewAdapter.notifyDataSetChanged();
-                }
+                });
             }
         });
 
-         */
+
     }
 }

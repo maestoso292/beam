@@ -14,21 +14,27 @@ import com.example.beam.R;
 import com.example.beam.models.Session;
 
 import java.util.List;
+import java.util.Map;
 import java.util.concurrent.ThreadLocalRandom;
 
 public class TodayRecyclerAdapter extends RecyclerView.Adapter<TodayRecyclerAdapter.TodayRecyclerViewHolder> {
     private List<Session> userTodayTimetable;
+    private Map<String, String> userModules;
 
     public static class TodayRecyclerViewHolder extends RecyclerView.ViewHolder {
         ImageView status;
         TextView moduleName;
+        TextView moduleCode;
+        TextView sessionType;
         TextView sessionTime;
 
-        public TodayRecyclerViewHolder(@NonNull View itemView) {
+        public TodayRecyclerViewHolder(@NonNull final View itemView) {
             super(itemView);
 
             status = itemView.findViewById(R.id.today_recycler_row_status);
             moduleName = itemView.findViewById(R.id.today_recycler_row_module_name);
+            moduleCode = itemView.findViewById(R.id.today_recycler_row_module_code);
+            sessionType = itemView.findViewById(R.id.today_recycler_row_session_type);
             sessionTime = itemView.findViewById(R.id.today_recycler_row_time);
 
             itemView.setOnClickListener(new View.OnClickListener() {
@@ -44,6 +50,10 @@ public class TodayRecyclerAdapter extends RecyclerView.Adapter<TodayRecyclerAdap
         this.userTodayTimetable = userTodayTimetable;
     }
 
+    public void setUserModules(Map<String, String> userModules) {
+        this.userModules = userModules;
+    }
+
     @NonNull
     @Override
     public TodayRecyclerViewHolder onCreateViewHolder(@NonNull ViewGroup parent, int viewType) {
@@ -55,8 +65,11 @@ public class TodayRecyclerAdapter extends RecyclerView.Adapter<TodayRecyclerAdap
     @Override
     public void onBindViewHolder(@NonNull TodayRecyclerViewHolder holder, int position) {
         holder.status.setImageResource(ThreadLocalRandom.current().nextInt(0, 2) == 0 ? R.drawable.ic_done : R.drawable.ic_clear);
-        holder.moduleName.setText("Sample Module Name");
-        holder.sessionTime.setText("9:00 - 11:00");
+        Session currentSession = userTodayTimetable.get(position);
+        holder.moduleCode.setText(currentSession.getModuleID());
+        holder.moduleName.setText(userModules.get(currentSession.getModuleID()));
+        holder.sessionType.setText(currentSession.getSessionType());
+        holder.sessionTime.setText("" + currentSession.getTimeBegin() + " - " + currentSession.getTimeEnd());
     }
 
     @Override

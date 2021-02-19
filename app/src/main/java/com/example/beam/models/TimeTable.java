@@ -16,12 +16,12 @@ public class TimeTable extends Session{
     public String toString() {
         return "TimeTable{" +
                 "date='" + date + '\'' +
-                "moduleID='" + moduleID + '\'' +
-                "sessionID='" + sessionID + '\'' +
-                "sessionType='" + sessionType + '\'' +
-                "timeBegin='" + timeBegin + '\'' +
-                "timeEnd='" + timeEnd + '\'' +
-                ", status='" + status +
+                "moduleID='" + getModuleID() + '\'' +
+                "sessionID='" + getSessionID() + '\'' +
+                "sessionType='" + getSessionType() + '\'' +
+                "timeBegin='" + getTimeBegin() + '\'' +
+                "timeEnd='" + getTimeEnd() + '\'' +
+                ", status='" + getStatus() +
                 '}';
     }
 

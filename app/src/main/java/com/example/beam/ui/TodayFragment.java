@@ -1,6 +1,7 @@
 package com.example.beam.ui;
 
 import android.os.Bundle;
+import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
@@ -17,15 +18,17 @@ import com.example.beam.BeamViewModel;
 import com.example.beam.R;
 import com.example.beam.models.BeamUser;
 import com.example.beam.models.Session;
+import com.example.beam.models.TimeTable;
 
 import java.util.ArrayList;
 import java.util.Calendar;
-import java.util.Collections;
 import java.util.HashMap;
-import java.util.List;
+import java.util.Locale;
 import java.util.Map;
 
 public class TodayFragment extends Fragment {
+    private static final String LOG_TAG = "TodayFragment";
+
     private RecyclerView recyclerView;
     private TodayRecyclerAdapter recyclerViewAdapter;
 
@@ -43,13 +46,13 @@ public class TodayFragment extends Fragment {
 
         recyclerView = view.findViewById(R.id.today_recycler);
         recyclerViewAdapter = new TodayRecyclerAdapter();
-        recyclerViewAdapter.setUserTodayTimetable(new ArrayList<Session>());
+        recyclerViewAdapter.setUserDailyTimetable(new ArrayList<Session>());
         recyclerViewAdapter.setUserModules(new HashMap<String, String>());
         recyclerView.setAdapter(recyclerViewAdapter);
         recyclerView.setLayoutManager(new LinearLayoutManager(getContext()));
 
         Calendar calendar = Calendar.getInstance();
-        final String date = String.format("%04d%02d%02d", calendar.get(Calendar.YEAR), calendar.get(Calendar.MONTH), calendar.get(Calendar.DAY_OF_MONTH));
+        final String date = String.format(Locale.ENGLISH, "%04d%02d%02d", calendar.get(Calendar.YEAR), calendar.get(Calendar.MONTH), calendar.get(Calendar.DAY_OF_MONTH));
 
         beamViewModel = new ViewModelProvider(getActivity()).get(BeamViewModel.class);
         beamViewModel.getUserDetails().observe(getViewLifecycleOwner(), new Observer<BeamUser>() {
@@ -59,29 +62,22 @@ public class TodayFragment extends Fragment {
                     @Override
                     public void onChanged(Map<String, String> userModules) {
                         recyclerViewAdapter.setUserModules(userModules);
-                        recyclerViewAdapter.notifyDataSetChanged();
                     }
                 });
-                beamViewModel.getUserWeeklyTimetable().observe(getViewLifecycleOwner(), new Observer<Map<String, Map<String, Map<String, Session>>>>() {
+                beamViewModel.getUserWeeklyTimetable().observe(getViewLifecycleOwner(), new Observer<TimeTable>() {
                     @Override
-                    public void onChanged(Map<String, Map<String, Map<String, Session>>> userWeeklyTimetable) {
-                        if (userWeeklyTimetable.containsKey(date)) {
-                            List<Session> sessions = new ArrayList<>();
-
-                            for(Map.Entry<String, Map<String, Session>> entry: userWeeklyTimetable.get(date).entrySet()) {
-                                if (entry.getValue() != null) {
-                                    sessions.addAll(entry.getValue().values());
-                                }
-                            }
-                            Collections.sort(sessions);
-                            recyclerViewAdapter.setUserTodayTimetable(sessions);
-                            recyclerViewAdapter.notifyDataSetChanged();
+                    public void onChanged(TimeTable timeTable) {
+                        try {
+                            recyclerViewAdapter.setUserDailyTimetable(timeTable.getDailyTimetable(date));
+                            Log.d(LOG_TAG, timeTable.getDailyTimetable(date).toString());
+                        }
+                        catch (NullPointerException exception) {
+                            Log.d(LOG_TAG, "No daily sessions for " + date + ": " + exception);
+                            Log.d(LOG_TAG, "Weekly Sessions: " + timeTable.getWeeklyTimetable());
                         }
                     }
                 });
             }
         });
-
-
     }
 }

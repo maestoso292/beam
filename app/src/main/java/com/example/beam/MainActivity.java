@@ -17,12 +17,10 @@ import androidx.navigation.fragment.NavHostFragment;
 import androidx.navigation.ui.NavigationUI;
 
 import com.example.beam.models.BeamUser;
-import com.example.beam.models.Session;
 import com.google.firebase.auth.FirebaseAuth;
 import com.google.firebase.auth.FirebaseUser;
 
 import java.util.Arrays;
-import java.util.Map;
 
 public class MainActivity extends AppCompatActivity {
 
@@ -93,24 +91,13 @@ public class MainActivity extends AppCompatActivity {
             navController.navigate(R.id.login_dest);
         }
         else {
-            if (currentUser != null) {
-                beamViewModel.loadUser();
-                beamViewModel.getUserDetails().observe(this, new Observer<BeamUser>() {
-                    @Override
-                    public void onChanged(BeamUser beamUser) {
-                        beamViewModel.getUserModules().observe(MainActivity.this, new Observer<Map<String, String>>() {
-                            @Override
-                            public void onChanged(Map<String, String> userModules) {
-                            }
-                        });
-                        beamViewModel.getUserWeeklyTimetable().observe(MainActivity.this, new Observer<Map<String, Map<String, Map<String, Session>>>>() {
-                            @Override
-                            public void onChanged(Map<String, Map<String, Map<String, Session>>> userWeeklyTimetable) {
-                            }
-                        });
-                    }
-                });
-            }
+            beamViewModel.loadUser();
+            beamViewModel.getUserDetails().observe(this, new Observer<BeamUser>() {
+                @Override
+                public void onChanged(BeamUser beamUser) {
+                    beamViewModel.initialLoad();
+                }
+            });
         }
     }
 }

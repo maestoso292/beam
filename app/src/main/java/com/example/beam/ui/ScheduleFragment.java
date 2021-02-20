@@ -1,7 +1,6 @@
 package com.example.beam.ui;
 
 import android.os.Bundle;
-import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
@@ -15,7 +14,7 @@ import androidx.lifecycle.ViewModelProvider;
 
 import com.example.beam.BeamViewModel;
 import com.example.beam.R;
-import com.example.beam.models.Session;
+import com.example.beam.models.TimeTable;
 
 import java.util.HashMap;
 import java.util.Map;
@@ -38,24 +37,20 @@ public class ScheduleFragment extends Fragment {
 
         expandableListView = view.findViewById(R.id.schedule_expandable);
         expandableListAdapter = new ScheduleExpandableListAdapter(getContext());
-        expandableListAdapter.setUserWeeklyTimetable(new HashMap<String, Map<String, Map<String, Session>>>());
         expandableListAdapter.setUserModules(new HashMap<String, String>());
         expandableListView.setAdapter(expandableListAdapter);
 
         beamViewModel = new ViewModelProvider(getActivity()).get(BeamViewModel.class);
-        beamViewModel.getUserWeeklyTimetable().observe(getViewLifecycleOwner(), new Observer<Map<String, Map<String, Map<String, Session>>>>() {
+        beamViewModel.getUserWeeklyTimetable().observe(getViewLifecycleOwner(), new Observer<TimeTable>() {
             @Override
-            public void onChanged(Map<String, Map<String, Map<String, Session>>> userWeeklyTimetable) {
-                expandableListAdapter.setUserWeeklyTimetable(userWeeklyTimetable);
-                expandableListAdapter.notifyDataSetChanged();
-                Log.d("ScheduleFragment", "Timetable loaded");
+            public void onChanged(TimeTable timeTable) {
+                expandableListAdapter.setUserWeeklyTimetable(timeTable);
             }
         });
         beamViewModel.getUserModules().observe(getViewLifecycleOwner(), new Observer<Map<String, String>>() {
             @Override
             public void onChanged(Map<String, String> userModules) {
                 expandableListAdapter.setUserModules(userModules);
-                expandableListAdapter.notifyDataSetChanged();
             }
         });
 

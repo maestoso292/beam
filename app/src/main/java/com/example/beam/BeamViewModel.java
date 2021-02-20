@@ -11,6 +11,7 @@ import com.example.beam.models.BeamUser;
 import com.example.beam.models.Lecturer;
 import com.example.beam.models.Session;
 import com.example.beam.models.Student;
+import com.example.beam.models.TimeTable;
 import com.google.firebase.auth.FirebaseAuth;
 import com.google.firebase.auth.FirebaseUser;
 import com.google.firebase.database.DataSnapshot;
@@ -36,53 +37,23 @@ public class BeamViewModel extends ViewModel {
 
     private MutableLiveData<BeamUser> userDetails;
     private MutableLiveData<Map<String, String>> userModules;
-    private MutableLiveData<Map<String, Map<String, Map<String, Session>>>> userWeeklyTimetable;
+    private MutableLiveData<TimeTable> userWeeklyTimetable;
 
     public BeamViewModel() {
         currentUser = FirebaseAuth.getInstance().getCurrentUser();
         mDatabase = FirebaseDatabase.getInstance().getReference();
     }
 
+    public void initialLoad() {
+        userModules = new MutableLiveData<>();
+        userWeeklyTimetable = new MutableLiveData<>();
+
+        loadUserModules();
+        loadUserWeeklyTimetable();
+    }
+
     public void loadUser() {
         currentUser = FirebaseAuth.getInstance().getCurrentUser();
-    }
-
-    public LiveData<Map<String, Map<String, Map<String, Session>>>> getUserWeeklyTimetable() {
-        if (userWeeklyTimetable == null) {
-            userWeeklyTimetable = new MutableLiveData<>();
-            loadUserWeeklyTimetable();
-        }
-        return userWeeklyTimetable;
-    }
-
-    private void loadUserWeeklyTimetable() {
-        final Map<String, Map<String, Map<String, Session>>> tempMap = new HashMap<>();
-        userWeeklyTimetable.setValue(tempMap);
-        List<String> dates = new ArrayList<>();
-        List<String> modules = new ArrayList<>(userDetails.getValue().getModules().values());
-        Calendar calendar = Calendar.getInstance();
-        calendar.set(Calendar.DAY_OF_WEEK, Calendar.MONDAY);
-        for (int i = 0; i < 5; i++) {
-            dates.add(String.format("%04d%02d%02d", calendar.get(Calendar.YEAR), calendar.get(Calendar.MONTH), calendar.get(Calendar.DAY_OF_MONTH)+i));
-        }
-        for (final String date : dates) {
-            tempMap.put(date, new HashMap<String, Map<String, Session>>());
-            for(final String module : modules) {
-                mDatabase.child("timetableTest").child(date).child(module).addListenerForSingleValueEvent(new ValueEventListener() {
-                    @Override
-                    public void onDataChange(@NonNull DataSnapshot snapshot) {
-                        GenericTypeIndicator<Map<String, Session>> t = new GenericTypeIndicator<Map<String, Session>>() {};
-                        Map<String, Session> sessionMap = snapshot.getValue(t);
-                        tempMap.get(date).put(module, sessionMap);
-                        userWeeklyTimetable.setValue(tempMap);
-                    }
-                    @Override
-                    public void onCancelled(@NonNull DatabaseError error) {
-
-                    }
-                });
-            }
-        }
     }
 
     public LiveData<BeamUser> getUserDetails() {
@@ -103,6 +74,7 @@ public class BeamViewModel extends ViewModel {
                 else {
                     userDetails.setValue(snapshot.getValue(Lecturer.class));
                 }
+                Log.d(LOG_TAG, "User Details: " + userDetails.getValue());
             }
             @Override
             public void onCancelled(@NonNull DatabaseError error) {
@@ -130,10 +102,56 @@ public class BeamViewModel extends ViewModel {
                 public void onDataChange(@NonNull DataSnapshot snapshot) {
                     tempModules.put(moduleCode, snapshot.getValue(String.class));
                     userModules.setValue(tempModules);
+                    Log.d(LOG_TAG, "User Modules: " + userModules.getValue().values());
                 }
                 @Override
                 public void onCancelled(@NonNull DatabaseError error) {
                     Log.e(LOG_TAG, "Error Loading User Modules: " + error);
+                }
+            });
+        }
+    }
+
+    public LiveData<TimeTable> getUserWeeklyTimetable() {
+        if (userWeeklyTimetable == null) {
+            userWeeklyTimetable = new MutableLiveData<>();
+            loadUserWeeklyTimetable();
+        }
+        return userWeeklyTimetable;
+    }
+
+    private void loadUserWeeklyTimetable() {
+        final TimeTable timeTable = new TimeTable(new HashMap<String, List<Session>>());
+        userWeeklyTimetable.setValue(timeTable);
+
+        List<String> dates = new ArrayList<>();
+        Calendar calendar = Calendar.getInstance();
+        calendar.set(Calendar.DAY_OF_WEEK, Calendar.MONDAY);
+
+        for (int i = 0; i < 7; i++) {
+            dates.add(String.format("%04d%02d%02d", calendar.get(Calendar.YEAR), calendar.get(Calendar.MONTH), calendar.get(Calendar.DAY_OF_MONTH)+i));
+        }
+
+        for (final String date : dates) {
+            mDatabase.child("timetable").child(date).addValueEventListener(new ValueEventListener() {
+                @Override
+                public void onDataChange(@NonNull DataSnapshot snapshot) {
+                    GenericTypeIndicator<Map<String, Map<String, Session>>> t = new GenericTypeIndicator<Map<String, Map<String, Session>>>() {};
+                    // Module, SessionID, Session
+                    Map<String, Map<String, Session>> moduleSessionsMap = snapshot.getValue(t);
+                    List<Session> sessions = new ArrayList<>();
+                    for (Map<String, Session> map : moduleSessionsMap.values()) {
+                        sessions.addAll(map.values());
+                    }
+                    Collections.sort(sessions);
+                    timeTable.putDailyTimetable(date, sessions);
+                    userWeeklyTimetable.setValue(timeTable);
+                    Log.d(LOG_TAG, "User Daily Timetable " + date + ": " + userWeeklyTimetable.getValue().getDailyTimetable(date));
+                }
+
+                @Override
+                public void onCancelled(@NonNull DatabaseError error) {
+                    Log.d(LOG_TAG, "Error loading timetable: " + error);
                 }
             });
         }

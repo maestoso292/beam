@@ -19,6 +19,14 @@ public class Session implements Comparable<Session> {
         this.status = status;
     }
 
+    public Session(String moduleID, String sessionType, String timeBegin, String timeEnd, String status) {
+        this.moduleID = moduleID;
+        this.sessionType = sessionType;
+        this.timeBegin = timeBegin;
+        this.timeEnd = timeEnd;
+        this.status = status;
+    }
+
     @Override
     public String toString() {
         return "Session{" +

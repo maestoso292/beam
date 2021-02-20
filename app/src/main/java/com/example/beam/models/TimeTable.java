@@ -1,35 +1,38 @@
 package com.example.beam.models;
 
-public class TimeTable extends Session{
-    private String date;
+import java.util.List;
+import java.util.Map;
+
+public class TimeTable{
+    // Key: Date, Value: Sessions of the day
+    private Map<String, List<Session>> weeklyTimetable;
 
     public TimeTable() {
-        super();
+
     }
 
-    public TimeTable(String date, String moduleID, String sessionID, String sessionType, String timeBegin, String timeEnd, String status) {
-        super(moduleID, sessionID, sessionType, timeBegin, timeEnd, status);
-        this.date = date;
+    public TimeTable(Map<String, List<Session>> weeklyTimetable) {
+        this.weeklyTimetable = weeklyTimetable;
     }
 
-    @Override
-    public String toString() {
-        return "TimeTable{" +
-                "date='" + date + '\'' +
-                "moduleID='" + getModuleID() + '\'' +
-                "sessionID='" + getSessionID() + '\'' +
-                "sessionType='" + getSessionType() + '\'' +
-                "timeBegin='" + getTimeBegin() + '\'' +
-                "timeEnd='" + getTimeEnd() + '\'' +
-                ", status='" + getStatus() +
-                '}';
+    public void setWeeklyTimetable(Map<String, List<Session>> weeklyTimetable) {
+        this.weeklyTimetable = weeklyTimetable;
     }
 
-    public String getDate() {
-        return date;
+    public Map<String, List<Session>> getWeeklyTimetable() {
+        return weeklyTimetable;
     }
 
-    public void setDate(String date) {
-        this.date = date;
+    public void putDailyTimetable(String date, List<Session> sessions) {
+        weeklyTimetable.put(date, sessions);
+    }
+
+    public List<Session> getDailyTimetable(String date) throws NullPointerException {
+        try {
+            return weeklyTimetable.get(date);
+        }
+        catch (NullPointerException exception) {
+            throw exception;
+        }
     }
 }

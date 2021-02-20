@@ -54,7 +54,7 @@ public class MainActivity extends AppCompatActivity {
         currentUser = mAuth.getCurrentUser();
         beamViewModel = new ViewModelProvider(this).get(BeamViewModel.class);
         if (currentUser != null) {
-            beamViewModel.loadUser();
+            beamViewModel.initialLoad();
         }
     }
 
@@ -91,7 +91,7 @@ public class MainActivity extends AppCompatActivity {
             navController.navigate(R.id.login_dest);
         }
         else {
-            beamViewModel.loadUser();
+            beamViewModel.initialLoad();
             beamViewModel.getUserDetails().observe(this, new Observer<BeamUser>() {
                 @Override
                 public void onChanged(BeamUser beamUser) {

@@ -52,7 +52,7 @@ public class TodayFragment extends Fragment {
         recyclerView.setLayoutManager(new LinearLayoutManager(getContext()));
 
         Calendar calendar = Calendar.getInstance();
-        final String date = String.format(Locale.ENGLISH, "%04d%02d%02d", calendar.get(Calendar.YEAR), calendar.get(Calendar.MONTH), calendar.get(Calendar.DAY_OF_MONTH));
+        final String date = String.format(Locale.ENGLISH, "%04d%02d%02d", calendar.get(Calendar.YEAR), calendar.get(Calendar.MONTH)+1, calendar.get(Calendar.DAY_OF_MONTH));
 
         beamViewModel = new ViewModelProvider(getActivity()).get(BeamViewModel.class);
         beamViewModel.getUserDetails().observe(getViewLifecycleOwner(), new Observer<BeamUser>() {

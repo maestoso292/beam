@@ -4,11 +4,18 @@
     android:layout_height="match_parent"
     xmlns:app="http://schemas.android.com/apk/res-auto">
 
+    <Button
+        app:layout_constraintTop_toTopOf="parent"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:text="Button"
+        android:id="@+id/schedule_button" />
+
     <ExpandableListView
         android:id="@+id/schedule_expandable"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
-        app:layout_constraintTop_toTopOf="parent"
+        app:layout_constraintTop_toBottomOf="@id/schedule_button"
         android:indicatorRight="?android:attr/expandableListPreferredItemIndicatorRight"
         android:divider="@android:color/darker_gray"
         android:dividerHeight="1dp"/>

@@ -1,14 +1,14 @@
 package com.example.beam.models;
 
-import java.util.Map;
+import java.util.List;
 
 public class Plan {
     private String name;
-    private Map<String, String> modules;
+    private List<String> modules;
 
     public Plan() {}
 
-    public Plan(String name, Map<String, String> modules) {
+    public Plan(String name, List<String> modules) {
         this.name = name;
         this.modules = modules;
     }
@@ -29,11 +29,11 @@ public class Plan {
         this.name = name;
     }
 
-    public Map<String, String> getModules() {
+    public List<String> getModules() {
         return modules;
     }
 
-    public void setModules(Map<String, String> modules) {
+    public void setModules(List<String> modules) {
         this.modules = modules;
     }
 }

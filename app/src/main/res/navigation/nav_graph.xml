@@ -19,14 +19,14 @@
             android:id="@+id/action_go_to_settings"
             app:destination="@id/settings_dest" />
         <action
-            android:id="@+id/action_logout"
+            android:id="@+id/actionLogout"
             app:destination="@id/login_dest"
             app:enterAnim="@anim/nav_default_enter_anim"
             app:exitAnim="@anim/nav_default_exit_anim"
             app:popEnterAnim="@anim/nav_default_pop_enter_anim"
             app:popExitAnim="@anim/nav_default_pop_exit_anim" />
         <action
-            android:id="@+id/action_detailed_stats"
+            android:id="@+id/actionDetailedStats"
             app:destination="@id/detailed_stats_dest" />
     </fragment>
     <fragment
@@ -38,5 +38,11 @@
         android:id="@+id/detailed_stats_dest"
         android:name="com.example.beam.ui.DetailedStatsFragment"
         android:label="detailed_stats_fragment"
-        tools:layout="@layout/detailed_stats_fragment" />
+        tools:layout="@layout/detailed_stats_fragment" >
+        <argument
+            android:name="moduleCode"
+            app:argType="string"
+            app:nullable="true"
+            android:defaultValue="@null"/>
+    </fragment>
 </navigation>

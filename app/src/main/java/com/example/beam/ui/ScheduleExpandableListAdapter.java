@@ -110,7 +110,7 @@ public class ScheduleExpandableListAdapter extends BaseExpandableListAdapter {
                     .inflate(R.layout.schedule_expandable_child, viewGroup, false);
         }
         try {
-            Session session = userWeeklyTimetable.getDailyTimetable(dates.get(groupPosition)).get(childPosition);
+            final Session session = userWeeklyTimetable.getDailyTimetable(dates.get(groupPosition)).get(childPosition);
 
             ((TextView) view.findViewById(R.id.schedule_expandable_child_code)).setText(session.getModuleID());
             ((TextView) view.findViewById(R.id.schedule_expandable_child_name)).setText(userModules.get(session.getModuleID()));
@@ -120,7 +120,9 @@ public class ScheduleExpandableListAdapter extends BaseExpandableListAdapter {
             view.setOnClickListener(new View.OnClickListener() {
                 @Override
                 public void onClick(View view) {
-                    Navigation.findNavController(view).navigate(R.id.action_detailed_stats);
+                    MainFragmentDirections.ActionDetailedStats action = MainFragmentDirections.actionDetailedStats();
+                    action.setModuleCode(session.getModuleID());
+                    Navigation.findNavController(view).navigate(action);
                 }
             });
 

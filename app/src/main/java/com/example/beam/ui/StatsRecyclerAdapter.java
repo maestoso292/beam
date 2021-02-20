@@ -11,6 +11,7 @@ import androidx.navigation.Navigation;
 import androidx.recyclerview.widget.RecyclerView;
 
 import com.example.beam.R;
+import com.example.beam.models.Record;
 import com.example.beam.models.StudentModuleRecord;
 
 import java.util.ArrayList;
@@ -25,7 +26,7 @@ public class StatsRecyclerAdapter extends RecyclerView.Adapter<StatsRecyclerAdap
     private String userRole;
     private List<String> userModuleCodes;
     private Map<String, String> userModules;
-    private List<StudentModuleRecord> userModuleRecords;
+    private List<? extends Record> userModuleRecords;
     private Map<String, Double> userModuleStats;
 
     public static class StatsRecyclerViewHolder extends RecyclerView.ViewHolder {
@@ -43,7 +44,9 @@ public class StatsRecyclerAdapter extends RecyclerView.Adapter<StatsRecyclerAdap
             itemView.setOnClickListener(new View.OnClickListener() {
                 @Override
                 public void onClick(View view) {
-                    Navigation.findNavController(view).navigate(R.id.action_detailed_stats);
+                    MainFragmentDirections.ActionDetailedStats action = MainFragmentDirections.actionDetailedStats();
+                    action.setModuleCode(moduleCode.getText().toString());
+                    Navigation.findNavController(view).navigate(action);
                 }
             });
         }
@@ -86,11 +89,12 @@ public class StatsRecyclerAdapter extends RecyclerView.Adapter<StatsRecyclerAdap
     }
 
     private void calculateStudentModuleStats() {
-        for (StudentModuleRecord record : userModuleRecords) {
+        for (Record record : userModuleRecords) {
+            StudentModuleRecord temp = ((StudentModuleRecord) record);
             double avg = -1;
             try {
                 int numAttended = 0;
-                List<Boolean> list = new ArrayList<>(record.getAttendance().values());
+                List<Boolean> list = new ArrayList<>(temp.getAttendance().values());
                 for (Boolean bool : list) {
                     if (bool) {
                         numAttended++;
@@ -99,10 +103,10 @@ public class StatsRecyclerAdapter extends RecyclerView.Adapter<StatsRecyclerAdap
                 avg = ((double) numAttended) / list.size();
             }
             catch (NullPointerException exception) {
-                Log.d(LOG_TAG, "No record for " + record.getModuleID() + ": " + exception);
+                Log.d(LOG_TAG, "No record for " + temp.getModuleID() + ": " + exception);
             }
             finally {
-                userModuleStats.put(record.getModuleID(), avg);
+                userModuleStats.put(temp.getModuleID(), avg);
             }
 
         }
@@ -110,7 +114,7 @@ public class StatsRecyclerAdapter extends RecyclerView.Adapter<StatsRecyclerAdap
     }
 
     private void calculateLecturerModuleStats() {
-
+        // TODO Implement to calculate average attendance
     }
 
     public void setUserRole(String userRole) {
@@ -124,7 +128,7 @@ public class StatsRecyclerAdapter extends RecyclerView.Adapter<StatsRecyclerAdap
         notifyDataSetChanged();
     }
 
-    public void setUserModuleRecords(List<StudentModuleRecord> userModuleRecords) {
+    public void setUserModuleRecords(List<? extends Record> userModuleRecords) {
         this.userModuleRecords = userModuleRecords;
         if (userRole.equals("Student")) {
             calculateStudentModuleStats();

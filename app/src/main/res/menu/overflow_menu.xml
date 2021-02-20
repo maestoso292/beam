@@ -6,7 +6,7 @@
         android:title="Settings"
         app:showAsAction="never" />
     <item
-        android:id="@+id/action_logout"
+        android:id="@+id/actionLogout"
         android:title="Logout"
         app:showAsAction="never" />
 </menu>

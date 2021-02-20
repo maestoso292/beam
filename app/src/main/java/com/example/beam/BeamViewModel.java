@@ -9,7 +9,7 @@ import androidx.lifecycle.ViewModel;
 
 import com.example.beam.models.BeamUser;
 import com.example.beam.models.Lecturer;
-import com.example.beam.models.LecturerModuleRecord;
+import com.example.beam.models.Record;
 import com.example.beam.models.Session;
 import com.example.beam.models.Student;
 import com.example.beam.models.StudentModuleRecord;
@@ -41,8 +41,7 @@ public class BeamViewModel extends ViewModel {
     private MutableLiveData<Map<String, String>> userModules;
     private MutableLiveData<TimeTable> userWeeklyTimetable;
 
-    private MutableLiveData<List<StudentModuleRecord>> studentRecord;
-    private MutableLiveData<List<LecturerModuleRecord>> lecturerRecord;
+    private MutableLiveData<List<? extends Record>> userRecord;
 
     public BeamViewModel() {
         currentUser = FirebaseAuth.getInstance().getCurrentUser();
@@ -54,17 +53,16 @@ public class BeamViewModel extends ViewModel {
 
         userModules = new MutableLiveData<>();
         userWeeklyTimetable = new MutableLiveData<>();
+        userRecord = new MutableLiveData<>();
 
         loadUserModules();
         loadUserWeeklyTimetable();
 
         String role = userDetails.getValue().getRole();
         if (role.equals("Student")) {
-            studentRecord = new MutableLiveData<>();
             loadStudentRecord();
         }
         else if (role.equals("Lecturer")) {
-            lecturerRecord = new MutableLiveData<>();
             loadLecturerRecord();
         }
     }
@@ -174,17 +172,24 @@ public class BeamViewModel extends ViewModel {
         }
     }
 
-    public LiveData<List<StudentModuleRecord>> getStudentRecord() {
-        if (studentRecord == null) {
-            studentRecord = new MutableLiveData<>();
-            loadStudentRecord();
+    public LiveData<List<? extends Record>> getUserRecord() {
+        if (userRecord == null) {
+            userRecord = new MutableLiveData<>();
+
+            String role = userDetails.getValue().getRole();
+            if (role.equals("Student")) {
+                loadStudentRecord();
+            }
+            else if (role.equals("Lecturer")) {
+                loadLecturerRecord();
+            }
         }
-        return studentRecord;
+        return userRecord;
     }
 
     private void loadStudentRecord() {
         final List<StudentModuleRecord> tempList = new ArrayList<>();
-        studentRecord.setValue(tempList);
+        userRecord.setValue(tempList);
         for (final String moduleCode : userDetails.getValue().getModules().values()) {
             mDatabase.child("student_record").child(currentUser.getUid()).child(moduleCode).addValueEventListener(new ValueEventListener() {
                 @Override
@@ -192,7 +197,7 @@ public class BeamViewModel extends ViewModel {
                     GenericTypeIndicator<Map<String, Boolean>> t = new GenericTypeIndicator<Map<String, Boolean>>() {};
                     StudentModuleRecord record = new StudentModuleRecord(moduleCode, snapshot.getValue(t));
                     tempList.add(record);
-                    studentRecord.setValue(tempList);
+                    userRecord.setValue(tempList);
                     Log.d(LOG_TAG, record.toString());
                 }
 
@@ -204,14 +209,7 @@ public class BeamViewModel extends ViewModel {
         }
     }
 
-    public LiveData<List<LecturerModuleRecord>> getLecturerRecord() {
-        if (studentRecord == null) {
-            studentRecord = new MutableLiveData<>();
-            loadStudentRecord();
-        }
-        return lecturerRecord;
-    }
-
     private void loadLecturerRecord() {
+        // TODO Implement to fetch data from /record/
     }
 }

@@ -54,7 +54,8 @@ public class MainActivity extends AppCompatActivity {
         currentUser = mAuth.getCurrentUser();
         beamViewModel = new ViewModelProvider(this).get(BeamViewModel.class);
         if (currentUser != null) {
-            beamViewModel.initialLoad();
+            beamViewModel.loadUser();
+
         }
     }
 
@@ -77,7 +78,7 @@ public class MainActivity extends AppCompatActivity {
 
     @Override
     public boolean onOptionsItemSelected(@NonNull MenuItem item) {
-        if (item.getItemId() == R.id.action_logout) {
+        if (item.getItemId() == R.id.actionLogout) {
             FirebaseAuth.getInstance().signOut();
         }
         // Returns destination corresponding to id of item
@@ -91,7 +92,7 @@ public class MainActivity extends AppCompatActivity {
             navController.navigate(R.id.login_dest);
         }
         else {
-            beamViewModel.initialLoad();
+            beamViewModel.loadUser();
             beamViewModel.getUserDetails().observe(this, new Observer<BeamUser>() {
                 @Override
                 public void onChanged(BeamUser beamUser) {

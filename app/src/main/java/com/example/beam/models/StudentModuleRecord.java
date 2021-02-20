@@ -21,6 +21,7 @@ public class StudentModuleRecord implements Comparable<StudentModuleRecord>, Rec
                 '}';
     }
 
+    @Override
     public String getModuleID() {
         return moduleID;
     }

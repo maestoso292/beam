@@ -51,7 +51,9 @@ public class TodayRecyclerAdapter extends RecyclerView.Adapter<TodayRecyclerAdap
             itemView.setOnClickListener(new View.OnClickListener() {
                 @Override
                 public void onClick(View view) {
-                    Navigation.findNavController(view).navigate(R.id.action_detailed_stats);
+                    MainFragmentDirections.ActionDetailedStats action = MainFragmentDirections.actionDetailedStats();
+                    action.setModuleCode(moduleCode.getText().toString());
+                    Navigation.findNavController(view).navigate(action);
                 }
             });
         }

@@ -1,7 +1,6 @@
 package com.example.beam.ui;
 
 import android.os.Bundle;
-import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
@@ -17,9 +16,7 @@ import androidx.recyclerview.widget.RecyclerView;
 import com.example.beam.BeamViewModel;
 import com.example.beam.R;
 import com.example.beam.models.BeamUser;
-import com.example.beam.models.StudentModuleRecord;
-import com.google.firebase.auth.FirebaseAuth;
-import com.google.firebase.auth.FirebaseUser;
+import com.example.beam.models.Record;
 
 import java.util.List;
 import java.util.Map;
@@ -31,7 +28,6 @@ public class StatsFragment extends Fragment {
     StatsRecyclerAdapter recyclerAdapter;
     BeamViewModel beamViewModel;
 
-    private FirebaseUser currentUser;
     private String userRole;
 
     @Nullable
@@ -43,8 +39,6 @@ public class StatsFragment extends Fragment {
     @Override
     public void onViewCreated(@NonNull View view, @Nullable Bundle savedInstanceState) {
         super.onViewCreated(view, savedInstanceState);
-
-        currentUser = FirebaseAuth.getInstance().getCurrentUser();
 
         recyclerView = view.findViewById(R.id.stats_recycler);
         recyclerAdapter = new StatsRecyclerAdapter();
@@ -64,25 +58,17 @@ public class StatsFragment extends Fragment {
     }
 
     private void loadRecords() {
-        if (userRole.equals("Student")) {
-            beamViewModel.getUserModules().observe(getViewLifecycleOwner(), new Observer<Map<String, String>>() {
-                @Override
-                public void onChanged(Map<String, String> userModules) {
-                    recyclerAdapter.setUserModules(userModules);
-                }
-            });
-            beamViewModel.getStudentRecord().observe(getViewLifecycleOwner(), new Observer<List<StudentModuleRecord>>() {
-                @Override
-                public void onChanged(List<StudentModuleRecord> studentModuleRecords) {
-                    recyclerAdapter.setUserModuleRecords(studentModuleRecords);
-                }
-            });
-        }
-        else if (userRole.equals("Lecturer")) {
-
-        }
-        else {
-            Log.d(LOG_TAG, "Invalid User Role");
-        }
+        beamViewModel.getUserModules().observe(getViewLifecycleOwner(), new Observer<Map<String, String>>() {
+            @Override
+            public void onChanged(Map<String, String> userModules) {
+                recyclerAdapter.setUserModules(userModules);
+            }
+        });
+        beamViewModel.getUserRecord().observe(getViewLifecycleOwner(), new Observer<List<? extends Record>>() {
+            @Override
+            public void onChanged(List<? extends Record> userModuleRecords) {
+                recyclerAdapter.setUserModuleRecords(userModuleRecords);
+            }
+        });
     }
 }

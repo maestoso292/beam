@@ -42,6 +42,8 @@ public class BeamViewModel extends ViewModel {
     private MutableLiveData<Map<String, String>> userModules;
     private MutableLiveData<TimeTable> userWeeklyTimetable;
 
+    private MutableLiveData<List<Session>> userModuleSessions;
+
     private MutableLiveData<List<? extends Record>> userRecord;
 
     public BeamViewModel() {
@@ -54,6 +56,7 @@ public class BeamViewModel extends ViewModel {
 
         userModules = new MutableLiveData<>();
         userWeeklyTimetable = new MutableLiveData<>();
+        userModuleSessions = new MutableLiveData<>();
         userRecord = new MutableLiveData<>();
 
         loadUserModules();
@@ -212,5 +215,32 @@ public class BeamViewModel extends ViewModel {
 
     private void loadLecturerRecord() {
         // TODO Implement to fetch data from /record/
+    }
+
+    public MutableLiveData<List<Session>> getUserModuleSessions(String moduleCode) {
+        try {
+            final ArrayList<Session> list = new ArrayList<>();
+            mDatabase.child("modules_session").child(moduleCode).addListenerForSingleValueEvent(new ValueEventListener() {
+                @Override
+                public void onDataChange(@NonNull DataSnapshot snapshot) {
+                    GenericTypeIndicator<Map<String, Session>> t = new GenericTypeIndicator<Map<String, Session>>() {};
+                    Map<String, Session> temp = snapshot.getValue(t);
+                    for (Session session : temp.values()) {
+                        list.add(session);
+                        userModuleSessions.setValue(list);
+                    }
+                }
+
+                @Override
+                public void onCancelled(@NonNull DatabaseError error) {
+
+                }
+            });
+
+        }
+        catch (NullPointerException exception) {
+            Log.d(LOG_TAG, exception.toString());
+        }
+        return userModuleSessions;
     }
 }

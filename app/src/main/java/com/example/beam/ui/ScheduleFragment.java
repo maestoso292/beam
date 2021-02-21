@@ -45,6 +45,7 @@ public class ScheduleFragment extends Fragment {
         super.onViewCreated(view, savedInstanceState);
 
         mDatabase = FirebaseDatabase.getInstance().getReference();
+
         Button button = view.findViewById(R.id.schedule_button);
         button.setOnClickListener(new View.OnClickListener() {
             @Override
@@ -59,10 +60,51 @@ public class ScheduleFragment extends Fragment {
                         mDatabase.child("record").child(session.getModuleID()).child(session.getSessionID()).child(currentUser.getUid()).setValue(bool);
                     }
                 }
+                   */
+                /*
+                new Thread(new Runnable() {
+                    @Override
+                    public void run() {
 
-                 */
+                        Calendar calendar = Calendar.getInstance();
+                        calendar.set(2021,1,15);
+
+                        Calendar end = Calendar.getInstance();
+                        end.set(2021,4,10);
+                        while(calendar.compareTo(end) < 0) {
+                            final String date = String.format("%04d%02d%02d", calendar.get(Calendar.YEAR), calendar.get(Calendar.MONTH)+1,calendar.get(Calendar.DAY_OF_MONTH));
+                            mDatabase.child("timetable").child(date).addListenerForSingleValueEvent(new ValueEventListener() {
+                                @Override
+                                public void onDataChange(@NonNull DataSnapshot snapshot) {
+                                    GenericTypeIndicator<Map<String, Map<String, Session>>> t = new GenericTypeIndicator<Map<String, Map<String, Session>>>() {};
+                                    Map<String, Map<String, Session>> temp = snapshot.getValue(t);
+                                    try {
+                                        Log.d("ScheduleFrag", temp.toString());
+                                        for (Map.Entry<String, Map<String, Session>> entry : temp.entrySet()) {
+                                            for (Map.Entry<String, Session> entry1 : entry.getValue().entrySet()) {
+                                                mDatabase.child("modules_session").child(entry1.getValue().getModuleID()).child(entry1.getValue().getSessionID()).setValue(entry1.getValue());
+                                            }
+                                        }
+                                    }
+                                    catch (NullPointerException e) {
+                                        Log.d("ScheduleFrag ",date + " " + e.toString());
+                                    }
+                                }
+
+                                @Override
+                                public void onCancelled(@NonNull DatabaseError error) {
+
+                                }
+                            });
+                            calendar.add(Calendar.DATE, 1);
+                        }
+                    }
+                }).start();
+                */
+
             }
         });
+
 
         expandableListView = view.findViewById(R.id.schedule_expandable);
         expandableListAdapter = new ScheduleExpandableListAdapter(getContext());

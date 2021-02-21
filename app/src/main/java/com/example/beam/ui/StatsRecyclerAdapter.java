@@ -46,6 +46,7 @@ public class StatsRecyclerAdapter extends RecyclerView.Adapter<StatsRecyclerAdap
                 public void onClick(View view) {
                     MainFragmentDirections.ActionDetailedStats action = MainFragmentDirections.actionDetailedStats();
                     action.setModuleCode(moduleCode.getText().toString());
+                    action.setModuleName(moduleName.getText().toString());
                     Navigation.findNavController(view).navigate(action);
                 }
             });

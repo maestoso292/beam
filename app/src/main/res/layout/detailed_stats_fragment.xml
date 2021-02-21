@@ -5,7 +5,7 @@
     xmlns:app="http://schemas.android.com/apk/res-auto">
 
     <TextView
-        android:id="@+id/detailed_stats_module"
+        android:id="@+id/detailed_stats_module_name"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
         android:padding="10dp"
@@ -18,7 +18,7 @@
         android:id="@+id/detailed_stats_details_container"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
-        app:layout_constraintTop_toBottomOf="@id/detailed_stats_module"
+        app:layout_constraintTop_toBottomOf="@id/detailed_stats_module_name"
         android:orientation="horizontal">
 
         <LinearLayout

@@ -123,6 +123,7 @@ public class ScheduleExpandableListAdapter extends BaseExpandableListAdapter {
                 public void onClick(View view) {
                     MainFragmentDirections.ActionDetailedStats action = MainFragmentDirections.actionDetailedStats();
                     action.setModuleCode(session.getModuleID());
+                    action.setModuleName(userModules.get(session.getModuleID()));
                     Navigation.findNavController(view).navigate(action);
                 }
             });

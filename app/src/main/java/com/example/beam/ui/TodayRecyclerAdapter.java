@@ -53,6 +53,7 @@ public class TodayRecyclerAdapter extends RecyclerView.Adapter<TodayRecyclerAdap
                 public void onClick(View view) {
                     MainFragmentDirections.ActionDetailedStats action = MainFragmentDirections.actionDetailedStats();
                     action.setModuleCode(moduleCode.getText().toString());
+                    action.setModuleName(moduleName.getText().toString());
                     Navigation.findNavController(view).navigate(action);
                 }
             });

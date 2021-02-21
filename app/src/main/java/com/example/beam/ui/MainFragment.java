@@ -63,6 +63,7 @@ public class MainFragment extends Fragment {
     public void onViewCreated(@NonNull View view, @Nullable Bundle savedInstanceState) {
         super.onViewCreated(view, savedInstanceState);
 
+
         pager = view.findViewById(R.id.main_pager);
         //tabLayout = view.findViewById(R.id.main_tab_layout);
         adapter = new MainFragmentAdapter(this);

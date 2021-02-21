@@ -96,7 +96,7 @@ public class MainFragment extends Fragment {
             Calendar calendar;
             // 12 weeks of class
             for (int i = 0; i < 12; i++) {
-                calendar = Calendar.getInstance();
+                calendar = Calendar.getInstance(TimeZone.getTimeZone("Asia/Kuala_Lumpur"));
                 calendar.add(Calendar.WEEK_OF_YEAR, i);
                 generateTimetable(calendar);
             }

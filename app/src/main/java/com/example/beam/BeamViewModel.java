@@ -30,6 +30,7 @@ import java.util.HashMap;
 import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.TimeZone;
 
 public class BeamViewModel extends ViewModel {
     private final static String LOG_TAG = "BeamViewModel";
@@ -140,7 +141,7 @@ public class BeamViewModel extends ViewModel {
         userWeeklyTimetable.setValue(timeTable);
 
         List<String> dates = new ArrayList<>();
-        Calendar calendar = Calendar.getInstance();
+        Calendar calendar = Calendar.getInstance(TimeZone.getTimeZone("Asia/Kuala_Lumpur"));
         calendar.set(Calendar.DAY_OF_WEEK, Calendar.MONDAY);
 
         for (int i = 0; i < 7; i++) {

@@ -20,6 +20,7 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Locale;
 import java.util.Map;
+import java.util.TimeZone;
 
 public class ScheduleExpandableListAdapter extends BaseExpandableListAdapter {
     private static final String LOG_TAG = "ScheduleFragmentAdapter";
@@ -36,7 +37,7 @@ public class ScheduleExpandableListAdapter extends BaseExpandableListAdapter {
         userWeeklyTimetable = new TimeTable();
         userModules = new HashMap<>();
 
-        Calendar calendar = Calendar.getInstance();
+        Calendar calendar = Calendar.getInstance(TimeZone.getTimeZone("Asia/Kuala_Lumpur"));
         calendar.set(Calendar.DAY_OF_WEEK, Calendar.MONDAY);
         dates = new ArrayList<>();
         for (int i = 0; i < 7; i++) {

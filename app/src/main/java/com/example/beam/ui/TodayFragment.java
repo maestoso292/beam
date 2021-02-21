@@ -25,6 +25,7 @@ import java.util.Calendar;
 import java.util.HashMap;
 import java.util.Locale;
 import java.util.Map;
+import java.util.TimeZone;
 
 public class TodayFragment extends Fragment {
     private static final String LOG_TAG = "TodayFragment";
@@ -51,9 +52,9 @@ public class TodayFragment extends Fragment {
         recyclerView.setAdapter(recyclerViewAdapter);
         recyclerView.setLayoutManager(new LinearLayoutManager(getContext()));
 
-        Calendar calendar = Calendar.getInstance();
+        Calendar calendar = Calendar.getInstance(TimeZone.getTimeZone("Asia/Kuala_Lumpur"));
         final String date = String.format(Locale.ENGLISH, "%04d%02d%02d", calendar.get(Calendar.YEAR), calendar.get(Calendar.MONTH)+1, calendar.get(Calendar.DAY_OF_MONTH));
-
+        Log.d(LOG_TAG, "Date today: " + date);
         beamViewModel = new ViewModelProvider(getActivity()).get(BeamViewModel.class);
         beamViewModel.getUserDetails().observe(getViewLifecycleOwner(), new Observer<BeamUser>() {
             @Override

@@ -1,3 +1,14 @@
 <resources>
-    <string name="app_name">beam</string>
+    <string name="app_name">Beam</string>
+    <string name="beam">BEAM</string>
+    <string name="todo">TODO</string>
+    <string name="blackbg">blackbg</string>
+    <string name="whiteoverlay">overlay</string>
+    <string name="bar_1">bar1</string>
+    <string name="bar_2">bar2</string>
+    <string name="bar_3">bar3</string>
+    <string name="bar_4">bar4</string>
+    <string name="bar_5">bar5</string>
+    <string name="bar_6">bar6</string>
+
 </resources>

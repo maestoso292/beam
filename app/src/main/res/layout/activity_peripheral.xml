@@ -13,4 +13,11 @@
         app:layout_constraintTop_toTopOf="parent"
         android:text="Open Server" />
 
+    <TextView
+        android:id="@+id/connected_device"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:text="NONE"
+        app:layout_constraintTop_toBottomOf="@id/button_open_server"/>
+
 </androidx.constraintlayout.widget.ConstraintLayout>

@@ -20,4 +20,17 @@
         app:layout_constraintTop_toBottomOf="@+id/button_peripheral"
         android:text="Central/Client Activity"/>
 
+    <Button
+        android:id="@+id/button_peripheral_service"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        app:layout_constraintTop_toBottomOf="@id/button_central"
+        android:text="Peripheral/Server Service" />
+    <Button
+        android:id="@+id/button_central_service"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        app:layout_constraintTop_toBottomOf="@+id/button_peripheral_service"
+        android:text="Central/Client Service"/>
+
 </androidx.constraintlayout.widget.ConstraintLayout>

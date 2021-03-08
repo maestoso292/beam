@@ -1,13 +1,11 @@
 package com.example.beam;
 
-import android.Manifest;
 import android.app.Activity;
-import android.bluetooth.BluetoothAdapter;
-import android.bluetooth.BluetoothManager;
+import android.app.NotificationChannel;
+import android.app.NotificationManager;
 import android.content.Intent;
-import android.content.pm.PackageManager;
+import android.os.Build;
 import android.os.Bundle;
-import android.provider.Settings;
 import android.view.View;
 import android.widget.Button;
 import android.widget.Toast;
@@ -15,7 +13,6 @@ import android.widget.Toast;
 import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
 import androidx.appcompat.app.AppCompatActivity;
-import androidx.core.content.ContextCompat;
 
 import com.google.android.gms.tasks.OnCompleteListener;
 import com.google.android.gms.tasks.Task;
@@ -31,14 +28,33 @@ public class MainActivity extends AppCompatActivity {
 
     Button buttonPeripheral;
     Button buttonCentral;
+    Button buttonPeripheralService;
+    Button buttonCentralService;
 
     public static final int REQUEST_ENABLE_BT = 1;
     public static final int REQUEST_ENABLE_LOCATION = 2;
 
+    private void createNotificationChannel() {
+        // Create the NotificationChannel, but only on API 26+ because
+        // the NotificationChannel class is new and not in the support library
+        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
+            CharSequence name = "Some channel";
+            String description = "Some desc";
+            int importance = NotificationManager.IMPORTANCE_DEFAULT;
+            NotificationChannel channel = new NotificationChannel("123", name, importance);
+            channel.setDescription(description);
+            // Register the channel with the system; you can't change the importance
+            // or other notification behaviors after this
+            NotificationManager notificationManager = getSystemService(NotificationManager.class);
+            notificationManager.createNotificationChannel(channel);
+        }
+    }
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_main);
+
+        createNotificationChannel();
 
         mAuth = FirebaseAuth.getInstance();
         mUser = mAuth.getCurrentUser();
@@ -58,6 +74,8 @@ public class MainActivity extends AppCompatActivity {
 
         buttonPeripheral = findViewById(R.id.button_peripheral);
         buttonCentral = findViewById(R.id.button_central);
+        buttonPeripheralService = findViewById(R.id.button_peripheral_service);
+        buttonCentralService = findViewById(R.id.button_central_service);
 
         buttonPeripheral.setOnClickListener(new View.OnClickListener() {
             @Override
@@ -73,6 +91,34 @@ public class MainActivity extends AppCompatActivity {
             }
         });
 
+        buttonPeripheralService.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View view) {
+                Intent intent = new Intent(MainActivity.this, PeripheralService.class);
+                if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
+                    startForegroundService(intent);
+                }
+                else {
+                    startService(intent);
+                }
+
+            }
+        });
+
+        buttonCentralService.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View view) {
+                Intent intent = new Intent(MainActivity.this, CentralService.class);
+                if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
+                    startForegroundService(intent);
+                }
+                else {
+                    startService(intent);
+                }
+            }
+        });
+
+        /*
         BluetoothManager bluetoothManager = (BluetoothManager) getSystemService(BLUETOOTH_SERVICE);
         BluetoothAdapter bluetoothAdapter = bluetoothManager.getAdapter();
 
@@ -89,6 +135,8 @@ public class MainActivity extends AppCompatActivity {
             Intent enableLocationIntent = new Intent(Settings.ACTION_LOCATION_SOURCE_SETTINGS);
             startActivityForResult(enableLocationIntent, REQUEST_ENABLE_LOCATION);
         }
+
+         */
     }
 
     @Override

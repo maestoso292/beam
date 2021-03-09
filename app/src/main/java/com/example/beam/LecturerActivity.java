@@ -175,6 +175,7 @@ public class LecturerActivity extends AppCompatActivity {
             @Override
             public void onClick(View v) {
                 OpenAttendance();
+                popupWindow.dismiss();
             }
         });
 

@@ -56,8 +56,6 @@ public class LecturerActivity extends AppCompatActivity {
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_main);
-        setLecturerModuleID();
-        checkIfClassInSession(this.findViewById(android.R.id.content).getRootView());
         /**
          * Logout Button
          */
@@ -69,6 +67,17 @@ public class LecturerActivity extends AppCompatActivity {
             public void onClick(View view) {
                 FirebaseAuth.getInstance().signOut();
                 redirectToLoginActivity();
+            }
+        });
+        /**
+         * Open Attendance
+         */
+        Button Open_Attendance = findViewById(R.id.open_attendance);
+        Open_Attendance.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View view) {
+                setLecturerModuleID();
+                checkIfClassInSession(view);
             }
         });
 
@@ -83,7 +92,6 @@ public class LecturerActivity extends AppCompatActivity {
             }
         });
     }
-
 
     // Working, set the modules of the lecturer
     public void setLecturerModuleID() {

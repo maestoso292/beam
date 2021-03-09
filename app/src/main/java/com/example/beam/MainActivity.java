@@ -6,18 +6,15 @@ import android.content.Intent;
 import android.os.Bundle;
 import android.view.View;
 import android.widget.Button;
-
 import android.content.pm.PackageManager;
 import android.widget.Toast;
-
 import com.google.firebase.auth.FirebaseAuth;
 import com.google.firebase.auth.FirebaseUser;
 
 
 // TODO DON'T TOUCH ANYTHING HERE FOR NOW
 public class MainActivity extends AppCompatActivity {
-    Button buttonPeripheral;
-    Button buttonCentral;
+    Button buttonCloseAttendance;
     FirebaseUser currentUser;
     FirebaseAuth mAuth;
     Button logoutButton;
@@ -52,22 +49,7 @@ public class MainActivity extends AppCompatActivity {
             finish();
         }
 
-        buttonPeripheral = findViewById(R.id.button_peripheral);
-        buttonCentral = findViewById(R.id.button_central);
-
-        buttonPeripheral.setOnClickListener(new View.OnClickListener() {
-            @Override
-            public void onClick(View view) {
-                startActivity(new Intent(view.getContext(), PeripheralActivity.class));
-            }
-        });
-
-        buttonCentral.setOnClickListener(new View.OnClickListener() {
-            @Override
-            public void onClick(View view) {
-                startActivity(new Intent(view.getContext(), CentralActivity.class));
-            }
-        });
+        buttonCloseAttendance = findViewById(R.id.close_attendance);
     }
 
     @Override
@@ -83,12 +65,9 @@ public class MainActivity extends AppCompatActivity {
              */
             String email = currentUser.getEmail();
             assert email != null;
-            if (email.contains("nottingham.student")) {
-                Toast.makeText(this, "Student", Toast.LENGTH_SHORT).show();
-            }
-
-            else if (email.contains("nottingham.lecturer")) {
+            if (email.contains("nottingham.edu.my")) {
                 Toast.makeText(this, "Lecturer", Toast.LENGTH_SHORT).show();
+                redirectToLecturerActivity();
             }
 
             else {
@@ -101,6 +80,11 @@ public class MainActivity extends AppCompatActivity {
 
     private void redirectToLoginActivity() {
         Intent loginIntent = new Intent(MainActivity.this,LoginActivity.class);
+        startActivity(loginIntent);
+    }
+
+    private void redirectToLecturerActivity() {
+        Intent loginIntent = new Intent(MainActivity.this, LecturerActivity.class);
         startActivity(loginIntent);
     }
 }

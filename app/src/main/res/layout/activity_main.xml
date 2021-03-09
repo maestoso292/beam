@@ -3,23 +3,17 @@
 <androidx.constraintlayout.widget.ConstraintLayout xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:app="http://schemas.android.com/apk/res-auto"
     xmlns:tools="http://schemas.android.com/tools"
+    android:id="@+id/activity_main"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
     tools:context=".MainActivity">
 
     <Button
-        android:id="@+id/button_peripheral"
+        android:id="@+id/close_attendance"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
-        android:text="Peripheral/Server Activity"
+        android:text="TEST CLOSE"
         app:layout_constraintTop_toTopOf="parent" />
-
-    <Button
-        android:id="@+id/button_central"
-        android:layout_width="match_parent"
-        android:layout_height="wrap_content"
-        android:text="Central/Client Activity"
-        app:layout_constraintTop_toBottomOf="@+id/button_peripheral" />
 
     <Button
         android:id="@+id/logout"
@@ -34,5 +28,18 @@
         app:layout_constraintEnd_toEndOf="parent"
         app:layout_constraintStart_toStartOf="parent"
         app:layout_constraintTop_toTopOf="parent" />
+
+    <Button
+        android:id="@+id/open_attendance"
+        android:layout_width="413dp"
+        android:layout_height="75dp"
+        android:layout_marginTop="7dp"
+        android:layout_marginEnd="9dp"
+        android:layout_marginBottom="213dp"
+        android:text="TEST OPEN"
+        app:layout_constraintBottom_toTopOf="@+id/logout"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintTop_toBottomOf="@+id/close_attendance" />
 
 </androidx.constraintlayout.widget.ConstraintLayout>

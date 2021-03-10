@@ -47,7 +47,7 @@ public class LecturerActivity extends AppCompatActivity {
     String currentSessionType;
     String currentUserID = Objects.requireNonNull(FirebaseAuth.getInstance().getCurrentUser()).getUid();
     DatabaseReference database= FirebaseDatabase.getInstance().getReference();
-    ZonedDateTime date = ZonedDateTime.now(ZoneId.of("Asia/Singapore"));
+    ZonedDateTime date = ZonedDateTime.now(ZoneId.of("Asia/Kuala_Lumpur"));
     DateTimeFormatter formatter = DateTimeFormatter.ofPattern("yyyyMMdd");
     String currentDate = date.format(formatter);
     ArrayList<String> lecturerModuleID = new ArrayList<>();
@@ -175,6 +175,7 @@ public class LecturerActivity extends AppCompatActivity {
             @Override
             public void onClick(View v) {
                 OpenAttendance();
+                createAttendanceRecord();
                 popupWindow.dismiss();
             }
         });
@@ -217,7 +218,7 @@ public class LecturerActivity extends AppCompatActivity {
         ref.child("status").setValue("Closed");
     }
 
-    private void redirectToLoginActivity() {
+    public void redirectToLoginActivity() {
         Intent loginIntent = new Intent(LecturerActivity.this,LoginActivity.class);
         startActivity(loginIntent);
     }
@@ -225,5 +226,10 @@ public class LecturerActivity extends AppCompatActivity {
     public void OpenAttendance() {
         DatabaseReference ref = database.child("timetable/" + currentDate + "/" + currentModuleID + "/" + currentSessionID);
         ref.child("status").setValue("Open");
+    }
+
+    public void createAttendanceRecord() {
+        DatabaseReference ref = database.child("record/" +  currentModuleID + "/" + currentSessionID);
+        ref.child("name").setValue(currentModuleName);
     }
 }

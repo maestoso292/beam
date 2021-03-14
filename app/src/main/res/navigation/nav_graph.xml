@@ -56,8 +56,17 @@
             android:id="@+id/navigateToLoginFragment"
             app:destination="@id/login_dest"
             app:enterAnim="@android:anim/slide_in_left"
-            app:exitAnim="@android:anim/fade_out"
-            app:popEnterAnim="@anim/fragment_open_enter" />
+            app:exitAnim="@android:anim/fade_out" />
     </fragment>
+    <fragment
+        android:id="@+id/permissons"
+        android:name="com.example.beam.Permissons"
+        android:label="permissions_fragment"
+        tools:layout="@layout/permissions_fragment" />
+    <fragment
+        android:id="@+id/home_screen"
+        android:name="com.example.beam.Home"
+        android:label="home_fragment"
+        tools:layout="@layout/home_fragment" />
 
 </navigation>

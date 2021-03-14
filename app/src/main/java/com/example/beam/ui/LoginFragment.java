@@ -59,7 +59,7 @@ public class LoginFragment extends Fragment {
         String username = emailEditText.getText().toString().trim();
         String password = passwordEditText.getText().toString().trim();
         if(TextUtils.isEmpty(username) || TextUtils.isEmpty(password)) {
-            Toast.makeText(getContext(), "Username and password required", Toast.LENGTH_SHORT).show();
+            Toast.makeText(getContext(), "Email and password required", Toast.LENGTH_SHORT).show();
         }
         else {
             mAuth.signInWithEmailAndPassword(username, password)

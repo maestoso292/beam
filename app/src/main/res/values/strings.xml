@@ -13,6 +13,12 @@
     <string name="beam_hint_email">Email</string>
     <string name="beam_hint_password">Password</string>
     <string name="beam_button_login">Login</string>
+    <string name="beam_permissions">Permissions Required</string>
+    <string name="beam_permissions_details">Apps using Bluetooth® Low Energy (BLE) are required to
+have location access enabled.</string>
+    <string name="beam_location_access">Grant Location Access</string>
+    <string name="beam_turn_on_location">Turn On Location</string>
+    <string name="beam_turn_on_bluetooth">Turn On Bluetooth</string>
     <!-- TODO: Remove or change this placeholder text -->
     <string name="hello_blank_fragment">Hello blank fragment</string>
 

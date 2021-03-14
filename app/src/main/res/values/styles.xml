@@ -6,7 +6,7 @@
         <item name="colorPrimaryDark">@color/colorPrimaryDark</item>
         <item name="colorAccent">@color/colorAccent</item>
         <item name="textAppearanceHeadline4">@style/TextAppearance.Beam.Title</item>
-        <item name="textAppearanceButton">@style/TextAppearance.Beam.Button</item>
+        <item name="textAppearanceButton">@style/TextAppearance.Beam.OutlinedButton</item>
         <item name="android:windowLightStatusBar" tools:targetApi="m">true</item>
     </style>
 
@@ -35,7 +35,14 @@
 
     <style name="Widget.Beam.Button" parent="Widget.MaterialComponents.Button">
         <item name="android:layout_height">55dp</item>
-        <item name="android:textAppearance">@style/TextAppearance.Beam.Button</item>
+        <item name="shapeAppearance">@style/ShapeAppearance.Beam.SmallComponent</item>
+        <item name="backgroundTint">@color/colorPrimary</item>
+        <item name="android:textSize">12sp</item>
+    </style>
+
+    <style name="Widget.Beam.OutlinedButton" parent="Widget.MaterialComponents.Button">
+        <item name="android:layout_height">55dp</item>
+        <item name="android:textAppearance">@style/TextAppearance.Beam.OutlinedButton</item>
         <item name="android:textColor">?android:attr/textColorPrimary</item>
         <item name="shapeAppearance">@style/ShapeAppearance.Beam.SmallComponent</item>
         <item name="android:textSize">12sp</item>
@@ -49,8 +56,7 @@
         <item name="cornerSize">50dp</item>
     </style>
 
-    <style name="TextAppearance.Beam.Button" parent="TextAppearance.MaterialComponents.Button">
-        <item name="android:textColor">@color/colorOnPrimary</item>
+    <style name="TextAppearance.Beam.OutlinedButton" parent="TextAppearance.MaterialComponents.Button">
         <item name="fontFamily">@font/jtleonor</item>
         <item name="android:fontFamily">@font/jtleonor</item>
     </style>
@@ -70,7 +76,7 @@
     </style>
 
     <style name="TextAppearance.Beam.Permissions.Details" parent="TextAppearance.MaterialComponents.Headline5">
-        <item name="fontFamily">@font/CoreSansA45Regular</item>
+        <item name="fontFamily">@font/coresans</item>
         <item name="textAllCaps">false</item>
         <item name="android:textSize">10sp</item>
         <item name="android:letterSpacing">0.06</item>

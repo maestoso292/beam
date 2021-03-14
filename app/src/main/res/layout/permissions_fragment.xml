@@ -37,7 +37,7 @@
             android:layout_width="309dp"
             android:layout_marginBottom="5dp"
             android:layout_gravity="center_horizontal"
-            style="@style/Widget.Beam.Button"
+            style="@style/Widget.Beam.OutlinedButton"
             android:text="@string/beam_location_access"/>
 
         <com.google.android.material.button.MaterialButton
@@ -45,7 +45,7 @@
             android:layout_width="309dp"
             android:layout_marginBottom="5dp"
             android:layout_gravity="center_horizontal"
-            style="@style/Widget.Beam.Button"
+            style="@style/Widget.Beam.OutlinedButton"
             android:text="@string/beam_turn_on_location"/>
 
         <com.google.android.material.button.MaterialButton
@@ -53,7 +53,7 @@
             android:layout_width="309dp"
             android:layout_marginBottom="5dp"
             android:layout_gravity="center_horizontal"
-            style="@style/Widget.Beam.Button"
+            style="@style/Widget.Beam.OutlinedButton"
             android:text="@string/beam_turn_on_bluetooth"/>
 
     </LinearLayout>

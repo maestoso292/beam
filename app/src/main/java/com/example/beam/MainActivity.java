@@ -34,8 +34,7 @@ public class MainActivity extends AppCompatActivity {
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_main);
-        // Setup the toolbar at the top
-        setSupportActionBar((Toolbar) findViewById(R.id.toolbar));
+
 
         // Setup navigation component
         NavHostFragment hostFragment = (NavHostFragment) getSupportFragmentManager().findFragmentById(R.id.nav_host_fragment);
@@ -89,7 +88,7 @@ public class MainActivity extends AppCompatActivity {
     protected void onResume() {
         super.onResume();
         if (currentUser == null) {
-            navController.navigate(R.id.login_dest);
+            navController.navigate(R.id.signin_fragment);
         }
         else {
             beamViewModel.loadUser();

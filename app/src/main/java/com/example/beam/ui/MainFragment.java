@@ -89,7 +89,7 @@ public class MainFragment extends Fragment {
         super.onResume();
         currentUser = mAuth.getCurrentUser();
         if (currentUser == null) {
-            navController.navigate(R.id.login_dest);
+            navController.navigate(R.id.signin_fragment);
         }
         else {
             /*

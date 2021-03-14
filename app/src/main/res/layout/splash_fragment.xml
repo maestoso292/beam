@@ -16,6 +16,7 @@
         android:contentDescription="@string/blackbg" />
 
     <TextView
+        android:id="@+id/beamTxt"
         android:textAppearance="@style/TextAppearance.Beam.Title"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"

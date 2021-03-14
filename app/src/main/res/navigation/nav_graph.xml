@@ -6,11 +6,6 @@
     app:startDestination="@id/main_dest">
 
     <fragment
-        android:id="@+id/login_dest"
-        android:name="com.example.beam.ui.LoginFragment"
-        android:label="login_fragment"
-        tools:layout="@layout/login_fragment"/>
-    <fragment
         android:id="@+id/main_dest"
         android:name="com.example.beam.ui.MainFragment"
         android:label="main_fragment"
@@ -19,35 +14,50 @@
             android:id="@+id/action_go_to_settings"
             app:destination="@id/settings_dest" />
         <action
-            android:id="@+id/actionLogout"
-            app:destination="@id/login_dest"
-            app:enterAnim="@anim/nav_default_enter_anim"
-            app:exitAnim="@anim/nav_default_exit_anim"
-            app:popEnterAnim="@anim/nav_default_pop_enter_anim"
-            app:popExitAnim="@anim/nav_default_pop_exit_anim" />
-        <action
             android:id="@+id/actionDetailedStats"
             app:destination="@id/detailed_stats_dest" />
+        <action
+            android:id="@+id/action_main_dest_to_signin_fragment"
+            app:destination="@id/signin_fragment" />
     </fragment>
     <fragment
         android:id="@+id/settings_dest"
         android:name="com.example.beam.ui.SettingsFragment"
         android:label="settings_fragment"
-        tools:layout="@layout/settings_fragment"/>
+        tools:layout="@layout/settings_fragment" />
     <fragment
         android:id="@+id/detailed_stats_dest"
         android:name="com.example.beam.ui.DetailedStatsFragment"
         android:label="detailed_stats_fragment"
-        tools:layout="@layout/detailed_stats_fragment" >
+        tools:layout="@layout/detailed_stats_fragment">
         <argument
             android:name="moduleCode"
+            android:defaultValue="@null"
             app:argType="string"
-            app:nullable="true"
-            android:defaultValue="@null"/>
+            app:nullable="true" />
         <argument
             android:name="moduleName"
+            android:defaultValue="@null"
             app:argType="string"
-            app:nullable="true"
-            android:defaultValue="@null"/>
+            app:nullable="true" />
     </fragment>
+
+    <fragment
+            android:id="@+id/login_dest"
+            android:name="com.example.beam.ui.LoginFragment"
+            android:label="login_fragment"
+            tools:layout="@layout/login_fragment" />
+    <fragment
+        android:id="@+id/signin_fragment"
+        android:name="com.example.beam.ui.SigninFragment"
+        android:label="signin_fragment"
+        tools:layout="@layout/signin_fragment" >
+        <action
+            android:id="@+id/navigateToLoginFragment"
+            app:destination="@id/login_dest"
+            app:enterAnim="@android:anim/slide_in_left"
+            app:exitAnim="@android:anim/fade_out"
+            app:popEnterAnim="@anim/fragment_open_enter" />
+    </fragment>
+
 </navigation>

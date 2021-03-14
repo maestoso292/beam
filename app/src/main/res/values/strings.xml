@@ -1,6 +1,5 @@
 <resources>
     <string name="app_name">Beam</string>
-    <string name="beam">BEAM</string>
     <string name="todo">TODO</string>
     <string name="blackbg">blackbg</string>
     <string name="whiteoverlay">overlay</string>
@@ -10,5 +9,11 @@
     <string name="bar_4">bar4</string>
     <string name="bar_5">bar5</string>
     <string name="bar_6">bar6</string>
+    <string name="beam_button_sign_in">SIGN IN</string>
+    <string name="beam_hint_email">Email</string>
+    <string name="beam_hint_password">Password</string>
+    <string name="beam_button_login">Login</string>
+    <!-- TODO: Remove or change this placeholder text -->
+    <string name="hello_blank_fragment">Hello blank fragment</string>
 
 </resources>

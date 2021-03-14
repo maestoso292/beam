@@ -145,7 +145,30 @@ public class BeamViewModel extends ViewModel {
 
         List<String> dates = new ArrayList<>();
         Calendar calendar = Calendar.getInstance(TimeZone.getTimeZone("Asia/Kuala_Lumpur"));
-        calendar.set(Calendar.DAY_OF_WEEK, Calendar.MONDAY);
+
+        int calendarOffset = 0;
+        switch (calendar.get(Calendar.DAY_OF_WEEK)) {
+            case Calendar.TUESDAY:
+                calendarOffset = 1;
+                break;
+            case Calendar.WEDNESDAY:
+                calendarOffset = 2;
+                break;
+            case Calendar.THURSDAY:
+                calendarOffset = 3;
+                break;
+            case Calendar.FRIDAY:
+                calendarOffset = 4;
+                break;
+            case Calendar.SATURDAY:
+                calendarOffset = 5;
+                break;
+            case Calendar.SUNDAY:
+                calendarOffset = 6;
+                break;
+        }
+        calendar.set(Calendar.DAY_OF_MONTH, calendar.get(Calendar.DAY_OF_MONTH) - calendarOffset);
+
 
         for (int i = 0; i < 7; i++) {
             dates.add(String.format("%04d%02d%02d", calendar.get(Calendar.YEAR), calendar.get(Calendar.MONTH)+1, calendar.get(Calendar.DAY_OF_MONTH)+i));

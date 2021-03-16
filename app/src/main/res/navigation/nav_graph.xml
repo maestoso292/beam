@@ -56,7 +56,9 @@
             android:id="@+id/navigateToLoginFragment"
             app:destination="@id/login_dest"
             app:enterAnim="@android:anim/slide_in_left"
-            app:exitAnim="@android:anim/fade_out" />
+            app:exitAnim="@android:anim/fade_out"
+            app:popUpTo="@id/main_dest"
+            app:popUpToInclusive="false" />
     </fragment>
     <fragment
         android:id="@+id/permissons"

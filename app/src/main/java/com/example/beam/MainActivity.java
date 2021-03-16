@@ -1,8 +1,11 @@
 package com.example.beam;
 
 import android.app.Activity;
+import android.app.AlarmManager;
 import android.app.NotificationChannel;
 import android.app.NotificationManager;
+import android.app.PendingIntent;
+import android.content.Context;
 import android.content.Intent;
 import android.os.Build;
 import android.os.Bundle;
@@ -94,6 +97,7 @@ public class MainActivity extends AppCompatActivity {
         buttonPeripheralService.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View view) {
+                /*
                 Intent intent = new Intent(MainActivity.this, PeripheralService.class);
                 if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
                     startForegroundService(intent);
@@ -102,6 +106,25 @@ public class MainActivity extends AppCompatActivity {
                     startService(intent);
                 }
 
+                 */
+                Intent startPeripheralServiceIntent = new Intent(MainActivity.this, BootBroadcastReceiver.class);
+                startPeripheralServiceIntent.putExtra("command", "START_SERVICE_PERIPHERAL");
+                PendingIntent startPeripheralServicePIntent = PendingIntent.getBroadcast(MainActivity.this, 0, startPeripheralServiceIntent, 0);
+
+                Intent stopPeripheralServiceIntent = new Intent(MainActivity.this, BootBroadcastReceiver.class);
+                stopPeripheralServiceIntent.putExtra("command", "STOP_SERVICE_PERIPHERAL");
+                PendingIntent stopPeripheralServicePIntent = PendingIntent.getBroadcast(MainActivity.this, 1, stopPeripheralServiceIntent, 0);
+
+                AlarmManager alarmManager = (AlarmManager) getSystemService(Context.ALARM_SERVICE);
+                if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
+                    alarmManager.setAndAllowWhileIdle(AlarmManager.RTC_WAKEUP, System.currentTimeMillis()+10000, startPeripheralServicePIntent);
+                    //alarmManager.setAndAllowWhileIdle(AlarmManager.RTC_WAKEUP, System.currentTimeMillis()+40000, stopPeripheralServicePIntent);
+                }
+                else {
+                    alarmManager.set(AlarmManager.RTC_WAKEUP, System.currentTimeMillis()+10000, startPeripheralServicePIntent);
+                }
+
+                Toast.makeText(MainActivity.this, "Alarms set", Toast.LENGTH_SHORT).show();
             }
         });
 

@@ -19,6 +19,7 @@ have location access enabled.</string>
     <string name="beam_location_access">Grant Location Access</string>
     <string name="beam_turn_on_location">Turn On Location</string>
     <string name="beam_turn_on_bluetooth">Turn On Bluetooth</string>
+    <string name="beam_settings_title">Settings</string>
     <!-- TODO: Remove or change this placeholder text -->
     <string name="hello_blank_fragment">Hello blank fragment</string>
 

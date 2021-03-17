@@ -4,12 +4,14 @@
     android:layout_height="match_parent"
     xmlns:app="http://schemas.android.com/apk/res-auto">
 
-    <Button
-        app:layout_constraintTop_toTopOf="parent"
+    <com.google.android.material.button.MaterialButton
+        android:id="@+id/schedule_button"
+        style="@style/Widget.Beam.OutlinedButton"
         android:layout_width="match_parent"
-        android:layout_height="wrap_content"
         android:text="Button"
-        android:id="@+id/schedule_button" />
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintTop_toTopOf="parent" />
 
     <ExpandableListView
         android:id="@+id/schedule_expandable"

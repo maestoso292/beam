@@ -2,7 +2,7 @@
     <!-- Base application theme. -->
     <style name="Theme.Beam" parent="Theme.MaterialComponents.Light.NoActionBar">
         <!-- Customize your theme here. -->
-        <item name="colorPrimary">@color/colorPrimary</item>
+        <item name="colorPrimary">@color/white</item>
         <item name="colorPrimaryDark">@color/colorPrimaryDark</item>
         <item name="colorAccent">@color/colorAccent</item>
         <item name="textAppearanceHeadline4">@style/TextAppearance.Beam.Title</item>
@@ -22,6 +22,19 @@
         <item name="android:background">?android:attr/listDivider</item>
     </style>
 
+    <style name="Widget.Beam.Toolbar" parent="Widget.AppCompat.Toolbar">
+        <item name="android:background">?attr/colorPrimaryDark</item>
+        <item name="titleTextAppearance">@style/TextAppearance.Beam.Toolbar</item>
+        <item name="android:textAlignment">center</item>
+    </style>
+
+    <style name="TextAppearance.Beam.Toolbar" parent="TextAppearance.MaterialComponents.Button">
+        <item name="android:textSize">16sp</item>
+        <item name="android:textColor">@color/textColorPrimary</item>
+        <item name="fontFamily">@font/arca</item>
+
+    </style>
+
     <style name="Widget.Beam.TextInputLayout" parent="Widget.MaterialComponents.TextInputLayout.OutlinedBox">
         <item name="hintTextAppearance">@style/TextAppearance.Beam.TextInputLayout.HintText</item>
         <item name="hintTextColor">@color/textColorPrimary</item>
@@ -36,7 +49,7 @@
     <style name="Widget.Beam.Button" parent="Widget.MaterialComponents.Button">
         <item name="android:layout_height">55dp</item>
         <item name="shapeAppearance">@style/ShapeAppearance.Beam.SmallComponent</item>
-        <item name="backgroundTint">@color/colorPrimary</item>
+        <item name="backgroundTint">@color/black</item>
         <item name="android:textSize">12sp</item>
     </style>
 
@@ -83,6 +96,13 @@
         <item name="android:textColor">@color/permissionsDetailsColor</item>
     </style>
 
+    <style name="RippleImage">
+        <item name="android:layout_width">match_parent</item>
+        <item name="android:layout_height">match_parent</item>
+        <item name="android:src">@drawable/ripple_circle</item>
+    </style>
 
-
+    <style name="RippleImage.Thin">
+        <item name="android:src">@drawable/ripple_circle_thin</item>
+    </style>
 </resources>

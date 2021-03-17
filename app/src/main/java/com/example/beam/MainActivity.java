@@ -88,7 +88,7 @@ public class MainActivity extends AppCompatActivity {
     protected void onResume() {
         super.onResume();
         if (currentUser == null) {
-            navController.navigate(R.id.signin_fragment);
+            navController.navigate(R.id.splashFragment);
         }
         else {
             beamViewModel.loadUser();

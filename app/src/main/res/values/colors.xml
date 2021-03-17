@@ -2,11 +2,12 @@
 <resources>
     <color name="colorPrimary">@color/black</color>
     <color name="colorOnPrimary">@color/black</color>
+    <color name="textColorPrimary">@color/black</color>
     <color name="colorPrimaryDark">#FFFFFF</color>
     <color name="permissionsDetailsColor">#8E8C8C</color>
     <color name="colorAccent">#96cac6</color>
-    <color name="textColorPrimary">@color/black</color>
     <color name="black">#000000</color>
+    <color name="light_grey">#d3d3d3</color>
     <color name="white">#FFFFFF</color>
     <color name="textInputOutlineColor">@color/black</color>
     <color name="buttonOutlineColor">@color/black</color>

@@ -19,7 +19,7 @@
 
     <com.google.android.material.button.MaterialButton
         android:id="@+id/signinBtn"
-        style="@style/Widget.Beam.OutlinedButton"
+        style="@style/Widget.Beam.Button"
         android:layout_width="241dp"
         android:text="@string/beam_button_sign_in"
         app:layout_constraintBottom_toBottomOf="parent"

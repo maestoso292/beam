@@ -17,8 +17,8 @@
             android:id="@+id/actionDetailedStats"
             app:destination="@id/detailed_stats_dest" />
         <action
-            android:id="@+id/action_main_dest_to_signin_fragment"
-            app:destination="@id/signin_fragment" />
+            android:id="@+id/action_main_dest_to_splashFragment"
+            app:destination="@id/splashFragment" />
     </fragment>
     <fragment
         android:id="@+id/settings_dest"
@@ -58,7 +58,7 @@
             app:enterAnim="@android:anim/slide_in_left"
             app:exitAnim="@android:anim/fade_out"
             app:popUpTo="@id/main_dest"
-            app:popUpToInclusive="false" />
+            app:popUpToInclusive="false" />/>
     </fragment>
     <fragment
         android:id="@+id/permissons"
@@ -67,8 +67,18 @@
         tools:layout="@layout/permissions_fragment" />
     <fragment
         android:id="@+id/home_screen"
-        android:name="com.example.beam.Home"
+        android:name="com.example.beam.ui.HomeFragment"
         android:label="home_fragment"
         tools:layout="@layout/home_fragment" />
+    <fragment
+        android:id="@+id/splashFragment"
+        android:name="com.example.beam.ui.SplashFragment"
+        android:label="splash_fragment"
+        tools:layout="@layout/splash_fragment" >
+        <action
+            android:id="@+id/action_splashFragment_to_signin_fragment"
+            app:destination="@id/signin_fragment"
+            app:popUpToInclusive="true" />/>
+    </fragment>
 
 </navigation>

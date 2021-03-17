@@ -12,6 +12,7 @@ import androidx.lifecycle.Observer;
 import androidx.lifecycle.ViewModelProvider;
 import androidx.navigation.NavController;
 import androidx.navigation.fragment.NavHostFragment;
+import androidx.viewpager.widget.ViewPager;
 import androidx.viewpager2.widget.ViewPager2;
 
 import com.example.beam.BeamViewModel;
@@ -19,6 +20,7 @@ import com.example.beam.R;
 import com.example.beam.models.BeamUser;
 import com.example.beam.models.Session;
 import com.google.android.material.tabs.TabLayout;
+import com.google.android.material.tabs.TabLayoutMediator;
 import com.google.firebase.auth.FirebaseAuth;
 import com.google.firebase.auth.FirebaseUser;
 import com.google.firebase.database.DatabaseReference;
@@ -66,10 +68,13 @@ public class MainFragment extends Fragment {
 
 
         pager = view.findViewById(R.id.main_pager);
-        //tabLayout = view.findViewById(R.id.main_tab_layout);
+        tabLayout = view.findViewById(R.id.tab_layout);
         adapter = new MainFragmentAdapter(this);
 
         pager.setAdapter(adapter);
+        new TabLayoutMediator(tabLayout, pager,
+                (tab, position) ->{}
+        ).attach();
 
 
         /*
@@ -90,7 +95,7 @@ public class MainFragment extends Fragment {
         super.onResume();
         currentUser = mAuth.getCurrentUser();
         if (currentUser == null) {
-            navController.navigate(R.id.signin_fragment);
+            navController.navigate(R.id.splashFragment);
         }
         else {
             beamViewModel.loadUser();

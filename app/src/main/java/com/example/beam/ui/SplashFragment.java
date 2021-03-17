@@ -1,23 +1,49 @@
-package com.example.beam;
+package com.example.beam.ui;
 
 import android.animation.Animator;
 import android.animation.AnimatorInflater;
 import android.animation.AnimatorSet;
+import android.app.Activity;
+import android.content.Context;
 import android.os.Bundle;
+import android.view.LayoutInflater;
 import android.view.View;
+import android.view.ViewGroup;
 
-import androidx.appcompat.app.AppCompatActivity;
+import androidx.fragment.app.Fragment;
+
+import com.example.beam.R;
 
 import java.util.HashMap;
 import java.util.Map;
 
-public class SplashActivity extends AppCompatActivity {
+/**
+ * A simple {@link Fragment} subclass.
+ * Use the {@link SplashFragment#newInstance} factory method to
+ * create an instance of this fragment.
+ */
+public class SplashFragment extends Fragment {
+    private View view;
     HashMap<View, Animator> animHashMap;
 
+    public static SplashFragment newInstance(String param1, String param2) {
+
+        SplashFragment fragment = new SplashFragment();
+        Bundle args = new Bundle();
+
+        fragment.setArguments(args);
+        return fragment;
+    }
+
     @Override
-    protected void onCreate(Bundle savedInstanceState) {
+    public void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
-        setContentView(R.layout.activity_main);
+    }
+
+    @Override
+    public View onCreateView(LayoutInflater inflater, ViewGroup container,
+                             Bundle savedInstanceState) {
+        view = inflater.inflate(R.layout.splash_fragment, container, false);
 
         animHashMap = new HashMap<>();
         addAnimToHashMap(R.id.beamTxt, R.animator.firstanim);
@@ -38,9 +64,13 @@ public class SplashActivity extends AppCompatActivity {
         AnimatorSet animatorSet = new AnimatorSet();
         animatorSet.playTogether(animHashMap.values());
         animatorSet.start();
+        // Inflate the layout for this fragment
+        return view;
     }
 
     private void addAnimToHashMap(int viewId, int animatorId) {
-        animHashMap.put(findViewById(viewId), AnimatorInflater.loadAnimator(this, animatorId));
+        //TODO i think issue is this
+        animHashMap.put(view.findViewById(viewId), AnimatorInflater.loadAnimator((Activity) getActivity(), animatorId));
     }
+
 }

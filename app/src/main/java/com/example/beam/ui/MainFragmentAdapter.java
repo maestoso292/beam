@@ -14,15 +14,17 @@ public class MainFragmentAdapter extends FragmentStateAdapter {
     MainFragmentAdapter(Fragment fragment) {
         super(fragment);
 
-        tabHeadings = new ArrayList<>(3);
+        tabHeadings = new ArrayList<>(4);
+        tabHeadings.add("Home");
         tabHeadings.add("Daily");
         tabHeadings.add("Weekly");
         tabHeadings.add("Stats");
 
-        fragmentList = new ArrayList<>(3);
-        fragmentList.add(0, new TodayFragment());
-        fragmentList.add(1, new ScheduleFragment());
-        fragmentList.add(2, new StatsFragment());
+        fragmentList = new ArrayList<>(4);
+        fragmentList.add(0, new HomeFragment());
+        fragmentList.add(1, new TodayFragment());
+        fragmentList.add(2, new ScheduleFragment());
+        fragmentList.add(3, new StatsFragment());
     }
 
     @NonNull

@@ -7,8 +7,6 @@ import android.view.MenuItem;
 import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
 import androidx.appcompat.app.AppCompatActivity;
-import androidx.appcompat.widget.Toolbar;
-import androidx.lifecycle.Observer;
 import androidx.lifecycle.ViewModelProvider;
 import androidx.navigation.NavController;
 import androidx.navigation.NavDestination;
@@ -16,7 +14,6 @@ import androidx.navigation.Navigation;
 import androidx.navigation.fragment.NavHostFragment;
 import androidx.navigation.ui.NavigationUI;
 
-import com.example.beam.models.BeamUser;
 import com.google.firebase.auth.FirebaseAuth;
 import com.google.firebase.auth.FirebaseUser;
 
@@ -82,22 +79,5 @@ public class MainActivity extends AppCompatActivity {
         }
         // Returns destination corresponding to id of item
         return NavigationUI.onNavDestinationSelected(item, Navigation.findNavController(this, R.id.nav_host_fragment));
-    }
-
-    @Override
-    protected void onResume() {
-        super.onResume();
-        if (currentUser == null) {
-            navController.navigate(R.id.splashFragment);
-        }
-        else {
-            beamViewModel.loadUser();
-            beamViewModel.getUserDetails().observe(this, new Observer<BeamUser>() {
-                @Override
-                public void onChanged(BeamUser beamUser) {
-                    beamViewModel.initialLoad();
-                }
-            });
-        }
     }
 }

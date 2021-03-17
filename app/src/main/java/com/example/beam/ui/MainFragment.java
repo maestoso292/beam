@@ -12,7 +12,6 @@ import androidx.lifecycle.Observer;
 import androidx.lifecycle.ViewModelProvider;
 import androidx.navigation.NavController;
 import androidx.navigation.fragment.NavHostFragment;
-import androidx.viewpager.widget.ViewPager;
 import androidx.viewpager2.widget.ViewPager2;
 
 import com.example.beam.BeamViewModel;
@@ -47,9 +46,12 @@ public class MainFragment extends Fragment {
     private BeamUser userDetails;
     private Map<String, String> userModules;
 
+    private boolean firstLoad;
+
     @Override
     public void onCreate(@Nullable Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
+        firstLoad = false;
         navController = NavHostFragment.findNavController(this);
         mAuth = FirebaseAuth.getInstance();
         mDatabase = FirebaseDatabase.getInstance().getReference();
@@ -94,10 +96,7 @@ public class MainFragment extends Fragment {
     public void onResume() {
         super.onResume();
         currentUser = mAuth.getCurrentUser();
-        if (currentUser == null) {
-            navController.navigate(R.id.splashFragment);
-        }
-        else {
+        if (currentUser != null) {
             beamViewModel.loadUser();
             beamViewModel.getUserDetails().observe(this, new Observer<BeamUser>() {
                 @Override
@@ -116,6 +115,11 @@ public class MainFragment extends Fragment {
             }
 
              */
+        }
+
+        if (!firstLoad) {
+            firstLoad = true;
+            navController.navigate(R.id.splashFragment);
         }
     }
 

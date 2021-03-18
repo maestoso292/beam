@@ -12,4 +12,5 @@
     <color name="textInputOutlineColor">@color/black</color>
     <color name="buttonOutlineColor">@color/black</color>
     <color name="loginPageBackgroundColor">@color/white</color>
+    <color name="red">#FF0000</color>
 </resources>

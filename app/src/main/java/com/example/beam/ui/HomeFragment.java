@@ -1,20 +1,16 @@
 package com.example.beam.ui;
 
-import android.app.Activity;
 import android.os.Bundle;
+import android.view.LayoutInflater;
+import android.view.View;
+import android.view.ViewGroup;
 
 import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
 import androidx.fragment.app.Fragment;
 
-import android.view.LayoutInflater;
-import android.view.View;
-import android.view.ViewGroup;
-import android.view.animation.AccelerateInterpolator;
-import android.view.animation.LinearInterpolator;
-
 import com.example.beam.R;
-import com.jackpocket.pulse.layouts.PulseLayout;
+import com.gauravbhola.ripplepulsebackground.RipplePulseLayout;
 
 /**
  * A simple {@link Fragment} subclass.
@@ -22,8 +18,7 @@ import com.jackpocket.pulse.layouts.PulseLayout;
  * create an instance of this fragment.
  */
 public class HomeFragment extends Fragment {
-
-    private PulseLayout pulseLayout;
+    RipplePulseLayout mRipplePulseLayout;
 
     // TODO: Rename and change types of parameters
     private String mParam1;
@@ -68,17 +63,7 @@ public class HomeFragment extends Fragment {
     @Override
     public void onViewCreated(@NonNull View view, @Nullable Bundle savedInstanceState) {
         super.onViewCreated(view, savedInstanceState);
-        pulseLayout = view.findViewById(R.id.my_pulsing_layout);
-        pulseLayout.getPulseController()
-                .setCirclePathOverride(true)
-                .setPulsingColor(0x22FF22)
-                .setPulsingStrokeWidth(1)
-                .setDurationMs(1500)
-                .setPulseLifeSpanMs(900)
-                .setRespawnRateMs(300)
-                .setAlphaInterpolator(new AccelerateInterpolator())
-                .setScaleInterpolator(new LinearInterpolator())
-                .attachTo((Activity) getActivity(), view.findViewById(R.id.pulse_target));
-
+        mRipplePulseLayout = view.findViewById(R.id.layout_ripplepulse);
+        mRipplePulseLayout.startRippleAnimation();
     }
 }

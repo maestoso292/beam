@@ -96,7 +96,6 @@ public class SplashFragment extends Fragment {
     }
 
     private void addAnimToHashMap(int viewId, int animatorId) {
-        //TODO i think issue is this
         animHashMap.put(view.findViewById(viewId), AnimatorInflater.loadAnimator((Activity) getActivity(), animatorId));
     }
 

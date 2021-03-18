@@ -5,8 +5,7 @@
         <item name="colorPrimary">@color/white</item>
         <item name="colorPrimaryDark">@color/colorPrimaryDark</item>
         <item name="colorAccent">@color/colorAccent</item>
-        <item name="textAppearanceHeadline4">@style/TextAppearance.Beam.Title</item>
-        <item name="textAppearanceButton">@style/TextAppearance.Beam.OutlinedButton</item>
+
         <item name="android:windowLightStatusBar" tools:targetApi="m">true</item>
     </style>
 
@@ -35,11 +34,21 @@
 
     </style>
 
-    <style name="Widget.Beam.TextInputLayout" parent="Widget.MaterialComponents.TextInputLayout.OutlinedBox">
+    <style name="Widget.Beam.TextInputLayout.OutlinedBox" parent="Widget.MaterialComponents.TextInputLayout.OutlinedBox">
+        <item name="materialThemeOverlay">@style/ThemeOverlay.Beam.TextInputLayout.OutlinedBox</item>
         <item name="hintTextAppearance">@style/TextAppearance.Beam.TextInputLayout.HintText</item>
         <item name="hintTextColor">@color/textColorPrimary</item>
         <item name="android:paddingBottom">8dp</item>
         <item name="boxStrokeColor">@color/textInputOutlineColor</item>
+    </style>
+
+    <style name="ThemeOverlay.Beam.TextInputLayout.OutlinedBox" parent="">
+        <item name="colorControlActivated">@color/black</item>
+        <item name="colorSurface">@color/white</item>
+        <item name="colorOnSurface">@color/black</item>
+        <item name="colorAccent">@color/colorAccent</item>
+        <item name="colorError">@color/red</item>
+        <item name="editTextStyle">@style/Widget.MaterialComponents.TextInputEditText.OutlinedBox</item>
     </style>
 
     <style name="TextAppearance.Beam.TextInputLayout.HintText" parent="TextAppearance.MaterialComponents.Subtitle2">

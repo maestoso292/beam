@@ -17,7 +17,6 @@ import androidx.recyclerview.widget.RecyclerView;
 import com.example.beam.BeamViewModel;
 import com.example.beam.R;
 import com.example.beam.models.BeamUser;
-import com.example.beam.models.Session;
 import com.example.beam.models.TimeTable;
 
 import java.util.ArrayList;
@@ -47,8 +46,8 @@ public class TodayFragment extends Fragment {
 
         recyclerView = view.findViewById(R.id.today_recycler);
         recyclerViewAdapter = new TodayRecyclerAdapter();
-        recyclerViewAdapter.setUserDailyTimetable(new ArrayList<Session>());
-        recyclerViewAdapter.setUserModules(new HashMap<String, String>());
+        recyclerViewAdapter.setUserDailyTimetable(new ArrayList<>());
+        recyclerViewAdapter.setUserModules(new HashMap<>());
         recyclerView.setAdapter(recyclerViewAdapter);
         recyclerView.setLayoutManager(new LinearLayoutManager(getContext()));
 

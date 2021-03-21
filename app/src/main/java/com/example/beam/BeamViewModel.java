@@ -35,6 +35,7 @@ import java.util.TimeZone;
 public class BeamViewModel extends ViewModel {
     private final static String LOG_TAG = "BeamViewModel";
 
+    private FirebaseAuth mAuth;
     private FirebaseUser currentUser;
     private DatabaseReference mDatabase;
 

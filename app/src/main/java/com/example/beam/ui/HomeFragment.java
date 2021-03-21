@@ -8,7 +8,9 @@ import android.view.ViewGroup;
 import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
 import androidx.fragment.app.Fragment;
+import androidx.lifecycle.ViewModelProvider;
 
+import com.example.beam.BeamViewModel;
 import com.example.beam.R;
 import com.gauravbhola.ripplepulsebackground.RipplePulseLayout;
 
@@ -23,6 +25,8 @@ public class HomeFragment extends Fragment {
     // TODO: Rename and change types of parameters
     private String mParam1;
     private String mParam2;
+
+    private BeamViewModel beamViewModel;
 
     public HomeFragment() {
         // Required empty public constructor
@@ -50,7 +54,7 @@ public class HomeFragment extends Fragment {
     public void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
 
-
+        beamViewModel = new ViewModelProvider(getActivity()).get(BeamViewModel.class);
     }
 
     @Override
@@ -64,6 +68,11 @@ public class HomeFragment extends Fragment {
     public void onViewCreated(@NonNull View view, @Nullable Bundle savedInstanceState) {
         super.onViewCreated(view, savedInstanceState);
         mRipplePulseLayout = view.findViewById(R.id.layout_ripplepulse);
+    }
+
+    @Override
+    public void onResume() {
+        super.onResume();
         mRipplePulseLayout.startRippleAnimation();
     }
 }

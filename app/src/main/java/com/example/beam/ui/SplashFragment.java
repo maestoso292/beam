@@ -10,12 +10,19 @@ import android.view.View;
 import android.view.ViewGroup;
 
 import androidx.fragment.app.Fragment;
+import androidx.lifecycle.Observer;
+import androidx.lifecycle.ViewModelProvider;
 import androidx.navigation.fragment.NavHostFragment;
 
+import com.example.beam.BeamViewModel;
 import com.example.beam.R;
+import com.example.beam.models.BeamUser;
+import com.example.beam.models.TimeTable;
 import com.google.firebase.auth.FirebaseAuth;
 
+import java.util.ArrayList;
 import java.util.HashMap;
+import java.util.List;
 import java.util.Map;
 
 /**
@@ -24,8 +31,11 @@ import java.util.Map;
  * create an instance of this fragment.
  */
 public class SplashFragment extends Fragment {
-    private View view;
-    HashMap<View, Animator> animHashMap;
+    private View layoutView;
+    private HashMap<View, Animator> anim1HashMap;
+    private HashMap<View, Animator> anim2HashMap;
+
+    private BeamViewModel beamViewModel;
 
     public static SplashFragment newInstance(String param1, String param2) {
 
@@ -39,32 +49,40 @@ public class SplashFragment extends Fragment {
     @Override
     public void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
+        beamViewModel = new ViewModelProvider(getActivity()).get(BeamViewModel.class);
     }
 
     @Override
     public View onCreateView(LayoutInflater inflater, ViewGroup container,
                              Bundle savedInstanceState) {
-        view = inflater.inflate(R.layout.splash_fragment, container, false);
+        layoutView = inflater.inflate(R.layout.splash_fragment, container, false);
 
-        animHashMap = new HashMap<>();
-        addAnimToHashMap(R.id.beamTxt, R.animator.firstanim);
-        addAnimToHashMap(R.id.blackBg, R.animator.bganim);
-        addAnimToHashMap(R.id.whiteOverlay, R.animator.overlayanim);
-        addAnimToHashMap(R.id.bars, R.animator.barsappear);
-        addAnimToHashMap(R.id.bar_1, R.animator.bar_1);
-        addAnimToHashMap(R.id.bar_2, R.animator.bar_2);
-        addAnimToHashMap(R.id.bar_3, R.animator.bar_3);
-        addAnimToHashMap(R.id.bar_4, R.animator.bar_4);
-        addAnimToHashMap(R.id.bar_5, R.animator.bar_5);
-        addAnimToHashMap(R.id.bar_6, R.animator.bar_6);
+        anim1HashMap = new HashMap<>();
+        anim2HashMap = new HashMap<>();
+        addAnimToHashMap(anim1HashMap, R.id.beamTxt, R.animator.firstanim);
+        addAnimToHashMap(anim2HashMap, R.id.blackBg, R.animator.bganim);
+        addAnimToHashMap(anim2HashMap, R.id.whiteOverlay, R.animator.overlayanim);
+        addAnimToHashMap(anim2HashMap, R.id.bars, R.animator.barsappear);
+        addAnimToHashMap(anim2HashMap, R.id.bar_1, R.animator.bar_1);
+        addAnimToHashMap(anim2HashMap, R.id.bar_2, R.animator.bar_2);
+        addAnimToHashMap(anim2HashMap, R.id.bar_3, R.animator.bar_3);
+        addAnimToHashMap(anim2HashMap, R.id.bar_4, R.animator.bar_4);
+        addAnimToHashMap(anim2HashMap, R.id.bar_5, R.animator.bar_5);
+        addAnimToHashMap(anim2HashMap, R.id.bar_6, R.animator.bar_6);
 
-        for (Map.Entry<View, Animator> entry : animHashMap.entrySet()) {
+        for (Map.Entry<View, Animator> entry : anim1HashMap.entrySet()) {
             entry.getValue().setTarget(entry.getKey());
         }
-
+        for (Map.Entry<View, Animator> entry : anim2HashMap.entrySet()) {
+            entry.getValue().setTarget(entry.getKey());
+        }
+        /*
         AnimatorSet animatorSet = new AnimatorSet();
-        animatorSet.playTogether(animHashMap.values());
+        animatorSet.playTogether(anim1HashMap.values());
         animatorSet.start();
+
+         */
+        /*
         animatorSet.addListener(new Animator.AnimatorListener() {
             @Override
             public void onAnimationStart(Animator animator) {
@@ -91,12 +109,114 @@ public class SplashFragment extends Fragment {
 
             }
         });
+
+         */
         // Inflate the layout for this fragment
-        return view;
+        return layoutView;
     }
 
-    private void addAnimToHashMap(int viewId, int animatorId) {
-        animHashMap.put(view.findViewById(viewId), AnimatorInflater.loadAnimator((Activity) getActivity(), animatorId));
+    private void addAnimToHashMap(HashMap<View, Animator> hashMap, int viewId, int animatorId) {
+        hashMap.put(layoutView.findViewById(viewId), AnimatorInflater.loadAnimator((Activity) getActivity(), animatorId));
     }
 
+    @Override
+    public void onResume() {
+        super.onResume();
+        if (FirebaseAuth.getInstance().getCurrentUser() == null) {
+            AnimatorSet animatorSet = new AnimatorSet();
+            List<Animator> animators = new ArrayList<>(anim1HashMap.values());
+            animators.addAll(anim2HashMap.values());
+            animatorSet.playTogether(animators);
+            animatorSet.addListener(new Animator.AnimatorListener() {
+                @Override
+                public void onAnimationStart(Animator animator) {
+
+                }
+
+                @Override
+                public void onAnimationEnd(Animator animator) {
+                    NavHostFragment.findNavController(SplashFragment.this).navigate(R.id.signin_fragment);
+                }
+
+                @Override
+                public void onAnimationCancel(Animator animator) {
+
+                }
+
+                @Override
+                public void onAnimationRepeat(Animator animator) {
+
+                }
+            });
+            animatorSet.start();
+        }
+        else {
+            // Play blinking text animation on repeat indefinitely
+            AnimatorSet animatorSet1 = new AnimatorSet();
+            animatorSet1.playTogether(anim1HashMap.values());
+            animatorSet1.addListener(new Animator.AnimatorListener() {
+                @Override
+                public void onAnimationStart(Animator animator) {
+
+                }
+
+                @Override
+                public void onAnimationEnd(Animator animator) {
+                    animatorSet1.start();
+                }
+
+                @Override
+                public void onAnimationCancel(Animator animator) {
+
+                }
+
+                @Override
+                public void onAnimationRepeat(Animator animator) {
+
+                }
+            });
+            animatorSet1.start();
+
+            // Play bars animation once entire weekly timetable is loaded
+            AnimatorSet animatorSet2 = new AnimatorSet();
+            animatorSet2.playTogether(anim2HashMap.values());
+            animatorSet2.addListener(new Animator.AnimatorListener() {
+                @Override
+                public void onAnimationStart(Animator animator) {
+
+                }
+
+                @Override
+                public void onAnimationEnd(Animator animator) {
+                    NavHostFragment.findNavController(SplashFragment.this).popBackStack();
+                }
+
+                @Override
+                public void onAnimationCancel(Animator animator) {
+
+                }
+
+                @Override
+                public void onAnimationRepeat(Animator animator) {
+
+                }
+            });
+            beamViewModel.loadUser();
+            beamViewModel.getUserDetails().observe(getViewLifecycleOwner(), new Observer<BeamUser>() {
+                @Override
+                public void onChanged(BeamUser beamUser) {
+                    beamViewModel.initialLoad();
+                    beamViewModel.getUserWeeklyTimetable().observe(getViewLifecycleOwner(), new Observer<TimeTable>() {
+                        @Override
+                        public void onChanged(TimeTable timeTable) {
+                            if (timeTable.getWeeklyTimetable().size() == 7) {
+                                animatorSet1.cancel();
+                                animatorSet2.start();
+                            }
+                        }
+                    });
+                }
+            });
+        }
+    }
 }

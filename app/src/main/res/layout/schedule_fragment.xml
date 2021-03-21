@@ -3,7 +3,7 @@
     android:layout_width="match_parent"
     android:layout_height="match_parent"
     xmlns:app="http://schemas.android.com/apk/res-auto">
-
+    <!--
     <com.google.android.material.button.MaterialButton
         android:id="@+id/schedule_button"
         style="@style/Widget.Beam.OutlinedButton"
@@ -12,12 +12,13 @@
         app:layout_constraintEnd_toEndOf="parent"
         app:layout_constraintStart_toStartOf="parent"
         app:layout_constraintTop_toTopOf="parent" />
+        -->
 
     <ExpandableListView
         android:id="@+id/schedule_expandable"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
-        app:layout_constraintTop_toBottomOf="@id/schedule_button"
+        app:layout_constraintTop_toTopOf="parent"
         android:indicatorRight="?android:attr/expandableListPreferredItemIndicatorRight"
         android:divider="@android:color/darker_gray"
         android:dividerHeight="1dp"/>

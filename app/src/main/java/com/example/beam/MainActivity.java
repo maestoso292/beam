@@ -19,6 +19,16 @@ import com.google.firebase.auth.FirebaseUser;
 
 import java.util.Arrays;
 
+import android.content.Intent;
+import android.content.pm.PackageManager;
+
+import android.widget.Toast;
+import android.widget.Button;
+import android.view.View;
+
+
+
+// TODO DON'T TOUCH ANYTHING HERE FOR NOW
 public class MainActivity extends AppCompatActivity {
     public static final String NOTIFICATION_CHANNEL_ID = "BEAM_CHANNEL_ID";
 
@@ -27,6 +37,7 @@ public class MainActivity extends AppCompatActivity {
 
     private FirebaseAuth mAuth;
     private FirebaseUser currentUser;
+
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -72,5 +83,6 @@ public class MainActivity extends AppCompatActivity {
         // or other notification behaviors after this
         NotificationManager notificationManager = getSystemService(NotificationManager.class);
         notificationManager.createNotificationChannel(channel);
+
     }
 }

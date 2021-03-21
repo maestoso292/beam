@@ -24,4 +24,7 @@ have location access enabled.</string>
     <!-- TODO: Remove or change this placeholder text -->
     <string name="hello_blank_fragment">Hello blank fragment</string>
 
+    <string name="app_name">beam</string>
+    <string name="ble_not_supported">App not supported.</string>
+
 </resources>

@@ -142,7 +142,6 @@ public class BeamViewModel extends ViewModel {
 
     private void loadUserWeeklyTimetable() {
         final TimeTable timeTable = new TimeTable(new HashMap<String, List<Session>>());
-        userWeeklyTimetable.setValue(timeTable);
 
         List<String> dates = new ArrayList<>();
         Calendar calendar = Calendar.getInstance(TimeZone.getTimeZone("Asia/Kuala_Lumpur"));
@@ -188,8 +187,11 @@ public class BeamViewModel extends ViewModel {
                     }
                     Collections.sort(sessions);
                     timeTable.putDailyTimetable(date, sessions);
-                    userWeeklyTimetable.setValue(timeTable);
-                    Log.d(LOG_TAG, "User Daily Timetable " + date + ": " + userWeeklyTimetable.getValue().getDailyTimetable(date));
+                    if (timeTable.getWeeklyTimetable().size() == 7) {
+                        userWeeklyTimetable.setValue(timeTable);
+                    }
+                    Log.d(LOG_TAG, "User Daily Timetable " + date + ": " + timeTable.getDailyTimetable(date));
+                    Log.d(LOG_TAG, "Timetable Size: " + timeTable.getWeeklyTimetable().size());
                 }
 
                 @Override

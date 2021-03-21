@@ -4,7 +4,9 @@ import android.app.AlarmManager;
 import android.app.PendingIntent;
 import android.content.Context;
 import android.content.Intent;
+import android.os.Build;
 import android.os.Bundle;
+import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
@@ -58,7 +60,7 @@ public class MainFragment extends Fragment {
     private AlarmManager alarmManager;
 
     private boolean firstLoad;
-    private static int temp=0;
+    private static int temp=1;
 
     @Override
     public void onCreate(@Nullable Bundle savedInstanceState) {
@@ -146,14 +148,18 @@ public class MainFragment extends Fragment {
         beamViewModel.getUserWeeklyTimetable().observe(getViewLifecycleOwner(), new Observer<TimeTable>() {
             @Override
             public void onChanged(TimeTable timeTable) {
+                Log.d("MainFragment", date + ": " + timeTable.getWeeklyTimetable().size());
+
                 if (timeTable.getWeeklyTimetable().size() != 7) {
+                    Log.d("MainFragment", "timetable not large enough: " + timeTable.getWeeklyTimetable().size());
                     return;
                 }
 
                 try {
                     List<Session> sessions = timeTable.getDailyTimetable(date);
+                    Log.d("MainFragment", "Sessions Size: " + sessions.size());
                     for (Session session : sessions) {
-                        /*
+
                         if (currentTime.compareTo(session.getTimeBegin()) > 0) {
                             continue;
                         }
@@ -164,22 +170,31 @@ public class MainFragment extends Fragment {
                         Map<String, String> extras = new HashMap<>();
                         extras.put("token", session.getSessionID());
 
-                        PendingIntent startCentralPIntent = getPIntentForServiceBroadcast(BeamBroadcastReceiver.CENTRAL_SERVICE, BeamBroadcastReceiver.START_SERVICE, extras, 0);
-                        PendingIntent stopCentralPIntent = getPIntentForServiceBroadcast(BeamBroadcastReceiver.CENTRAL_SERVICE, BeamBroadcastReceiver.STOP_SERVICE, null, 0);
+                        PendingIntent startCentralPIntent = getPIntentForServiceBroadcast(session.getTimeBegin(), BeamBroadcastReceiver.CENTRAL_SERVICE, BeamBroadcastReceiver.START_SERVICE, extras);
+                        PendingIntent stopCentralPIntent = getPIntentForServiceBroadcast(session.getTimeEnd(), BeamBroadcastReceiver.CENTRAL_SERVICE, BeamBroadcastReceiver.STOP_SERVICE, null);
 
+                        if (startCentralPIntent==null) {
+                            Log.d("MainFragment", "Start Intent Already Exists");
+                            continue;
+                        }
+                        if (stopCentralPIntent==null) {
+                            Log.d("MainFragment", "Stop Intent Already Exists");
+                            continue;
+                        }
+
+                        Log.d("MainFragment", "Service Alarm posted: " + sessionBeginMillisecond);
                         if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
-                            alarmManager.setAndAllowWhileIdle(AlarmManager.RTC_WAKEUP, sessionBeginMillisecond, startCentralPIntent);
-                            alarmManager.setAndAllowWhileIdle(AlarmManager.RTC_WAKEUP, sessionEndMillisecond, stopCentralPIntent);
+                            alarmManager.setExactAndAllowWhileIdle(AlarmManager.RTC_WAKEUP, sessionBeginMillisecond, startCentralPIntent);
+                            alarmManager.setExactAndAllowWhileIdle(AlarmManager.RTC_WAKEUP, sessionEndMillisecond, stopCentralPIntent);
                         }
                         else {
                             alarmManager.set(AlarmManager.RTC_WAKEUP, sessionBeginMillisecond, startCentralPIntent);
                             alarmManager.set(AlarmManager.RTC_WAKEUP, sessionEndMillisecond, stopCentralPIntent);
                         }
-                         */
                     }
                 }
                 catch (NullPointerException e) {
-
+                    Log.d("MainFragment", "Error posting Alarm");
                 }
             }
         });
@@ -208,11 +223,15 @@ public class MainFragment extends Fragment {
      * @param service Type of service to start
      * @param command Whether to start or stop the service
      * @param extras String extras to put in the PendingIntent
-     * @param flags Flags for PendingIntent.getBroadcast()
      * @return PendingIntent to start a Beam background service
      */
-    private PendingIntent getPIntentForServiceBroadcast(int service, int command, @Nullable Map<String, String> extras, int flags) {
+    private PendingIntent getPIntentForServiceBroadcast(String time, int service, int command, @Nullable Map<String, String> extras) {
+        int requestCode = Integer.parseInt("1" + time + service + command, 10);
+        Log.d("MainFragment", "RequestCode: " + requestCode);
+
         Intent intent = new Intent(getContext(), BeamBroadcastReceiver.class);
+        intent.setAction(BeamBroadcastReceiver.INTENT_ACTION);
+
         intent.putExtra("service", service);
         intent.putExtra("command", command);
         if (extras != null) {
@@ -220,7 +239,12 @@ public class MainFragment extends Fragment {
                 intent.putExtra(entry.getKey(), entry.getValue());
             }
         }
-        return PendingIntent.getBroadcast(getContext(), service + command, intent, flags);
+        if (PendingIntent.getBroadcast(getContext(), requestCode, intent, PendingIntent.FLAG_NO_CREATE) == null) {
+            return PendingIntent.getBroadcast(getContext(), requestCode, intent, 0);
+        }
+        else {
+            return null;
+        }
     }
 
     public void addToDatabase(String date, Map<String, List<Session>> map) {

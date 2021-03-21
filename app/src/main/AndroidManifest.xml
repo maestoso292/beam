@@ -28,6 +28,7 @@
                 <action android:name="android.intent.action." />
                 <action android:name="android.intent.action.BOOT_COMPLETED" />
                 <action android:name="android.intent.action.LOCKED_BOOT_COMPLETED" />
+                <action android:name="beam.intent.action.service"/>
             </intent-filter>
         </receiver>
         <service

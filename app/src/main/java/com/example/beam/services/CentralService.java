@@ -37,7 +37,7 @@ import java.util.Collections;
 import java.util.List;
 
 public class CentralService extends Service {
-    private static final long SCAN_PERIOD = 60000;
+    private static final long SCAN_PERIOD = 15000;
 
     private boolean serviceStarted;
     private boolean isScanning = false;
@@ -64,6 +64,7 @@ public class CentralService extends Service {
             return START_STICKY;
         }
         serviceStarted = true;
+        attendanceSuccess = false;
 
         currentSessionId = intent.getStringExtra("sessionId");
         Toast.makeText(this, "Service started: " + currentSessionId, Toast.LENGTH_SHORT).show();
@@ -98,11 +99,13 @@ public class CentralService extends Service {
             mDatabase.child("ble_test").child("central").setValue("Central On");
         }
 
+        /*
         initialiseScanCallback();
         initialiseGattCallback();
 
-        //startLeScan();
+        startLeScan();
 
+         */
         return START_STICKY;
     }
 
@@ -213,7 +216,12 @@ public class CentralService extends Service {
             handler.postDelayed(new Runnable() {
                 @Override
                 public void run() {
-                    stopSelf();
+                    if (attendanceSuccess) {
+                        stopSelf();
+                    }
+                    else {
+                        startLeScan();
+                    }
                 }
             }, 10000);
         }

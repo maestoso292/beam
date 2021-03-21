@@ -1,6 +1,16 @@
 <?xml version="1.0" encoding="utf-8"?>
 <resources>
-    <color name="colorPrimary">#6200EE</color>
-    <color name="colorPrimaryDark">#3700B3</color>
-    <color name="colorAccent">#03DAC5</color>
+    <color name="colorPrimary">@color/black</color>
+    <color name="colorOnPrimary">@color/black</color>
+    <color name="textColorPrimary">@color/black</color>
+    <color name="colorPrimaryDark">#FFFFFF</color>
+    <color name="permissionsDetailsColor">#8E8C8C</color>
+    <color name="colorAccent">#96cac6</color>
+    <color name="black">#000000</color>
+    <color name="light_grey">#d3d3d3</color>
+    <color name="white">#FFFFFF</color>
+    <color name="textInputOutlineColor">@color/black</color>
+    <color name="buttonOutlineColor">@color/black</color>
+    <color name="loginPageBackgroundColor">@color/white</color>
+    <color name="red">#FF0000</color>
 </resources>

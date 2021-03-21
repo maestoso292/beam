@@ -1,4 +1,30 @@
 <resources>
+    <string name="app_name">Beam</string>
+    <string name="todo">TODO</string>
+    <string name="blackbg">blackbg</string>
+    <string name="whiteoverlay">overlay</string>
+    <string name="bar_1">bar1</string>
+    <string name="bar_2">bar2</string>
+    <string name="bar_3">bar3</string>
+    <string name="bar_4">bar4</string>
+    <string name="bar_5">bar5</string>
+    <string name="bar_6">bar6</string>
+    <string name="beam_button_sign_in">SIGN IN</string>
+    <string name="beam_hint_email">Email</string>
+    <string name="beam_hint_password">Password</string>
+    <string name="beam_button_login">Login</string>
+    <string name="beam_permissions">Permissions Required</string>
+    <string name="beam_permissions_details">Apps using Bluetooth® Low Energy (BLE) are required to
+have location access enabled.</string>
+    <string name="beam_location_access">Grant Location Access</string>
+    <string name="beam_turn_on_location">Turn On Location</string>
+    <string name="beam_turn_on_bluetooth">Turn On Bluetooth</string>
+    <string name="beam_settings_title">Settings</string>
+    <string name="beam_settings_logout">Logout</string>
+    <!-- TODO: Remove or change this placeholder text -->
+    <string name="hello_blank_fragment">Hello blank fragment</string>
+
     <string name="app_name">beam</string>
     <string name="ble_not_supported">App not supported.</string>
+
 </resources>

@@ -1,0 +1,60 @@
+<?xml version="1.0" encoding="utf-8"?>
+<FrameLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:tools="http://schemas.android.com/tools"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    tools:context=".Permissons">
+
+    <LinearLayout
+        android:layout_width="match_parent"
+        android:layout_height="match_parent"
+        android:orientation="vertical"
+        android:padding="24dp"
+        android:paddingTop="16dp"
+        android:background="@color/white">
+
+        <TextView
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_gravity="center_horizontal"
+            android:layout_marginTop="220dp"
+            android:layout_marginBottom="17dp"
+            android:text="@string/beam_permissions"
+            android:textAppearance="@style/TextAppearance.Beam.Permissions"
+            android:textColor="@color/colorPrimary" />
+
+        <TextView
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_gravity="center_horizontal"
+            android:layout_marginBottom="40dp"
+            android:textAppearance="@style/TextAppearance.Beam.Permissions.Details"
+            android:text="@string/beam_permissions_details"
+            android:textAlignment="center"/>
+
+        <com.google.android.material.button.MaterialButton
+            android:id="@+id/location_access"
+            android:layout_width="309dp"
+            android:layout_marginBottom="5dp"
+            android:layout_gravity="center_horizontal"
+            style="@style/Widget.Beam.OutlinedButton"
+            android:text="@string/beam_location_access"/>
+
+        <com.google.android.material.button.MaterialButton
+            android:id="@+id/turn_on_location"
+            android:layout_width="309dp"
+            android:layout_marginBottom="5dp"
+            android:layout_gravity="center_horizontal"
+            style="@style/Widget.Beam.OutlinedButton"
+            android:text="@string/beam_turn_on_location"/>
+
+        <com.google.android.material.button.MaterialButton
+            android:id="@+id/turn_on_bluetooth"
+            android:layout_width="309dp"
+            android:layout_marginBottom="5dp"
+            android:layout_gravity="center_horizontal"
+            style="@style/Widget.Beam.OutlinedButton"
+            android:text="@string/beam_turn_on_bluetooth"/>
+
+    </LinearLayout>
+</FrameLayout>

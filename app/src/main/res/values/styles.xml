@@ -1,10 +1,117 @@
-<resources>
+<resources xmlns:tools="http://schemas.android.com/tools">
     <!-- Base application theme. -->
-    <style name="AppTheme" parent="Theme.AppCompat.Light.DarkActionBar">
+    <style name="Theme.Beam" parent="Theme.MaterialComponents.Light.NoActionBar">
         <!-- Customize your theme here. -->
-        <item name="colorPrimary">@color/colorPrimary</item>
+        <item name="colorPrimary">@color/white</item>
         <item name="colorPrimaryDark">@color/colorPrimaryDark</item>
         <item name="colorAccent">@color/colorAccent</item>
+
+        <item name="android:windowLightStatusBar" tools:targetApi="m">true</item>
     </style>
 
+    <style name="HorizontalDivider">
+        <item name="android:layout_width">match_parent</item>
+        <item name="android:layout_height">1dp</item>
+        <item name="android:background">?android:attr/listDivider</item>
+    </style>
+
+    <style name="VerticalDivider">
+        <item name="android:layout_width">1dp</item>
+        <item name="android:layout_height">match_parent</item>
+        <item name="android:background">?android:attr/listDivider</item>
+    </style>
+
+    <style name="Widget.Beam.Toolbar" parent="Widget.AppCompat.Toolbar">
+        <item name="android:background">?attr/colorPrimaryDark</item>
+        <item name="titleTextAppearance">@style/TextAppearance.Beam.Toolbar</item>
+        <item name="android:textAlignment">center</item>
+    </style>
+
+    <style name="TextAppearance.Beam.Toolbar" parent="TextAppearance.MaterialComponents.Button">
+        <item name="android:textSize">16sp</item>
+        <item name="android:textColor">@color/textColorPrimary</item>
+        <item name="fontFamily">@font/arca</item>
+
+    </style>
+
+    <style name="Widget.Beam.TextInputLayout.OutlinedBox" parent="Widget.MaterialComponents.TextInputLayout.OutlinedBox">
+        <item name="materialThemeOverlay">@style/ThemeOverlay.Beam.TextInputLayout.OutlinedBox</item>
+        <item name="hintTextAppearance">@style/TextAppearance.Beam.TextInputLayout.HintText</item>
+        <item name="hintTextColor">@color/textColorPrimary</item>
+        <item name="android:paddingBottom">8dp</item>
+        <item name="boxStrokeColor">@color/textInputOutlineColor</item>
+    </style>
+
+    <style name="ThemeOverlay.Beam.TextInputLayout.OutlinedBox" parent="">
+        <item name="colorControlActivated">@color/black</item>
+        <item name="colorSurface">@color/white</item>
+        <item name="colorOnSurface">@color/black</item>
+        <item name="colorAccent">@color/colorAccent</item>
+        <item name="colorError">@color/red</item>
+        <item name="editTextStyle">@style/Widget.MaterialComponents.TextInputEditText.OutlinedBox</item>
+    </style>
+
+    <style name="TextAppearance.Beam.TextInputLayout.HintText" parent="TextAppearance.MaterialComponents.Subtitle2">
+        <item name="android:textColor">?android:attr/textColorPrimary</item>
+    </style>
+
+    <style name="Widget.Beam.Button" parent="Widget.MaterialComponents.Button">
+        <item name="android:layout_height">55dp</item>
+        <item name="shapeAppearance">@style/ShapeAppearance.Beam.SmallComponent</item>
+        <item name="backgroundTint">@color/black</item>
+        <item name="android:textSize">12sp</item>
+    </style>
+
+    <style name="Widget.Beam.OutlinedButton" parent="Widget.MaterialComponents.Button">
+        <item name="android:layout_height">55dp</item>
+        <item name="android:textAppearance">@style/TextAppearance.Beam.OutlinedButton</item>
+        <item name="android:textColor">?android:attr/textColorPrimary</item>
+        <item name="shapeAppearance">@style/ShapeAppearance.Beam.SmallComponent</item>
+        <item name="android:textSize">12sp</item>
+        <item name="strokeColor">@color/colorOnPrimary</item>
+        <item name="strokeWidth">1dp</item>
+        <item name="backgroundTint">@color/white</item>
+    </style>
+
+    <style name="ShapeAppearance.Beam.SmallComponent" parent="ShapeAppearance.MaterialComponents.SmallComponent">
+        <item name="cornerFamily">rounded</item>
+        <item name="cornerSize">50dp</item>
+    </style>
+
+    <style name="TextAppearance.Beam.OutlinedButton" parent="TextAppearance.MaterialComponents.Button">
+        <item name="fontFamily">@font/jtleonor</item>
+        <item name="android:fontFamily">@font/jtleonor</item>
+    </style>
+
+    <style name="TextAppearance.Beam.Title" parent="TextAppearance.MaterialComponents.Headline4">
+        <item name="fontFamily">@font/arca</item>
+        <item name="android:textStyle">normal</item>
+        <item name="textAllCaps">true</item>
+        <item name="android:textSize">30sp</item>
+    </style>
+
+    <style name="TextAppearance.Beam.Permissions" parent="TextAppearance.MaterialComponents.Headline4">
+        <item name="fontFamily">@font/jtleonor</item>
+        <item name="textAllCaps">true</item>
+        <item name="android:letterSpacing">0.15</item>
+        <item name="android:textSize">12.5sp</item>
+    </style>
+
+    <style name="TextAppearance.Beam.Permissions.Details" parent="TextAppearance.MaterialComponents.Headline5">
+        <item name="fontFamily">@font/coresans</item>
+        <item name="textAllCaps">false</item>
+        <item name="android:textSize">10sp</item>
+        <item name="android:letterSpacing">0.06</item>
+        <item name="android:textColor">@color/permissionsDetailsColor</item>
+    </style>
+
+    <style name="RippleImage">
+        <item name="android:layout_width">match_parent</item>
+        <item name="android:layout_height">match_parent</item>
+        <item name="android:src">@drawable/ripple_circle</item>
+    </style>
+
+    <style name="RippleImage.Thin">
+        <item name="android:src">@drawable/ripple_circle_thin</item>
+    </style>
 </resources>

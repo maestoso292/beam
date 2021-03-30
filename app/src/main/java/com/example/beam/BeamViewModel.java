@@ -171,8 +171,10 @@ public class BeamViewModel extends ViewModel {
 
 
         for (int i = 0; i < 7; i++) {
-            dates.add(String.format("%04d%02d%02d", calendar.get(Calendar.YEAR), calendar.get(Calendar.MONTH)+1, calendar.get(Calendar.DAY_OF_MONTH)+i));
+            dates.add(String.format("%04d%02d%02d", calendar.get(Calendar.YEAR), calendar.get(Calendar.MONTH)+1, calendar.get(Calendar.DAY_OF_MONTH)));
+            calendar.add(Calendar.DAY_OF_MONTH, 1);
         }
+        Log.d(LOG_TAG, dates.toString());
 
         for (final String date : dates) {
             mDatabase.child("timetable").child(date).addValueEventListener(new ValueEventListener() {

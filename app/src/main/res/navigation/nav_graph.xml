@@ -57,7 +57,7 @@
             app:destination="@id/login_dest"
             app:enterAnim="@android:anim/slide_in_left"
             app:exitAnim="@android:anim/fade_out"
-            app:popUpTo="@id/main_dest"
+            app:popUpTo="@id/splashFragment"
             app:popUpToInclusive="false" />/>
     </fragment>
     <fragment

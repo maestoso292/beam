@@ -10,6 +10,7 @@ import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
+import android.widget.Toast;
 
 import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
@@ -72,15 +73,6 @@ public class MainFragment extends Fragment {
         mDatabase = FirebaseDatabase.getInstance().getReference();
 
         beamViewModel = new ViewModelProvider(getActivity()).get(BeamViewModel.class);
-
-        mAuth.addAuthStateListener(new FirebaseAuth.AuthStateListener() {
-            @Override
-            public void onAuthStateChanged(@NonNull FirebaseAuth firebaseAuth) {
-                if (firebaseAuth.getCurrentUser() == null) {
-                    navController.navigate(R.id.splashFragment);
-                }
-            }
-        });
     }
 
     @Nullable
@@ -141,63 +133,86 @@ public class MainFragment extends Fragment {
             }
              */
         }
-        Calendar calendar = Calendar.getInstance(TimeZone.getTimeZone("Asia/Kuala_Lumpur"));
-        final String date = String.format(Locale.ENGLISH, "%04d%02d%02d", calendar.get(Calendar.YEAR), calendar.get(Calendar.MONTH)+1, calendar.get(Calendar.DAY_OF_MONTH));
-        final String currentTime = String.format("%02d%02d", calendar.get(Calendar.HOUR_OF_DAY), calendar.get(Calendar.MINUTE));
+        else {
+            pager.setCurrentItem(0);
 
-        beamViewModel.getUserWeeklyTimetable().observe(getViewLifecycleOwner(), new Observer<TimeTable>() {
-            @Override
-            public void onChanged(TimeTable timeTable) {
-                Log.d("MainFragment", date + ": " + timeTable.getWeeklyTimetable().size());
+            Calendar calendar = Calendar.getInstance(TimeZone.getTimeZone("Asia/Kuala_Lumpur"));
+            final String date = String.format(Locale.ENGLISH, "%04d%02d%02d", calendar.get(Calendar.YEAR), calendar.get(Calendar.MONTH)+1, calendar.get(Calendar.DAY_OF_MONTH));
+            final String currentTime = String.format("%02d%02d", calendar.get(Calendar.HOUR_OF_DAY), calendar.get(Calendar.MINUTE));
 
-                if (timeTable.getWeeklyTimetable().size() != 7) {
-                    Log.d("MainFragment", "timetable not large enough: " + timeTable.getWeeklyTimetable().size());
-                    return;
-                }
+            beamViewModel.getUserWeeklyTimetable().observe(getViewLifecycleOwner(), new Observer<TimeTable>() {
+                @Override
+                public void onChanged(TimeTable timeTable) {
+                    Log.d("MainFragment", date + ": " + timeTable.getWeeklyTimetable().size());
 
-                try {
-                    List<Session> sessions = timeTable.getDailyTimetable(date);
-                    Log.d("MainFragment", "Sessions Size: " + sessions.size());
-                    for (Session session : sessions) {
+                    if (timeTable.getWeeklyTimetable().size() != 7) {
+                        Log.d("MainFragment", "timetable not large enough: " + timeTable.getWeeklyTimetable().size());
+                        return;
+                    }
 
-                        if (currentTime.compareTo(session.getTimeBegin()) > 0) {
-                            continue;
+                    try {
+                        List<Session> sessions = timeTable.getDailyTimetable(date);
+                        Log.d("MainFragment", "Sessions Size: " + sessions.size());
+                        for (Session session : sessions) {
+
+
+                            if (currentTime.compareTo(session.getTimeBegin()) > 0) {
+                                Log.d("MainFragment", "Current time > session time");
+                                //continue;
+                            }
+
+                            long sessionBeginMillisecond = getMillisecondForSessionTime(session.getTimeBegin());
+                            long sessionEndMillisecond = getMillisecondForSessionTime(session.getTimeEnd());
+
+                            Map<String, String> extras = new HashMap<>();
+                            extras.put("token", session.getSessionID());
+
+                            PendingIntent startPIntent;
+                            PendingIntent stopPIntent;
+                            String userRole = beamViewModel.getUserDetails().getValue().getRole();
+                            if (userRole.equals("Student")) {
+                                startPIntent = getPIntentForServiceBroadcast(session.getTimeBegin(), BeamBroadcastReceiver.CENTRAL_SERVICE, BeamBroadcastReceiver.START_SERVICE, extras);
+                                stopPIntent = getPIntentForServiceBroadcast(session.getTimeEnd(), BeamBroadcastReceiver.CENTRAL_SERVICE, BeamBroadcastReceiver.STOP_SERVICE, null);
+                            }
+                            else if (userRole.equals("Lecturer")) {
+                                startPIntent = getPIntentForServiceBroadcast(session.getTimeBegin(), BeamBroadcastReceiver.PERIPHERAL_SERVICE, BeamBroadcastReceiver.START_SERVICE, extras);
+                                stopPIntent = getPIntentForServiceBroadcast(session.getTimeEnd(), BeamBroadcastReceiver.PERIPHERAL_SERVICE, BeamBroadcastReceiver.STOP_SERVICE, null);
+                            }
+                            else {
+                                Log.d("MainFragment", "No user role.");
+                                Toast.makeText(getContext(), "No user role", Toast.LENGTH_SHORT).show();
+                                return;
+                            }
+
+
+                            if (startPIntent==null) {
+                                Log.d("MainFragment", "Start Intent Already Exists");
+                                continue;
+                            }
+                            if (stopPIntent==null) {
+                                Log.d("MainFragment", "Stop Intent Already Exists");
+                                continue;
+                            }
+
+                            Log.d("MainFragment", "Service Alarm posted: " + sessionBeginMillisecond);
+                            if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.M) {
+                                alarmManager.setExactAndAllowWhileIdle(AlarmManager.RTC_WAKEUP, sessionBeginMillisecond, startPIntent);
+                                alarmManager.setExactAndAllowWhileIdle(AlarmManager.RTC_WAKEUP, sessionEndMillisecond, stopPIntent);
+                            }
+                            else {
+                                alarmManager.setExact(AlarmManager.RTC_WAKEUP, sessionBeginMillisecond, startPIntent);
+                                alarmManager.setExact(AlarmManager.RTC_WAKEUP, sessionEndMillisecond, stopPIntent);
+                            }
+                            break;
                         }
-
-                        long sessionBeginMillisecond = getMillisecondForSessionTime(session.getTimeBegin());
-                        long sessionEndMillisecond = getMillisecondForSessionTime(session.getTimeEnd());
-
-                        Map<String, String> extras = new HashMap<>();
-                        extras.put("token", session.getSessionID());
-
-                        PendingIntent startCentralPIntent = getPIntentForServiceBroadcast(session.getTimeBegin(), BeamBroadcastReceiver.CENTRAL_SERVICE, BeamBroadcastReceiver.START_SERVICE, extras);
-                        PendingIntent stopCentralPIntent = getPIntentForServiceBroadcast(session.getTimeEnd(), BeamBroadcastReceiver.CENTRAL_SERVICE, BeamBroadcastReceiver.STOP_SERVICE, null);
-
-                        if (startCentralPIntent==null) {
-                            Log.d("MainFragment", "Start Intent Already Exists");
-                            continue;
-                        }
-                        if (stopCentralPIntent==null) {
-                            Log.d("MainFragment", "Stop Intent Already Exists");
-                            continue;
-                        }
-
-                        Log.d("MainFragment", "Service Alarm posted: " + sessionBeginMillisecond);
-                        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
-                            alarmManager.setExactAndAllowWhileIdle(AlarmManager.RTC_WAKEUP, sessionBeginMillisecond, startCentralPIntent);
-                            alarmManager.setExactAndAllowWhileIdle(AlarmManager.RTC_WAKEUP, sessionEndMillisecond, stopCentralPIntent);
-                        }
-                        else {
-                            alarmManager.set(AlarmManager.RTC_WAKEUP, sessionBeginMillisecond, startCentralPIntent);
-                            alarmManager.set(AlarmManager.RTC_WAKEUP, sessionEndMillisecond, stopCentralPIntent);
-                        }
+                        Toast.makeText(getContext(), "All alarms posted", Toast.LENGTH_SHORT).show();
+                    }
+                    catch (NullPointerException e) {
+                        Log.d("MainFragment", "Error posting Alarm");
                     }
                 }
-                catch (NullPointerException e) {
-                    Log.d("MainFragment", "Error posting Alarm");
-                }
-            }
-        });
+            });
+        }
     }
 
     /**
@@ -211,9 +226,14 @@ public class MainFragment extends Fragment {
         int sessionBeginHour = Integer.parseInt(sessionTime.substring(0, 2),10);
         int sessionBeginMinute = Integer.parseInt(sessionTime.substring(2),10);
 
+        /*
         calendar.set(Calendar.HOUR_OF_DAY, sessionBeginHour);
         calendar.set(Calendar.MINUTE, sessionBeginMinute);
         calendar.set(Calendar.SECOND, 0);
+
+         */
+        calendar.add(Calendar.SECOND, temp*30);
+        temp+=6;
 
         return calendar.getTimeInMillis();
     }
@@ -249,7 +269,6 @@ public class MainFragment extends Fragment {
 
     public void addToDatabase(String date, Map<String, List<Session>> map) {
         for (Map.Entry<String, List<Session>> entry : map.entrySet()) {
-
             for (Session session : entry.getValue()) {
                 DatabaseReference ref = mDatabase.child("timetable").child(date).child(entry.getKey()).push();
                 session.setSessionID(ref.getKey());

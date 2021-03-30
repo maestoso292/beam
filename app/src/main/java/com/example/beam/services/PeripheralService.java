@@ -49,6 +49,7 @@ public class PeripheralService extends Service {
     private DatabaseReference mDatabase;
 
     private boolean serviceStarted;
+    private boolean hasConnected;
 
     private Handler handler = new Handler();
     private String currentSessionId;
@@ -70,7 +71,7 @@ public class PeripheralService extends Service {
 
         Notification notification;
         if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
-            notification = new NotificationCompat.Builder(this, MainActivity.NOTIFICATION_CHANNEL_ID)
+            notification = new NotificationCompat.Builder(this, MainActivity.NOTIF_CHANNEL_SERVICE_ID)
                     .setContentTitle("Peripheral Service")
                     .setContentInfo("Service is running")
                     .setContentIntent(pendingIntent)
@@ -97,14 +98,6 @@ public class PeripheralService extends Service {
         }
 
         openGattServer();
-
-
-        handler.postDelayed(new Runnable() {
-            @Override
-            public void run() {
-                stopSelf();
-            }
-        }, 60000);
 
         return START_STICKY;
     }
@@ -163,6 +156,7 @@ public class PeripheralService extends Service {
                 switch(newState) {
                     case BluetoothProfile.STATE_CONNECTED:
                     case BluetoothProfile.STATE_CONNECTING:
+                        hasConnected = true;
                         mDatabase.child("ble_test").child("CONNECTED").setValue(true);
                         mDatabase.child("ble_test").child("Central").setValue(device.getName());
                         stopAdvertising();
@@ -227,6 +221,20 @@ public class PeripheralService extends Service {
         }
 
         bluetoothLeAdvertiser.startAdvertising(settings, advertiseData, scanResponseData, advertiseCallback);
+        Runnable runnableStartAdvertising = new Runnable() {
+            @Override
+            public void run() {
+                if (hasConnected) {
+                    hasConnected = false;
+                    handler.postDelayed(this::run, 60000);
+                }
+                else {
+                    Toast.makeText(PeripheralService.this, "No connection over the past minute", Toast.LENGTH_SHORT).show();
+                    stopSelf();
+                }
+            }
+        };
+        handler.postDelayed(runnableStartAdvertising,60000);
     }
 
     private void stopAdvertising() {

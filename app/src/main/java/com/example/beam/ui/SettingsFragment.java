@@ -40,6 +40,7 @@ public class SettingsFragment extends Fragment {
             @Override
             public void onClick(View view) {
                 FirebaseAuth.getInstance().signOut();
+                NavHostFragment.findNavController(SettingsFragment.this).popBackStack();
             }
         });
     }

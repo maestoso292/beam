@@ -19,18 +19,12 @@ import com.google.firebase.auth.FirebaseUser;
 
 import java.util.Arrays;
 
-import android.content.Intent;
-import android.content.pm.PackageManager;
-
-import android.widget.Toast;
-import android.widget.Button;
-import android.view.View;
-
-
 
 // TODO DON'T TOUCH ANYTHING HERE FOR NOW
 public class MainActivity extends AppCompatActivity {
-    public static final String NOTIFICATION_CHANNEL_ID = "BEAM_CHANNEL_ID";
+    public static final String NOTIF_CHANNEL_SERVICE_ID = "BEAM_SERVICE";
+    public static final String NOTIF_CHANNEL_MISC_ID = "BEAM_MISC";
+
 
     private NavController navController;
     private BeamViewModel beamViewModel;
@@ -66,23 +60,29 @@ public class MainActivity extends AppCompatActivity {
         beamViewModel = new ViewModelProvider(this).get(BeamViewModel.class);
         if (currentUser != null) {
             beamViewModel.loadUser();
-
         }
     }
 
     @RequiresApi(api = Build.VERSION_CODES.O)
     private void createNotificationChannel() {
+        int importance = NotificationManager.IMPORTANCE_DEFAULT;
+        NotificationManager notificationManager = getSystemService(NotificationManager.class);
+
         // Create the NotificationChannel, but only on API 26+ because
         // the NotificationChannel class is new and not in the support library
-        CharSequence name = "Beam Notification Channel";
+        CharSequence name = "Beam Service Notification Channel";
         String description = "Notification channel for beam app to notify users of ongoing background services";
-        int importance = NotificationManager.IMPORTANCE_DEFAULT;
-        NotificationChannel channel = new NotificationChannel(NOTIFICATION_CHANNEL_ID, name, importance);
+
+        NotificationChannel channel = new NotificationChannel(NOTIF_CHANNEL_SERVICE_ID, name, importance);
         channel.setDescription(description);
         // Register the channel with the system; you can't change the importance
         // or other notification behaviors after this
-        NotificationManager notificationManager = getSystemService(NotificationManager.class);
         notificationManager.createNotificationChannel(channel);
 
+        name = "Beam Miscellaneous Notification Channel";
+        description = "Notification channel for beam app to notify users of miscellaneous actions";
+        channel = new NotificationChannel(NOTIF_CHANNEL_MISC_ID, name, importance);
+        channel.setDescription(description);
+        notificationManager.createNotificationChannel(channel);
     }
 }

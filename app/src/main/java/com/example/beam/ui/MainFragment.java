@@ -24,7 +24,6 @@ import androidx.viewpager2.widget.ViewPager2;
 
 import com.example.beam.BeamViewModel;
 import com.example.beam.R;
-import com.example.beam.models.BeamUser;
 import com.example.beam.models.Session;
 import com.example.beam.models.TimeTable;
 import com.example.beam.services.BeamBroadcastReceiver;
@@ -32,10 +31,7 @@ import com.google.android.material.tabs.TabLayout;
 import com.google.android.material.tabs.TabLayoutMediator;
 import com.google.firebase.auth.FirebaseAuth;
 import com.google.firebase.auth.FirebaseUser;
-import com.google.firebase.database.DatabaseReference;
-import com.google.firebase.database.FirebaseDatabase;
 
-import java.util.ArrayList;
 import java.util.Calendar;
 import java.util.HashMap;
 import java.util.List;
@@ -50,27 +46,20 @@ public class MainFragment extends Fragment {
 
     private FirebaseAuth mAuth;
     private FirebaseUser currentUser;
-    private DatabaseReference mDatabase;
 
     private NavController navController;
     private BeamViewModel beamViewModel;
 
-    private BeamUser userDetails;
-    private Map<String, String> userModules;
-
     private AlarmManager alarmManager;
 
     private boolean firstLoad;
-    private static int temp=1;
 
     @Override
     public void onCreate(@Nullable Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
-        firstLoad = false;
         navController = NavHostFragment.findNavController(this);
 
         mAuth = FirebaseAuth.getInstance();
-        mDatabase = FirebaseDatabase.getInstance().getReference();
 
         beamViewModel = new ViewModelProvider(getActivity()).get(BeamViewModel.class);
     }
@@ -112,108 +101,87 @@ public class MainFragment extends Fragment {
     public void onResume() {
         super.onResume();
 
-        if (!firstLoad) {
-            firstLoad = true;
-            navController.navigate(R.id.splashFragment);
-        }
-
         currentUser = mAuth.getCurrentUser();
-        if (currentUser == null) {
+        if (beamViewModel.isFirstLoad() || currentUser == null) {
+            beamViewModel.setFirstLoad(false);
             navController.navigate(R.id.splashFragment);
-
-
-            /*
-            // Manual timetable insertion
-            Calendar calendar;
-            // 12 weeks of class
-            for (int i = 0; i < 12; i++) {
-                calendar = Calendar.getInstance(TimeZone.getTimeZone("Asia/Kuala_Lumpur"));
-                calendar.add(Calendar.WEEK_OF_YEAR, i);
-                generateTimetable(calendar);
-            }
-             */
         }
-        else {
-            pager.setCurrentItem(0);
 
-            Calendar calendar = Calendar.getInstance(TimeZone.getTimeZone("Asia/Kuala_Lumpur"));
-            final String date = String.format(Locale.ENGLISH, "%04d%02d%02d", calendar.get(Calendar.YEAR), calendar.get(Calendar.MONTH)+1, calendar.get(Calendar.DAY_OF_MONTH));
-            final String currentTime = String.format("%02d%02d", calendar.get(Calendar.HOUR_OF_DAY), calendar.get(Calendar.MINUTE));
+        pager.setCurrentItem(0);
 
-            beamViewModel.getUserWeeklyTimetable().observe(getViewLifecycleOwner(), new Observer<TimeTable>() {
-                @Override
-                public void onChanged(TimeTable timeTable) {
-                    Log.d("MainFragment", date + ": " + timeTable.getWeeklyTimetable().size());
+        Calendar calendar = Calendar.getInstance(TimeZone.getTimeZone("Asia/Kuala_Lumpur"));
+        final String date = String.format(Locale.ENGLISH, "%04d%02d%02d", calendar.get(Calendar.YEAR), calendar.get(Calendar.MONTH)+1, calendar.get(Calendar.DAY_OF_MONTH));
+        final String currentTime = String.format(Locale.ENGLISH, "%02d%02d", calendar.get(Calendar.HOUR_OF_DAY), calendar.get(Calendar.MINUTE));
 
-                    if (timeTable.getWeeklyTimetable().size() != 7) {
-                        Log.d("MainFragment", "timetable not large enough: " + timeTable.getWeeklyTimetable().size());
-                        return;
-                    }
+        beamViewModel.getUserWeeklyTimetable().observe(getViewLifecycleOwner(), new Observer<TimeTable>() {
+            @Override
+            public void onChanged(TimeTable timeTable) {
+                Log.d("MainFragment", date + ": " + timeTable.getWeeklyTimetable().size());
 
-                    try {
-                        List<Session> sessions = timeTable.getDailyTimetable(date);
-                        Log.d("MainFragment", "Sessions Size: " + sessions.size());
-                        for (Session session : sessions) {
-
-
-                            if (currentTime.compareTo(session.getTimeBegin()) > 0) {
-                                Log.d("MainFragment", "Current time > session time");
-                                //continue;
-                            }
-
-                            long sessionBeginMillisecond = getMillisecondForSessionTime(session.getTimeBegin());
-                            long sessionEndMillisecond = getMillisecondForSessionTime(session.getTimeEnd());
-
-                            Map<String, String> extras = new HashMap<>();
-                            extras.put("moduleId", session.getModuleID());
-                            extras.put("sessionId", session.getSessionID());
-
-                            PendingIntent startPIntent;
-                            PendingIntent stopPIntent;
-                            String userRole = beamViewModel.getUserDetails().getValue().getRole();
-                            if (userRole.equals("Student")) {
-                                startPIntent = getPIntentForServiceBroadcast(session.getTimeBegin(), BeamBroadcastReceiver.CENTRAL_SERVICE, BeamBroadcastReceiver.START_SERVICE, extras);
-                                stopPIntent = getPIntentForServiceBroadcast(session.getTimeEnd(), BeamBroadcastReceiver.CENTRAL_SERVICE, BeamBroadcastReceiver.STOP_SERVICE, null);
-                            }
-                            else if (userRole.equals("Lecturer")) {
-                                startPIntent = getPIntentForServiceBroadcast(session.getTimeBegin(), BeamBroadcastReceiver.PERIPHERAL_SERVICE, BeamBroadcastReceiver.START_SERVICE, extras);
-                                stopPIntent = getPIntentForServiceBroadcast(session.getTimeEnd(), BeamBroadcastReceiver.PERIPHERAL_SERVICE, BeamBroadcastReceiver.STOP_SERVICE, null);
-                            }
-                            else {
-                                Log.d("MainFragment", "No user role.");
-                                Toast.makeText(getContext(), "No user role", Toast.LENGTH_SHORT).show();
-                                return;
-                            }
-
-
-                            if (startPIntent==null) {
-                                Log.d("MainFragment", "Start Intent Already Exists");
-                                continue;
-                            }
-                            if (stopPIntent==null) {
-                                Log.d("MainFragment", "Stop Intent Already Exists");
-                                continue;
-                            }
-
-                            Log.d("MainFragment", "Service Alarm posted: " + sessionBeginMillisecond);
-                            if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.M) {
-                                alarmManager.setExactAndAllowWhileIdle(AlarmManager.RTC_WAKEUP, sessionBeginMillisecond, startPIntent);
-                                alarmManager.setExactAndAllowWhileIdle(AlarmManager.RTC_WAKEUP, sessionEndMillisecond, stopPIntent);
-                            }
-                            else {
-                                alarmManager.setExact(AlarmManager.RTC_WAKEUP, sessionBeginMillisecond, startPIntent);
-                                alarmManager.setExact(AlarmManager.RTC_WAKEUP, sessionEndMillisecond, stopPIntent);
-                            }
-                            break;
-                        }
-                        Toast.makeText(getContext(), "All alarms posted", Toast.LENGTH_SHORT).show();
-                    }
-                    catch (NullPointerException e) {
-                        Log.d("MainFragment", "Error posting Alarm");
-                    }
+                if (timeTable.getWeeklyTimetable().size() != 7) {
+                    Log.d("MainFragment", "timetable not large enough: " + timeTable.getWeeklyTimetable().size());
+                    return;
                 }
-            });
-        }
+
+                try {
+                    List<Session> sessions = timeTable.getDailyTimetable(date);
+                    Log.d("MainFragment", "Sessions Size: " + sessions.size());
+                    for (Session session : sessions) {
+                        if (currentTime.compareTo(session.getTimeBegin()) > 0) {
+                            Log.d("MainFragment", "Current time > session time");
+                            continue;
+                        }
+
+                        long sessionBeginMillisecond = getMillisecondForSessionTime(session.getTimeBegin());
+                        long sessionEndMillisecond = getMillisecondForSessionTime(session.getTimeEnd());
+
+                        Map<String, String> extras = new HashMap<>();
+                        extras.put("moduleId", session.getModuleID());
+                        extras.put("sessionId", session.getSessionID());
+
+                        PendingIntent startPIntent;
+                        PendingIntent stopPIntent;
+                        String userRole = beamViewModel.getUserDetails().getValue().getRole();
+                        if (userRole.equals("Student")) {
+                            startPIntent = getPIntentForServiceBroadcast(session.getTimeBegin(), BeamBroadcastReceiver.CENTRAL_SERVICE, BeamBroadcastReceiver.START_SERVICE, extras);
+                            stopPIntent = getPIntentForServiceBroadcast(session.getTimeEnd(), BeamBroadcastReceiver.CENTRAL_SERVICE, BeamBroadcastReceiver.STOP_SERVICE, null);
+                        }
+                        else if (userRole.equals("Lecturer")) {
+                            startPIntent = getPIntentForServiceBroadcast(session.getTimeBegin(), BeamBroadcastReceiver.PERIPHERAL_SERVICE, BeamBroadcastReceiver.START_SERVICE, extras);
+                            stopPIntent = getPIntentForServiceBroadcast(session.getTimeEnd(), BeamBroadcastReceiver.PERIPHERAL_SERVICE, BeamBroadcastReceiver.STOP_SERVICE, null);
+                        }
+                        else {
+                            Log.d("MainFragment", "No user role.");
+                            Toast.makeText(getContext(), "No user role", Toast.LENGTH_SHORT).show();
+                            return;
+                        }
+
+                        if (startPIntent==null) {
+                            Log.d("MainFragment", "Start Intent Already Exists");
+                            continue;
+                        }
+                        if (stopPIntent==null) {
+                            Log.d("MainFragment", "Stop Intent Already Exists");
+                            continue;
+                        }
+
+                        Log.d("MainFragment", "Service Alarm posted: " + sessionBeginMillisecond);
+                        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.M) {
+                            alarmManager.setAndAllowWhileIdle(AlarmManager.RTC_WAKEUP, sessionBeginMillisecond, startPIntent);
+                            alarmManager.setAndAllowWhileIdle(AlarmManager.RTC_WAKEUP, sessionEndMillisecond, stopPIntent);
+                        }
+                        else {
+                            alarmManager.set(AlarmManager.RTC_WAKEUP, sessionBeginMillisecond, startPIntent);
+                            alarmManager.set(AlarmManager.RTC_WAKEUP, sessionEndMillisecond, stopPIntent);
+                        }
+                    }
+                    Toast.makeText(getContext(), "All alarms posted", Toast.LENGTH_SHORT).show();
+                }
+                catch (NullPointerException e) {
+                    Log.d("MainFragment", "Error posting Alarm");
+                }
+            }
+        });
     }
 
     /**
@@ -227,14 +195,9 @@ public class MainFragment extends Fragment {
         int sessionBeginHour = Integer.parseInt(sessionTime.substring(0, 2),10);
         int sessionBeginMinute = Integer.parseInt(sessionTime.substring(2),10);
 
-        /*
         calendar.set(Calendar.HOUR_OF_DAY, sessionBeginHour);
         calendar.set(Calendar.MINUTE, sessionBeginMinute);
         calendar.set(Calendar.SECOND, 0);
-
-         */
-        calendar.add(Calendar.SECOND, temp*30);
-        temp+=6;
 
         return calendar.getTimeInMillis();
     }
@@ -266,119 +229,5 @@ public class MainFragment extends Fragment {
         else {
             return null;
         }
-    }
-
-    public void addToDatabase(String date, Map<String, List<Session>> map) {
-        for (Map.Entry<String, List<Session>> entry : map.entrySet()) {
-            for (Session session : entry.getValue()) {
-                DatabaseReference ref = mDatabase.child("timetable").child(date).child(entry.getKey()).push();
-                session.setSessionID(ref.getKey());
-                ref.setValue(session);
-            }
-        }
-    }
-
-    public void generateTimetable(Calendar calendar) {
-        calendar.set(Calendar.DAY_OF_WEEK, Calendar.MONDAY);
-        List<Session> sessions;
-        Map<String, List<Session>> map;
-        String date;
-        map = new HashMap<>();
-        sessions = new ArrayList<>();
-        // MONDAY
-        map = new HashMap<>();
-
-        sessions = new ArrayList<>();
-        sessions.add(new Session("COMP1000", "Computing", "0900", "1100", "Unavailable"));
-        sessions.add(new Session("COMP1000", "Tutorial", "1600", "1800", "Unavailable"));
-        map.put("COMP1000", sessions);
-
-        sessions = new ArrayList<>();
-        sessions.add(new Session("COMP1002", "Computing", "1100", "1300", "Unavailable"));
-        sessions.add(new Session("COMP1002", "Computing", "1400", "1600", "Unavailable"));
-        map.put("COMP1002", sessions);
-
-        date = String.format("%04d%02d%02d", calendar.get(Calendar.YEAR), calendar.get(Calendar.MONTH)+1, calendar.get(Calendar.DAY_OF_MONTH));
-        addToDatabase(date, map);
-
-        // TUESDAY
-        calendar.add(Calendar.DATE, 1);
-        map = new HashMap<>();
-
-        sessions = new ArrayList<>();
-        sessions.add(new Session("COMP1000", "Computing", "1100", "1300", "Unavailable"));
-        map.put("COMP1000", sessions);
-
-        sessions = new ArrayList<>();
-        sessions.add(new Session("COMP1002", "Lecture", "1600", "1700", "Unavailable"));
-        map.put("COMP1002", sessions);
-
-        sessions = new ArrayList<>();
-        sessions.add(new Session("COMP1003", "Lecture", "1400", "1600", "Unavailable"));
-        map.put("COMP1003", sessions);
-
-        date = String.format("%04d%02d%02d", calendar.get(Calendar.YEAR), calendar.get(Calendar.MONTH)+1, calendar.get(Calendar.DAY_OF_MONTH));
-        addToDatabase(date, map);
-
-        // WEDNESDAY
-        calendar.add(Calendar.DATE, 1);
-        map = new HashMap<>();
-
-        sessions = new ArrayList<>();
-        sessions.add(new Session("COMP1001", "Lecture", "1400", "1600", "Unavailable"));
-        sessions.add(new Session("COMP1001", "Tutorial", "1600", "1700", "Unavailable"));
-        map.put("COMP1001", sessions);
-
-        sessions = new ArrayList<>();
-        sessions.add(new Session("COMP1002", "Lecture", "1100", "1300", "Unavailable"));
-        map.put("COMP1002", sessions);
-
-        date = String.format("%04d%02d%02d", calendar.get(Calendar.YEAR), calendar.get(Calendar.MONTH)+1, calendar.get(Calendar.DAY_OF_MONTH));
-        addToDatabase(date, map);
-
-        // THURSDAY
-        calendar.add(Calendar.DATE, 1);
-        map = new HashMap<>();
-
-        sessions = new ArrayList<>();
-        sessions.add(new Session("COMP1003", "Computing", "0900", "1100", "Unavailable"));
-        sessions.add(new Session("COMP1003", "Computing", "1100", "1300", "Unavailable"));
-        map.put("COMP1003", sessions);
-
-        date = String.format("%04d%02d%02d", calendar.get(Calendar.YEAR), calendar.get(Calendar.MONTH)+1, calendar.get(Calendar.DAY_OF_MONTH));
-        addToDatabase(date, map);
-
-        // FRIDAY
-        calendar.add(Calendar.DATE, 1);
-        map = new HashMap<>();
-
-        sessions = new ArrayList<>();
-        sessions.add(new Session("COMP1000", "Lecture", "1000", "1200", "Unavailable"));
-        map.put("COMP1000", sessions);
-
-        date = String.format("%04d%02d%02d", calendar.get(Calendar.YEAR), calendar.get(Calendar.MONTH)+1, calendar.get(Calendar.DAY_OF_MONTH));
-        addToDatabase(date, map);
-
-        // SATURDAY
-        calendar.add(Calendar.DATE, 1);
-        map = new HashMap<>();
-
-        sessions = new ArrayList<>();
-        sessions.add(new Session("MLAC1007", "Lecture", "1100", "1300", "Unavailable"));
-        map.put("MLAC1007", sessions);
-
-        date = String.format("%04d%02d%02d", calendar.get(Calendar.YEAR), calendar.get(Calendar.MONTH)+1, calendar.get(Calendar.DAY_OF_MONTH));
-        addToDatabase(date, map);
-
-        // SUNDAY
-        calendar.add(Calendar.DATE, 1);
-        map = new HashMap<>();
-
-        sessions = new ArrayList<>();
-        sessions.add(new Session("MLAC1048", "Seminar", "0900", "1100", "Unavailable"));
-        map.put("MLAC1048", sessions);
-
-        date = String.format("%04d%02d%02d", calendar.get(Calendar.YEAR), calendar.get(Calendar.MONTH)+1, calendar.get(Calendar.DAY_OF_MONTH));
-        addToDatabase(date, map);
     }
 }

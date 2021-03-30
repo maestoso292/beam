@@ -35,6 +35,8 @@ import java.util.TimeZone;
 public class BeamViewModel extends ViewModel {
     private final static String LOG_TAG = "BeamViewModel";
 
+    private boolean firstLoad;
+
     private FirebaseAuth mAuth;
     private FirebaseUser currentUser;
     private DatabaseReference mDatabase;
@@ -48,6 +50,7 @@ public class BeamViewModel extends ViewModel {
     private MutableLiveData<List<? extends Record>> userRecord;
 
     public BeamViewModel() {
+        firstLoad = true;
         currentUser = FirebaseAuth.getInstance().getCurrentUser();
         mDatabase = FirebaseDatabase.getInstance().getReference();
     }
@@ -70,6 +73,14 @@ public class BeamViewModel extends ViewModel {
         else if (role.equals("Lecturer")) {
             loadLecturerRecord();
         }
+    }
+
+    public void setFirstLoad(boolean firstLoad) {
+        this.firstLoad = firstLoad;
+    }
+
+    public boolean isFirstLoad() {
+        return firstLoad;
     }
 
     public void loadUser() {

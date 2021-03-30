@@ -19,6 +19,7 @@ import com.example.beam.R;
 import com.example.beam.models.BeamUser;
 import com.example.beam.models.TimeTable;
 import com.google.firebase.auth.FirebaseAuth;
+import com.google.firebase.auth.FirebaseUser;
 
 import java.util.ArrayList;
 import java.util.HashMap;
@@ -36,6 +37,7 @@ public class SplashFragment extends Fragment {
     private HashMap<View, Animator> anim2HashMap;
 
     private BeamViewModel beamViewModel;
+    private FirebaseAuth mAuth;
 
     public static SplashFragment newInstance(String param1, String param2) {
 
@@ -50,11 +52,11 @@ public class SplashFragment extends Fragment {
     public void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         beamViewModel = new ViewModelProvider(getActivity()).get(BeamViewModel.class);
+        mAuth = FirebaseAuth.getInstance();
     }
 
     @Override
-    public View onCreateView(LayoutInflater inflater, ViewGroup container,
-                             Bundle savedInstanceState) {
+    public View onCreateView(LayoutInflater inflater, ViewGroup container, Bundle savedInstanceState) {
         layoutView = inflater.inflate(R.layout.splash_fragment, container, false);
 
         anim1HashMap = new HashMap<>();
@@ -76,42 +78,6 @@ public class SplashFragment extends Fragment {
         for (Map.Entry<View, Animator> entry : anim2HashMap.entrySet()) {
             entry.getValue().setTarget(entry.getKey());
         }
-        /*
-        AnimatorSet animatorSet = new AnimatorSet();
-        animatorSet.playTogether(anim1HashMap.values());
-        animatorSet.start();
-
-         */
-        /*
-        animatorSet.addListener(new Animator.AnimatorListener() {
-            @Override
-            public void onAnimationStart(Animator animator) {
-
-            }
-
-            @Override
-            public void onAnimationEnd(Animator animator) {
-                if (FirebaseAuth.getInstance().getCurrentUser() != null) {
-                    NavHostFragment.findNavController(SplashFragment.this).popBackStack();
-                }
-                else {
-                    NavHostFragment.findNavController(SplashFragment.this).navigate(R.id.signin_fragment);
-                }
-            }
-
-            @Override
-            public void onAnimationCancel(Animator animator) {
-
-            }
-
-            @Override
-            public void onAnimationRepeat(Animator animator) {
-
-            }
-        });
-
-         */
-        // Inflate the layout for this fragment
         return layoutView;
     }
 
@@ -122,7 +88,8 @@ public class SplashFragment extends Fragment {
     @Override
     public void onResume() {
         super.onResume();
-        if (FirebaseAuth.getInstance().getCurrentUser() == null) {
+        FirebaseUser currentUser = mAuth.getCurrentUser();
+        if (currentUser == null) {
             AnimatorSet animatorSet = new AnimatorSet();
             List<Animator> animators = new ArrayList<>(anim1HashMap.values());
             animators.addAll(anim2HashMap.values());

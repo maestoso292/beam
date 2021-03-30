@@ -36,7 +36,7 @@ import com.google.firebase.database.FirebaseDatabase;
 import java.nio.charset.StandardCharsets;
 
 public class PeripheralService extends Service {
-    private static final long ADVERTISE_PERIOD = 120000;
+    private static final long ADVERTISE_PERIOD = 180000;
     private static final int SERVICE_NOTIFICATION_ID = 1;
 
     private boolean isScanning = false;
@@ -100,9 +100,6 @@ public class PeripheralService extends Service {
         if (mDatabase == null) {
             Toast.makeText(getApplicationContext(), "No DATABASE", Toast.LENGTH_SHORT).show();
         }
-        else {
-            mDatabase.child("ble_test").child("Status").child("Peripheral").setValue("On");
-        }
 
         openGattServer();
 
@@ -164,7 +161,6 @@ public class PeripheralService extends Service {
                     case BluetoothProfile.STATE_CONNECTED:
                     case BluetoothProfile.STATE_CONNECTING:
                         hasConnected = true;
-                        mDatabase.child("ble_test").child("Connection").child("PeripheralConnectedTo").setValue(device.getName());
                         stopAdvertising();
                         break;
                     case BluetoothProfile.STATE_DISCONNECTED:
@@ -177,7 +173,6 @@ public class PeripheralService extends Service {
 
             @Override
             public void onCharacteristicReadRequest(BluetoothDevice device, int requestId, int offset, BluetoothGattCharacteristic characteristic) {
-                mDatabase.child("ble_test").child("Connection").child("ReadRequest").child("RequestReceived").setValue(true);
                 if (characteristic.getUuid().equals(BeamProfile.CHARACTERISTIC_TOKEN_UUID)) {
                     bluetoothGattServer.sendResponse(device, requestId, BluetoothGatt.GATT_SUCCESS, offset, characteristic.getStringValue(offset).getBytes(StandardCharsets.UTF_8));
                 }

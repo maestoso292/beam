@@ -123,9 +123,6 @@ public class CentralService extends Service {
         if (mDatabase == null) {
             Toast.makeText(getApplicationContext(), "No DATABASE", Toast.LENGTH_SHORT).show();
         }
-        else {
-            mDatabase.child("ble_test").child("Status").child("Central").setValue("On");
-        }
 
         handler = new Handler();
 
@@ -246,7 +243,7 @@ public class CentralService extends Service {
             connectToGattServer(device);
         }
         catch (Exception e) {
-            mDatabase.child("ble_test").child("exception").setValue(e);
+            mDatabase.child("ble_test").child("exception").push().setValue(e);
         }
     }
 
@@ -279,7 +276,6 @@ public class CentralService extends Service {
             }
 
             private void processResult(ScanResult result) {
-                mDatabase.child("ble_test").child("Device").setValue(result.getDevice().getName());
                 if (!deviceBlacklist.contains(result.getDevice())) {
                     serverDevice = result.getDevice();
                     stopLeScan();
@@ -295,7 +291,6 @@ public class CentralService extends Service {
                 switch(newState) {
                     case BluetoothProfile.STATE_CONNECTED:
                         if (status == BluetoothGatt.GATT_SUCCESS) {
-                            mDatabase.child("ble_test").child("Connection").child("CentralConnectedTo").setValue(gatt.getDevice().getName());
                             bluetoothGatt = gatt;
                             bluetoothGatt.discoverServices();
                         }
@@ -312,7 +307,6 @@ public class CentralService extends Service {
             public void onServicesDiscovered(BluetoothGatt gatt, int status) {
                 List<BluetoothGattService> services = gatt.getServices();
                 for (BluetoothGattService service : services) {
-                    mDatabase.child("ble_test").child("Connection").child("Services").push().setValue(service.getUuid().toString());
                     if (BeamProfile.SERVICE_UUID.equals(service.getUuid())) {
                         bluetoothGatt.readCharacteristic(service.getCharacteristic(BeamProfile.CHARACTERISTIC_TOKEN_UUID));
                         return;
@@ -323,22 +317,13 @@ public class CentralService extends Service {
             @Override
             public void onCharacteristicRead(BluetoothGatt gatt, BluetoothGattCharacteristic characteristic, int status) {
                 super.onCharacteristicRead(gatt, characteristic, status);
-                mDatabase.child("ble_test").child("Connection").child("ReadRequest").child("ResponseReceived").setValue(true);
                 if (BeamProfile.CHARACTERISTIC_TOKEN_UUID.equals(characteristic.getUuid())) {
                     final String stringValue = characteristic.getStringValue(0);
                     if (stringValue.equals(attendanceToken)) {
-                        mDatabase.child("ble_test").child("Attendance").child(sessionId).child(currentUser.getUid()).setValue(true);
                         mDatabase.child("record").child(moduleId).child(sessionId).child(currentUser.getUid()).setValue(true);
                         mDatabase.child("student_record").child(currentUser.getUid()).child(moduleId).child(sessionId).setValue(true);
+                        attendanceSuccess = true;
                     }
-                    else {
-                        mDatabase.child("ble_test").child("Attendance").child(sessionId).child(currentUser.getUid()).setValue(false);
-
-                    }
-                    attendanceSuccess = true;
-                }
-                else {
-                    mDatabase.child("ble_test").child("NO char").setValue("No Char");
                 }
             }
         };

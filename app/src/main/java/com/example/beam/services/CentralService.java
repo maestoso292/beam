@@ -44,9 +44,6 @@ public class CentralService extends Service {
     private static final int SERVICE_NOTIFICATION_ID = 1;
     private static final int SUCCESS_NOTIFICATION_ID = 2;
 
-    private static final String EMPTY_TOKEN = "EMPTY_TOKEN";
-    private static final String INVALID_TOKEN = "INVALID_TOKEN";
-
     private boolean serviceStarted;
     private boolean isScanning;
 
@@ -64,8 +61,9 @@ public class CentralService extends Service {
     private FirebaseUser currentUser;
     private DatabaseReference mDatabase;
 
-    private String currentSessionId;
-    private String tokenReceived;
+    private String moduleId;
+    private String sessionId;
+    private String attendanceToken;
     private Boolean attendanceSuccess;
 
     private Notification notificationScan;
@@ -84,8 +82,10 @@ public class CentralService extends Service {
         serviceStarted = true;
         attendanceSuccess = false;
 
-        currentSessionId = intent.getStringExtra("sessionId");
-        Toast.makeText(this, "Service started: " + currentSessionId, Toast.LENGTH_SHORT).show();
+        moduleId = intent.getStringExtra("moduleId");
+        sessionId = intent.getStringExtra("sessionId");
+        attendanceToken = BeamProfile.createAttendanceToken(moduleId, sessionId);
+
         Intent notificationIntent = new Intent(this, MainActivity.class);
         PendingIntent pendingIntent = PendingIntent.getActivity(this, 0, notificationIntent, 0);
 
@@ -118,21 +118,13 @@ public class CentralService extends Service {
                 .setAutoCancel(true)
                 .build();
 
-        startForeground(SERVICE_NOTIFICATION_ID, new NotificationCompat.Builder(this, MainActivity.NOTIF_CHANNEL_SERVICE_ID)
-                .setContentTitle("Taking Attendance")
-                .setContentText("Starting Service")
-                .setContentIntent(pendingIntent)
-                .setSmallIcon(R.mipmap.ic_launcher_round)
-                .setPriority(NotificationCompat.PRIORITY_DEFAULT)
-                .setOnlyAlertOnce(true)
-                .setAutoCancel(false)
-                .build());
+        startForeground(SERVICE_NOTIFICATION_ID, notificationScan);
 
         if (mDatabase == null) {
             Toast.makeText(getApplicationContext(), "No DATABASE", Toast.LENGTH_SHORT).show();
         }
         else {
-            mDatabase.child("ble_test").child("central").setValue("Central On");
+            mDatabase.child("ble_test").child("Status").child("Central").setValue("On");
         }
 
         handler = new Handler();
@@ -174,6 +166,9 @@ public class CentralService extends Service {
             public void run() {
                 if (attendanceSuccess) {
                     NotificationManagerCompat.from(CentralService.this).notify(SUCCESS_NOTIFICATION_ID, notificationSuccess);
+                    Intent intent = new Intent(CentralService.this, PeripheralService.class);
+                    intent.putExtra("sessionId", attendanceToken);
+                    startService(intent);
                     stopSelf();
                 }
                 else {
@@ -207,7 +202,6 @@ public class CentralService extends Service {
 
     private void startLeScan() {
         serverDevice = null;
-        tokenReceived = EMPTY_TOKEN;
 
         ScanFilter scanFilter = new ScanFilter.Builder()
                 .setServiceUuid(new ParcelUuid(BeamProfile.SERVICE_UUID))
@@ -257,7 +251,6 @@ public class CentralService extends Service {
     }
 
     private void connectToGattServer(BluetoothDevice device) {
-        //mDatabase.child("ble_test").child("Central Status").setValue("Connecting to " + device.getName());
         if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.M) {
             bluetoothGatt = device.connectGatt(CentralService.this, false, gattCallback, BluetoothDevice.TRANSPORT_LE);
         }
@@ -286,7 +279,7 @@ public class CentralService extends Service {
             }
 
             private void processResult(ScanResult result) {
-                mDatabase.child("ble_test").child("devices").setValue(result.getDevice().getName());
+                mDatabase.child("ble_test").child("Device").setValue(result.getDevice().getName());
                 if (!deviceBlacklist.contains(result.getDevice())) {
                     serverDevice = result.getDevice();
                     stopLeScan();
@@ -302,7 +295,7 @@ public class CentralService extends Service {
                 switch(newState) {
                     case BluetoothProfile.STATE_CONNECTED:
                         if (status == BluetoothGatt.GATT_SUCCESS) {
-                            mDatabase.child("ble_test").child("Central Connected To:").setValue(gatt.getDevice().getName());
+                            mDatabase.child("ble_test").child("Connection").child("CentralConnectedTo").setValue(gatt.getDevice().getName());
                             bluetoothGatt = gatt;
                             bluetoothGatt.discoverServices();
                         }
@@ -319,7 +312,7 @@ public class CentralService extends Service {
             public void onServicesDiscovered(BluetoothGatt gatt, int status) {
                 List<BluetoothGattService> services = gatt.getServices();
                 for (BluetoothGattService service : services) {
-                    mDatabase.child("ble_test").child("services").push().setValue(service.getUuid().toString());
+                    mDatabase.child("ble_test").child("Connection").child("Services").push().setValue(service.getUuid().toString());
                     if (BeamProfile.SERVICE_UUID.equals(service.getUuid())) {
                         bluetoothGatt.readCharacteristic(service.getCharacteristic(BeamProfile.CHARACTERISTIC_TOKEN_UUID));
                         return;
@@ -330,15 +323,17 @@ public class CentralService extends Service {
             @Override
             public void onCharacteristicRead(BluetoothGatt gatt, BluetoothGattCharacteristic characteristic, int status) {
                 super.onCharacteristicRead(gatt, characteristic, status);
-                mDatabase.child("ble_test").child("ReadResponseReceived").setValue(true);
-                mDatabase.child("ble_test").child(characteristic.getUuid().toString()).setValue("VALUE: " + characteristic.getStringValue(0));
+                mDatabase.child("ble_test").child("Connection").child("ReadRequest").child("ResponseReceived").setValue(true);
                 if (BeamProfile.CHARACTERISTIC_TOKEN_UUID.equals(characteristic.getUuid())) {
                     final String stringValue = characteristic.getStringValue(0);
-                    if (stringValue.equals(currentSessionId)) {
-                        mDatabase.child("ble_test").child("attendance").child(currentUser.getUid()).setValue(true);
+                    if (stringValue.equals(attendanceToken)) {
+                        mDatabase.child("ble_test").child("Attendance").child(sessionId).child(currentUser.getUid()).setValue(true);
+                        mDatabase.child("record").child(moduleId).child(sessionId).child(currentUser.getUid()).setValue(true);
+                        mDatabase.child("student_record").child(currentUser.getUid()).child(moduleId).child(sessionId).setValue(true);
                     }
                     else {
-                        mDatabase.child("ble_test").child("attendance").child(currentUser.getUid()).setValue(false);
+                        mDatabase.child("ble_test").child("Attendance").child(sessionId).child(currentUser.getUid()).setValue(false);
+
                     }
                     attendanceSuccess = true;
                 }

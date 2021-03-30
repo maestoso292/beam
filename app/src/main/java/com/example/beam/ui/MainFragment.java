@@ -165,7 +165,8 @@ public class MainFragment extends Fragment {
                             long sessionEndMillisecond = getMillisecondForSessionTime(session.getTimeEnd());
 
                             Map<String, String> extras = new HashMap<>();
-                            extras.put("token", session.getSessionID());
+                            extras.put("moduleId", session.getModuleID());
+                            extras.put("sessionId", session.getSessionID());
 
                             PendingIntent startPIntent;
                             PendingIntent stopPIntent;

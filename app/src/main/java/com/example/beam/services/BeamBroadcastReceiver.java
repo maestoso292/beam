@@ -22,7 +22,8 @@ public class BeamBroadcastReceiver extends BroadcastReceiver {
         }
         final int SERVICE = intent.getIntExtra("service", -1);
         final int COMMAND = intent.getIntExtra("command", -1);
-        final String TOKEN = intent.getStringExtra("token");
+        final String MODULE_ID = intent.getStringExtra("moduleId");
+        final String SESSION_ID = intent.getStringExtra("sessionId");
 
         Intent serviceIntent;
 
@@ -40,8 +41,8 @@ public class BeamBroadcastReceiver extends BroadcastReceiver {
                 Toast.makeText(context, "broadcast failed", Toast.LENGTH_SHORT).show();
                 return;
         }
-
-        serviceIntent.putExtra("sessionId", TOKEN);
+        serviceIntent.putExtra("moduleId", MODULE_ID);
+        serviceIntent.putExtra("sessionId", SESSION_ID);
 
         // Stop or start the service
         switch (COMMAND) {

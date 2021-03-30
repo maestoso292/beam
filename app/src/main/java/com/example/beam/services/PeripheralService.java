@@ -29,12 +29,16 @@ import androidx.core.app.NotificationCompat;
 
 import com.example.beam.BeamProfile;
 import com.example.beam.MainActivity;
+import com.example.beam.R;
 import com.google.firebase.database.DatabaseReference;
 import com.google.firebase.database.FirebaseDatabase;
 
 import java.nio.charset.StandardCharsets;
 
 public class PeripheralService extends Service {
+    private static final long ADVERTISE_PERIOD = 120000;
+    private static final int SERVICE_NOTIFICATION_ID = 1;
+
     private boolean isScanning = false;
 
     private BluetoothManager bluetoothManager;
@@ -52,7 +56,7 @@ public class PeripheralService extends Service {
     private boolean hasConnected;
 
     private Handler handler = new Handler();
-    private String currentSessionId;
+    private String attendanceToken;
 
     @Override
     public int onStartCommand(Intent intent, int flags, int startId) {
@@ -61,10 +65,9 @@ public class PeripheralService extends Service {
         }
         serviceStarted = true;
 
-        currentSessionId = intent.getStringExtra("sessionId");
-        if (currentSessionId == null) {
-            currentSessionId = "Failed to get session ID";
-        }
+        String moduleId = intent.getStringExtra("moduleId");
+        String sessionId = intent.getStringExtra("sessionId");
+        attendanceToken = BeamProfile.createAttendanceToken(moduleId, sessionId);
 
         Intent notificationIntent = new Intent(this, MainActivity.class);
         PendingIntent pendingIntent = PendingIntent.getActivity(this, 0, notificationIntent, 0);
@@ -72,29 +75,33 @@ public class PeripheralService extends Service {
         Notification notification;
         if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
             notification = new NotificationCompat.Builder(this, MainActivity.NOTIF_CHANNEL_SERVICE_ID)
-                    .setContentTitle("Peripheral Service")
-                    .setContentInfo("Service is running")
+                    .setContentTitle("Advertising Tokens")
+                    .setContentText("Sending out attendance tokens to other devices...")
                     .setContentIntent(pendingIntent)
-                    .setTicker("IDK")
+                    .setSmallIcon(R.mipmap.ic_launcher_round)
                     .setPriority(NotificationCompat.PRIORITY_DEFAULT)
+                    .setOnlyAlertOnce(true)
+                    .setAutoCancel(false)
                     .build();
         }
         else {
             notification = new NotificationCompat.Builder(this)
-                    .setContentTitle("Peripheral Service")
-                    .setContentInfo("Service is running")
+                    .setContentTitle("Advertising Tokens")
+                    .setContentText("Sending out attendance tokens to other devices...")
                     .setContentIntent(pendingIntent)
-                    .setTicker("IDK")
+                    .setSmallIcon(R.mipmap.ic_launcher_round)
                     .setPriority(NotificationCompat.PRIORITY_DEFAULT)
+                    .setOnlyAlertOnce(true)
+                    .setAutoCancel(false)
                     .build();
         }
-        startForeground(1, notification);
+        startForeground(SERVICE_NOTIFICATION_ID, notification);
 
         if (mDatabase == null) {
             Toast.makeText(getApplicationContext(), "No DATABASE", Toast.LENGTH_SHORT).show();
         }
         else {
-            mDatabase.child("ble_test").child("peripheral").setValue("Peripheral On");
+            mDatabase.child("ble_test").child("Status").child("Peripheral").setValue("On");
         }
 
         openGattServer();
@@ -144,7 +151,7 @@ public class PeripheralService extends Service {
         initialiseGattServerCallback();
         bluetoothGattServer = bluetoothManager.openGattServer(this, bluetoothGattServerCallback);
         BluetoothGattService bluetoothGattService = BeamProfile.getBeamService();
-        bluetoothGattService.getCharacteristic(BeamProfile.CHARACTERISTIC_TOKEN_UUID).setValue(currentSessionId);
+        bluetoothGattService.getCharacteristic(BeamProfile.CHARACTERISTIC_TOKEN_UUID).setValue(attendanceToken);
         bluetoothGattServer.addService(bluetoothGattService);
     }
 
@@ -157,8 +164,7 @@ public class PeripheralService extends Service {
                     case BluetoothProfile.STATE_CONNECTED:
                     case BluetoothProfile.STATE_CONNECTING:
                         hasConnected = true;
-                        mDatabase.child("ble_test").child("CONNECTED").setValue(true);
-                        mDatabase.child("ble_test").child("Central").setValue(device.getName());
+                        mDatabase.child("ble_test").child("Connection").child("PeripheralConnectedTo").setValue(device.getName());
                         stopAdvertising();
                         break;
                     case BluetoothProfile.STATE_DISCONNECTED:
@@ -171,7 +177,7 @@ public class PeripheralService extends Service {
 
             @Override
             public void onCharacteristicReadRequest(BluetoothDevice device, int requestId, int offset, BluetoothGattCharacteristic characteristic) {
-                mDatabase.child("ble_test").child("ReadRequestReceived").setValue(true);
+                mDatabase.child("ble_test").child("Connection").child("ReadRequest").child("RequestReceived").setValue(true);
                 if (characteristic.getUuid().equals(BeamProfile.CHARACTERISTIC_TOKEN_UUID)) {
                     bluetoothGattServer.sendResponse(device, requestId, BluetoothGatt.GATT_SUCCESS, offset, characteristic.getStringValue(offset).getBytes(StandardCharsets.UTF_8));
                 }
@@ -226,7 +232,7 @@ public class PeripheralService extends Service {
             public void run() {
                 if (hasConnected) {
                     hasConnected = false;
-                    handler.postDelayed(this::run, 60000);
+                    handler.postDelayed(this::run, ADVERTISE_PERIOD);
                 }
                 else {
                     Toast.makeText(PeripheralService.this, "No connection over the past minute", Toast.LENGTH_SHORT).show();
@@ -234,7 +240,7 @@ public class PeripheralService extends Service {
                 }
             }
         };
-        handler.postDelayed(runnableStartAdvertising,60000);
+        handler.postDelayed(runnableStartAdvertising,ADVERTISE_PERIOD);
     }
 
     private void stopAdvertising() {

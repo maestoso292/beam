@@ -99,7 +99,7 @@ public class BeamViewModel extends ViewModel {
         mDatabase.child("users").child(currentUser.getUid()).addValueEventListener(new ValueEventListener() {
             @Override
             public void onDataChange(@NonNull DataSnapshot snapshot) {
-                if (snapshot.child("role").getValue(String.class).equals("Student")) {
+                if (snapshot.child("Role").getValue(String.class).equals("Student")) {
                     userDetails.setValue(snapshot.getValue(Student.class));
                 }
                 else {
@@ -259,7 +259,7 @@ public class BeamViewModel extends ViewModel {
     public MutableLiveData<List<Session>> getUserModuleSessions(String moduleCode) {
         try {
             final ArrayList<Session> list = new ArrayList<>();
-            mDatabase.child("modules_session").child(moduleCode).addListenerForSingleValueEvent(new ValueEventListener() {
+            mDatabase.child("module_session").child(moduleCode).addListenerForSingleValueEvent(new ValueEventListener() {
                 @Override
                 public void onDataChange(@NonNull DataSnapshot snapshot) {
                     GenericTypeIndicator<Map<String, Session>> t = new GenericTypeIndicator<Map<String, Session>>() {};

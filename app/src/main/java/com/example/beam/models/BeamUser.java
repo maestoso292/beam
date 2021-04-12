@@ -6,7 +6,7 @@ public abstract class BeamUser {
     private String email;
     private String firstName;
     private String lastName;
-    private String role;
+    private String Role;
     private Map<String, String> modules;
 
     public BeamUser() {}
@@ -15,7 +15,7 @@ public abstract class BeamUser {
         this.email = email;
         this.firstName = firstName;
         this.lastName = lastName;
-        this.role = role;
+        this.Role = role;
         this.modules = modules;
     }
 
@@ -25,7 +25,7 @@ public abstract class BeamUser {
                 "email='" + email + '\'' +
                 ", firstName='" + firstName + '\'' +
                 ", lastName='" + lastName + '\'' +
-                ", role='" + role + '\'' +
+                ", role='" + Role + '\'' +
                 ", modules=" + modules +
                 '}';
     }
@@ -55,11 +55,11 @@ public abstract class BeamUser {
     }
 
     public String getRole() {
-        return role;
+        return Role;
     }
 
     public void setRole(String role) {
-        this.role = role;
+        this.Role = role;
     }
 
     public Map<String, String> getModules() {

@@ -52,8 +52,6 @@ public class MainFragment extends Fragment {
 
     private AlarmManager alarmManager;
 
-    private boolean firstLoad;
-
     @Override
     public void onCreate(@Nullable Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
@@ -127,28 +125,28 @@ public class MainFragment extends Fragment {
                     List<Session> sessions = timeTable.getDailyTimetable(date);
                     Log.d("MainFragment", "Sessions Size: " + sessions.size());
                     for (Session session : sessions) {
-                        if (currentTime.compareTo(session.getTimeBegin()) > 0) {
+                        if (currentTime.compareTo(session.getTime_begin()) > 0) {
                             Log.d("MainFragment", "Current time > session time");
                             continue;
                         }
 
-                        long sessionBeginMillisecond = getMillisecondForSessionTime(session.getTimeBegin());
-                        long sessionEndMillisecond = getMillisecondForSessionTime(session.getTimeEnd());
+                        long sessionBeginMillisecond = getMillisecondForSessionTime(session.getTime_begin());
+                        long sessionEndMillisecond = getMillisecondForSessionTime(session.getTime_end());
 
                         Map<String, String> extras = new HashMap<>();
-                        extras.put("moduleId", session.getModuleID());
-                        extras.put("sessionId", session.getSessionID());
+                        extras.put("moduleId", session.getModule_id());
+                        extras.put("sessionId", session.getSession_id());
 
                         PendingIntent startPIntent;
                         PendingIntent stopPIntent;
                         String userRole = beamViewModel.getUserDetails().getValue().getRole();
                         if (userRole.equals("Student")) {
-                            startPIntent = getPIntentForServiceBroadcast(session.getTimeBegin(), BeamBroadcastReceiver.CENTRAL_SERVICE, BeamBroadcastReceiver.START_SERVICE, extras);
-                            stopPIntent = getPIntentForServiceBroadcast(session.getTimeEnd(), BeamBroadcastReceiver.CENTRAL_SERVICE, BeamBroadcastReceiver.STOP_SERVICE, null);
+                            startPIntent = getPIntentForServiceBroadcast(session.getTime_begin(), BeamBroadcastReceiver.CENTRAL_SERVICE, BeamBroadcastReceiver.START_SERVICE, extras);
+                            stopPIntent = getPIntentForServiceBroadcast(session.getTime_end(), BeamBroadcastReceiver.CENTRAL_SERVICE, BeamBroadcastReceiver.STOP_SERVICE, null);
                         }
                         else if (userRole.equals("Lecturer")) {
-                            startPIntent = getPIntentForServiceBroadcast(session.getTimeBegin(), BeamBroadcastReceiver.PERIPHERAL_SERVICE, BeamBroadcastReceiver.START_SERVICE, extras);
-                            stopPIntent = getPIntentForServiceBroadcast(session.getTimeEnd(), BeamBroadcastReceiver.PERIPHERAL_SERVICE, BeamBroadcastReceiver.STOP_SERVICE, null);
+                            startPIntent = getPIntentForServiceBroadcast(session.getTime_begin(), BeamBroadcastReceiver.PERIPHERAL_SERVICE, BeamBroadcastReceiver.START_SERVICE, extras);
+                            stopPIntent = getPIntentForServiceBroadcast(session.getTime_end(), BeamBroadcastReceiver.PERIPHERAL_SERVICE, BeamBroadcastReceiver.STOP_SERVICE, null);
                         }
                         else {
                             Log.d("MainFragment", "No user role.");
@@ -175,7 +173,7 @@ public class MainFragment extends Fragment {
                             alarmManager.set(AlarmManager.RTC_WAKEUP, sessionEndMillisecond, stopPIntent);
                         }
                     }
-                    Toast.makeText(getContext(), "All alarms posted", Toast.LENGTH_SHORT).show();
+                    Toast.makeText(getContext(), "All session alarms set", Toast.LENGTH_SHORT).show();
                 }
                 catch (NullPointerException e) {
                     Log.d("MainFragment", "Error posting Alarm");

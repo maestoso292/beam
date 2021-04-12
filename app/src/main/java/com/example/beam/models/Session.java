@@ -1,62 +1,62 @@
 package com.example.beam.models;
 
 public class Session implements Comparable<Session> {
-    private String moduleID;
-    private String sessionID;
+    private String module_id;
+    private String session_id;
     private String sessionType;
-    private String timeBegin;
-    private String timeEnd;
+    private String time_begin;
+    private String time_end;
     private String status;
 
     public Session() {}
 
-    public Session(String moduleID, String sessionID, String sessionType, String timeBegin, String timeEnd, String status) {
-        this.moduleID = moduleID;
-        this.sessionID = sessionID;
+    public Session(String module_id, String session_id, String sessionType, String time_begin, String time_end, String status) {
+        this.module_id = module_id;
+        this.session_id = session_id;
         this.sessionType = sessionType;
-        this.timeBegin = timeBegin;
-        this.timeEnd = timeEnd;
+        this.time_begin = time_begin;
+        this.time_end = time_end;
         this.status = status;
     }
 
-    public Session(String moduleID, String sessionType, String timeBegin, String timeEnd, String status) {
-        this.moduleID = moduleID;
+    public Session(String module_id, String sessionType, String time_begin, String time_end, String status) {
+        this.module_id = module_id;
         this.sessionType = sessionType;
-        this.timeBegin = timeBegin;
-        this.timeEnd = timeEnd;
+        this.time_begin = time_begin;
+        this.time_end = time_end;
         this.status = status;
     }
 
     @Override
     public String toString() {
         return "Session{" +
-                "moduleCode='" + moduleID + '\'' +
+                "moduleCode='" + module_id + '\'' +
                 ", sessionType='" + sessionType + '\'' +
-                ", timeBegin='" + timeBegin + '\'' +
-                ", timeEnd='" + timeEnd + '\'' +
+                ", timeBegin='" + time_begin + '\'' +
+                ", timeEnd='" + time_end + '\'' +
                 ", status='" + status + '\'' +
                 '}';
     }
 
     @Override
     public int compareTo(Session session) {
-        return this.timeBegin.compareTo(session.timeBegin);
+        return this.time_begin.compareTo(session.time_begin);
     }
 
-    public String getModuleID() {
-        return moduleID;
+    public String getModule_id() {
+        return module_id;
     }
 
-    public void setModuleID(String moduleID) {
-        this.moduleID = moduleID;
+    public void setModule_id(String module_id) {
+        this.module_id = module_id;
     }
 
-    public String getSessionID() {
-        return sessionID;
+    public String getSession_id() {
+        return session_id;
     }
 
-    public void setSessionID(String sessionID) {
-        this.sessionID = sessionID;
+    public void setSession_id(String session_id) {
+        this.session_id = session_id;
     }
 
     public String getSessionType() {
@@ -67,20 +67,20 @@ public class Session implements Comparable<Session> {
         this.sessionType = sessionType;
     }
 
-    public String getTimeBegin() {
-        return timeBegin;
+    public String getTime_begin() {
+        return time_begin;
     }
 
-    public void setTimeBegin(String timeBegin) {
-        this.timeBegin = timeBegin;
+    public void setTime_begin(String time_begin) {
+        this.time_begin = time_begin;
     }
 
-    public String getTimeEnd() {
-        return timeEnd;
+    public String getTime_end() {
+        return time_end;
     }
 
-    public void setTimeEnd(String timeEnd) {
-        this.timeEnd = timeEnd;
+    public void setTime_end(String time_end) {
+        this.time_end = time_end;
     }
 
     public String getStatus() {

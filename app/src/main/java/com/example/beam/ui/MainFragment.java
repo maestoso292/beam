@@ -32,8 +32,12 @@ import com.google.android.material.tabs.TabLayout;
 import com.google.android.material.tabs.TabLayoutMediator;
 import com.google.firebase.auth.FirebaseAuth;
 import com.google.firebase.auth.FirebaseUser;
+import com.google.firebase.database.DataSnapshot;
+import com.google.firebase.database.DatabaseError;
 import com.google.firebase.database.DatabaseReference;
 import com.google.firebase.database.FirebaseDatabase;
+import com.google.firebase.database.GenericTypeIndicator;
+import com.google.firebase.database.ValueEventListener;
 
 import java.util.ArrayList;
 import java.util.Calendar;
@@ -75,6 +79,30 @@ public class MainFragment extends Fragment {
         beamViewModel = new ViewModelProvider(getActivity()).get(BeamViewModel.class);
     }
 
+    public void addModuleSession() {
+        mDatabase.child("timetable").addListenerForSingleValueEvent(new ValueEventListener() {
+            @Override
+            public void onDataChange(@NonNull DataSnapshot snapshot) {
+                GenericTypeIndicator<Map<String, Map<String, Map<String, Session>>>> t = new GenericTypeIndicator<Map<String, Map<String, Map<String, Session>>>>(){};
+                Map<String, Map<String, Map<String, Session>>> map = snapshot.getValue(t);
+                for (Map.Entry<String, Map<String, Map<String, Session>>> entry : map.entrySet()) {
+                    for (Map.Entry<String, Map<String, Session>> moduleMap : entry.getValue().entrySet()) {
+                        for (Map.Entry<String, Session> sessionMap : moduleMap.getValue().entrySet()) {
+                            sessionMap.getValue().setSession_id(sessionMap.getKey());
+                            sessionMap.getValue().setModule_id(moduleMap.getKey());
+                            mDatabase.child("module_session").child(moduleMap.getKey()).child(sessionMap.getKey()).setValue(sessionMap.getValue());
+                        }
+                    }
+                }
+            }
+
+            @Override
+            public void onCancelled(@NonNull DatabaseError error) {
+
+            }
+        });
+    }
+
     @Nullable
     @Override
     public View onCreateView(@NonNull LayoutInflater inflater, @Nullable ViewGroup container, @Nullable Bundle savedInstanceState) {
@@ -111,29 +139,32 @@ public class MainFragment extends Fragment {
     @Override
     public void onResume() {
         super.onResume();
-
+        /*
         if (!firstLoad) {
             firstLoad = true;
             navController.navigate(R.id.splashFragment);
         }
 
+         */
+
         currentUser = mAuth.getCurrentUser();
         if (currentUser == null) {
             navController.navigate(R.id.splashFragment);
 
-
+        }
+        else {
             /*
             // Manual timetable insertion
             Calendar calendar;
             // 12 weeks of class
-            for (int i = 0; i < 12; i++) {
+            for (int i = 0; i < 2; i++) {
                 calendar = Calendar.getInstance(TimeZone.getTimeZone("Asia/Kuala_Lumpur"));
                 calendar.add(Calendar.WEEK_OF_YEAR, i);
                 generateTimetable(calendar);
             }
+            addModuleSession();
+
              */
-        }
-        else {
             pager.setCurrentItem(0);
 
             Calendar calendar = Calendar.getInstance(TimeZone.getTimeZone("Asia/Kuala_Lumpur"));
@@ -156,28 +187,28 @@ public class MainFragment extends Fragment {
                         for (Session session : sessions) {
 
 
-                            if (currentTime.compareTo(session.getTimeBegin()) > 0) {
+                            if (currentTime.compareTo(session.getTime_begin()) > 0) {
                                 Log.d("MainFragment", "Current time > session time");
                                 //continue;
                             }
 
-                            long sessionBeginMillisecond = getMillisecondForSessionTime(session.getTimeBegin());
-                            long sessionEndMillisecond = getMillisecondForSessionTime(session.getTimeEnd());
+                            long sessionBeginMillisecond = getMillisecondForSessionTime(session.getTime_begin());
+                            long sessionEndMillisecond = getMillisecondForSessionTime(session.getTime_end());
 
                             Map<String, String> extras = new HashMap<>();
-                            extras.put("moduleId", session.getModuleID());
-                            extras.put("sessionId", session.getSessionID());
+                            extras.put("moduleId", session.getModule_id());
+                            extras.put("sessionId", session.getSession_id());
 
                             PendingIntent startPIntent;
                             PendingIntent stopPIntent;
                             String userRole = beamViewModel.getUserDetails().getValue().getRole();
                             if (userRole.equals("Student")) {
-                                startPIntent = getPIntentForServiceBroadcast(session.getTimeBegin(), BeamBroadcastReceiver.CENTRAL_SERVICE, BeamBroadcastReceiver.START_SERVICE, extras);
-                                stopPIntent = getPIntentForServiceBroadcast(session.getTimeEnd(), BeamBroadcastReceiver.CENTRAL_SERVICE, BeamBroadcastReceiver.STOP_SERVICE, null);
+                                startPIntent = getPIntentForServiceBroadcast(session.getTime_begin(), BeamBroadcastReceiver.CENTRAL_SERVICE, BeamBroadcastReceiver.START_SERVICE, extras);
+                                stopPIntent = getPIntentForServiceBroadcast(session.getTime_end(), BeamBroadcastReceiver.CENTRAL_SERVICE, BeamBroadcastReceiver.STOP_SERVICE, null);
                             }
                             else if (userRole.equals("Lecturer")) {
-                                startPIntent = getPIntentForServiceBroadcast(session.getTimeBegin(), BeamBroadcastReceiver.PERIPHERAL_SERVICE, BeamBroadcastReceiver.START_SERVICE, extras);
-                                stopPIntent = getPIntentForServiceBroadcast(session.getTimeEnd(), BeamBroadcastReceiver.PERIPHERAL_SERVICE, BeamBroadcastReceiver.STOP_SERVICE, null);
+                                startPIntent = getPIntentForServiceBroadcast(session.getTime_begin(), BeamBroadcastReceiver.PERIPHERAL_SERVICE, BeamBroadcastReceiver.START_SERVICE, extras);
+                                stopPIntent = getPIntentForServiceBroadcast(session.getTime_end(), BeamBroadcastReceiver.PERIPHERAL_SERVICE, BeamBroadcastReceiver.STOP_SERVICE, null);
                             }
                             else {
                                 Log.d("MainFragment", "No user role.");
@@ -272,7 +303,8 @@ public class MainFragment extends Fragment {
         for (Map.Entry<String, List<Session>> entry : map.entrySet()) {
             for (Session session : entry.getValue()) {
                 DatabaseReference ref = mDatabase.child("timetable").child(date).child(entry.getKey()).push();
-                session.setSessionID(ref.getKey());
+                mDatabase.child("module_session").child(session.getModule_id()).child(ref.getKey()).setValue(session);
+                session.setSession_id(ref.getKey());
                 ref.setValue(session);
             }
         }
@@ -289,14 +321,14 @@ public class MainFragment extends Fragment {
         map = new HashMap<>();
 
         sessions = new ArrayList<>();
-        sessions.add(new Session("COMP1000", "Computing", "0900", "1100", "Unavailable"));
-        sessions.add(new Session("COMP1000", "Tutorial", "1600", "1800", "Unavailable"));
-        map.put("COMP1000", sessions);
+        sessions.add(new Session("ENG1001", "Lab", "0900", "1100", "Unavailable"));
+        sessions.add(new Session("ENG1001", "Tutorial", "1600", "1800", "Unavailable"));
+        map.put("ENG1001", sessions);
 
         sessions = new ArrayList<>();
-        sessions.add(new Session("COMP1002", "Computing", "1100", "1300", "Unavailable"));
-        sessions.add(new Session("COMP1002", "Computing", "1400", "1600", "Unavailable"));
-        map.put("COMP1002", sessions);
+        sessions.add(new Session("ENG1003", "Lab", "1100", "1300", "Unavailable"));
+        sessions.add(new Session("ENG1003", "Lab", "1400", "1600", "Unavailable"));
+        map.put("ENG1003", sessions);
 
         date = String.format("%04d%02d%02d", calendar.get(Calendar.YEAR), calendar.get(Calendar.MONTH)+1, calendar.get(Calendar.DAY_OF_MONTH));
         addToDatabase(date, map);
@@ -306,16 +338,16 @@ public class MainFragment extends Fragment {
         map = new HashMap<>();
 
         sessions = new ArrayList<>();
-        sessions.add(new Session("COMP1000", "Computing", "1100", "1300", "Unavailable"));
-        map.put("COMP1000", sessions);
+        sessions.add(new Session("ENG1001", "Lab", "1100", "1300", "Unavailable"));
+        map.put("ENG1001", sessions);
 
         sessions = new ArrayList<>();
-        sessions.add(new Session("COMP1002", "Lecture", "1600", "1700", "Unavailable"));
-        map.put("COMP1002", sessions);
+        sessions.add(new Session("ENG1003", "Lecture", "1600", "1700", "Unavailable"));
+        map.put("ENG1003", sessions);
 
         sessions = new ArrayList<>();
-        sessions.add(new Session("COMP1003", "Lecture", "1400", "1600", "Unavailable"));
-        map.put("COMP1003", sessions);
+        sessions.add(new Session("ENG1004", "Lecture", "1400", "1600", "Unavailable"));
+        map.put("ENG1004", sessions);
 
         date = String.format("%04d%02d%02d", calendar.get(Calendar.YEAR), calendar.get(Calendar.MONTH)+1, calendar.get(Calendar.DAY_OF_MONTH));
         addToDatabase(date, map);
@@ -325,13 +357,13 @@ public class MainFragment extends Fragment {
         map = new HashMap<>();
 
         sessions = new ArrayList<>();
-        sessions.add(new Session("COMP1001", "Lecture", "1400", "1600", "Unavailable"));
-        sessions.add(new Session("COMP1001", "Tutorial", "1600", "1700", "Unavailable"));
-        map.put("COMP1001", sessions);
+        sessions.add(new Session("ENG1002", "Lecture", "1400", "1600", "Unavailable"));
+        sessions.add(new Session("ENG1002", "Tutorial", "1600", "1700", "Unavailable"));
+        map.put("ENG1002", sessions);
 
         sessions = new ArrayList<>();
-        sessions.add(new Session("COMP1002", "Lecture", "1100", "1300", "Unavailable"));
-        map.put("COMP1002", sessions);
+        sessions.add(new Session("ENG1003", "Lecture", "1100", "1300", "Unavailable"));
+        map.put("ENG1003", sessions);
 
         date = String.format("%04d%02d%02d", calendar.get(Calendar.YEAR), calendar.get(Calendar.MONTH)+1, calendar.get(Calendar.DAY_OF_MONTH));
         addToDatabase(date, map);
@@ -341,9 +373,9 @@ public class MainFragment extends Fragment {
         map = new HashMap<>();
 
         sessions = new ArrayList<>();
-        sessions.add(new Session("COMP1003", "Computing", "0900", "1100", "Unavailable"));
-        sessions.add(new Session("COMP1003", "Computing", "1100", "1300", "Unavailable"));
-        map.put("COMP1003", sessions);
+        sessions.add(new Session("ENG1004", "Lab", "0900", "1100", "Unavailable"));
+        sessions.add(new Session("ENG1004", "Lab", "1100", "1300", "Unavailable"));
+        map.put("ENG1004", sessions);
 
         date = String.format("%04d%02d%02d", calendar.get(Calendar.YEAR), calendar.get(Calendar.MONTH)+1, calendar.get(Calendar.DAY_OF_MONTH));
         addToDatabase(date, map);
@@ -353,8 +385,8 @@ public class MainFragment extends Fragment {
         map = new HashMap<>();
 
         sessions = new ArrayList<>();
-        sessions.add(new Session("COMP1000", "Lecture", "1000", "1200", "Unavailable"));
-        map.put("COMP1000", sessions);
+        sessions.add(new Session("ENG1001", "Lecture", "1000", "1200", "Unavailable"));
+        map.put("ENG1001", sessions);
 
         date = String.format("%04d%02d%02d", calendar.get(Calendar.YEAR), calendar.get(Calendar.MONTH)+1, calendar.get(Calendar.DAY_OF_MONTH));
         addToDatabase(date, map);

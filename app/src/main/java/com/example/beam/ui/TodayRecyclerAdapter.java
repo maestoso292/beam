@@ -82,10 +82,10 @@ public class TodayRecyclerAdapter extends RecyclerView.Adapter<TodayRecyclerAdap
     public void onBindViewHolder(@NonNull TodayRecyclerViewHolder holder, int position) {
         holder.status.setImageResource(ThreadLocalRandom.current().nextInt(0, 2) == 0 ? R.drawable.ic_done : R.drawable.ic_clear);
         Session currentSession = userDailyTimetable.get(position);
-        holder.moduleCode.setText(currentSession.getModuleID());
-        holder.moduleName.setText(userModules.get(currentSession.getModuleID()));
+        holder.moduleCode.setText(currentSession.getModule_id());
+        holder.moduleName.setText(userModules.get(currentSession.getModule_id()));
         holder.sessionType.setText(currentSession.getSessionType());
-        String time = "" + currentSession.getTimeBegin() + " - " + currentSession.getTimeEnd();
+        String time = "" + currentSession.getTime_begin() + " - " + currentSession.getTime_end();
         holder.sessionTime.setText(time);
     }
 

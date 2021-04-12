@@ -56,9 +56,7 @@ public class MainFragment extends Fragment {
     public void onCreate(@Nullable Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         navController = NavHostFragment.findNavController(this);
-
         mAuth = FirebaseAuth.getInstance();
-
         beamViewModel = new ViewModelProvider(getActivity()).get(BeamViewModel.class);
     }
 
@@ -110,7 +108,53 @@ public class MainFragment extends Fragment {
         Calendar calendar = Calendar.getInstance(TimeZone.getTimeZone("Asia/Kuala_Lumpur"));
         final String date = String.format(Locale.ENGLISH, "%04d%02d%02d", calendar.get(Calendar.YEAR), calendar.get(Calendar.MONTH)+1, calendar.get(Calendar.DAY_OF_MONTH));
         final String currentTime = String.format(Locale.ENGLISH, "%02d%02d", calendar.get(Calendar.HOUR_OF_DAY), calendar.get(Calendar.MINUTE));
+        /*
+        beamViewModel.getUserModules().observe(getViewLifecycleOwner(), new Observer<Map<String, String>>() {
+            @Override
+            public void onChanged(Map<String, String> stringStringMap) {
+                if (stringStringMap.size() != 6) {
+                    return;
+                }
 
+                DatabaseReference mDatabase = FirebaseDatabase.getInstance().getReference();
+                mDatabase.child("timetable").addListenerForSingleValueEvent(new ValueEventListener() {
+                    @Override
+                    public void onDataChange(@NonNull DataSnapshot snapshot) {
+                        GenericTypeIndicator<Map<String, Map<String, Map<String, Session>>>> t = new GenericTypeIndicator<Map<String, Map<String, Map<String, Session>>>>() {};
+                        Map<String, Map<String, Map<String, Session>>> map = snapshot.getValue(t);
+                        for (Map<String, Map<String, Session>> dateEntry : map.values()) {
+                            for (Map.Entry<String, Map<String, Session>> moduleEntry : dateEntry.entrySet()) {
+                                for (Map.Entry<String, Session> sessionEntry : moduleEntry.getValue().entrySet()) {
+                                    Session session = sessionEntry.getValue();
+                                    if (session.getStatus().equals("Closed")) {
+                                        boolean bool = ThreadLocalRandom.current().nextBoolean();
+                                        if (stringStringMap.keySet().contains(moduleEntry.getKey())) {
+                                            mDatabase.child("module_record")
+                                                    .child(moduleEntry.getKey())
+                                                    .child(sessionEntry.getKey())
+                                                    .child(currentUser.getUid())
+                                                    .setValue(bool);
+                                            mDatabase.child("student_record")
+                                                    .child(currentUser.getUid())
+                                                    .child(moduleEntry.getKey())
+                                                    .child(sessionEntry.getKey())
+                                                    .setValue(bool);
+                                        }
+                                    }
+                                }
+                            }
+                        }
+                    }
+
+                    @Override
+                    public void onCancelled(@NonNull DatabaseError error) {
+
+                    }
+                });
+            }
+        });
+
+         */
         beamViewModel.getUserWeeklyTimetable().observe(getViewLifecycleOwner(), new Observer<TimeTable>() {
             @Override
             public void onChanged(TimeTable timeTable) {
@@ -146,7 +190,7 @@ public class MainFragment extends Fragment {
                         }
                         else if (userRole.equals("Lecturer")) {
                             startPIntent = getPIntentForServiceBroadcast(session.getTime_begin(), BeamBroadcastReceiver.PERIPHERAL_SERVICE, BeamBroadcastReceiver.START_SERVICE, extras);
-                            stopPIntent = getPIntentForServiceBroadcast(session.getTime_end(), BeamBroadcastReceiver.PERIPHERAL_SERVICE, BeamBroadcastReceiver.STOP_SERVICE, null);
+                            stopPIntent = getPIntentForServiceBroadcast(session.getTime_end(), BeamBroadcastReceiver.CLOSE_ATTENDANCE, BeamBroadcastReceiver.CLOSE_ATTENDANCE, null);
                         }
                         else {
                             Log.d("MainFragment", "No user role.");

@@ -18,6 +18,26 @@ public class LecturerModuleRecord implements Record {
         return moduleID;
     }
 
+    @Override
+    public int getNumTotal() {
+        return 0;
+    }
+
+    @Override
+    public int getNumAttended() {
+        return 0;
+    }
+
+    @Override
+    public int getPercentageAttended() {
+        return 0;
+    }
+
+    @Override
+    public String getPercentageString() {
+        return null;
+    }
+
     public void setModuleID(String moduleID) {
         this.moduleID = moduleID;
     }

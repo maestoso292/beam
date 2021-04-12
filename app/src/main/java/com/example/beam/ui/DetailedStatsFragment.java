@@ -30,6 +30,10 @@ public class DetailedStatsFragment extends Fragment {
     private String moduleName;
     private String userRole;
 
+    private TextView percentage;
+    private TextView numAttended;
+    private TextView numTotal;
+
     private RecyclerView recyclerView;
     private DetailedStatsRecyclerAdapter recyclerAdapter;
 
@@ -49,6 +53,10 @@ public class DetailedStatsFragment extends Fragment {
     @Override
     public void onViewCreated(@NonNull View view, @Nullable Bundle savedInstanceState) {
         super.onViewCreated(view, savedInstanceState);
+
+        percentage = view.findViewById(R.id.detailed_stats_percentage);
+        numAttended = view.findViewById(R.id.detailed_stats_attended);
+        numTotal = view.findViewById(R.id.detailed_stats_total);
 
         moduleCode = DetailedStatsFragmentArgs.fromBundle(getArguments()).getModuleCode();
         moduleName = DetailedStatsFragmentArgs.fromBundle(getArguments()).getModuleName();
@@ -80,6 +88,11 @@ public class DetailedStatsFragment extends Fragment {
             public void onChanged(List<? extends Record> records) {
                 for (Record record : records) {
                     if (record.getModuleID().equals(moduleCode)) {
+
+                        numTotal.setText("" + record.getNumTotal());
+                        numAttended.setText("" + record.getNumAttended());
+                        percentage.setText(record.getPercentageString());
+
                         recyclerAdapter.setUserRecords(record);
                         recyclerAdapter.notifyDataSetChanged();
                         break;
@@ -96,4 +109,8 @@ public class DetailedStatsFragment extends Fragment {
             }
         });
     }
+
+
+
+
 }

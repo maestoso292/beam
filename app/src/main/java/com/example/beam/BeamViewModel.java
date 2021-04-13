@@ -35,7 +35,7 @@ import java.util.TimeZone;
 public class BeamViewModel extends ViewModel {
     private final static String LOG_TAG = "BeamViewModel";
 
-    private boolean firstLoad;
+    private boolean firstLoad = true;
 
     private FirebaseAuth mAuth;
     private FirebaseUser currentUser;
@@ -50,7 +50,6 @@ public class BeamViewModel extends ViewModel {
     private MutableLiveData<List<? extends Record>> userRecord;
 
     public BeamViewModel() {
-        firstLoad = true;
         currentUser = FirebaseAuth.getInstance().getCurrentUser();
         mDatabase = FirebaseDatabase.getInstance().getReference();
     }
@@ -125,6 +124,7 @@ public class BeamViewModel extends ViewModel {
     private void loadUserModules() {
         List<String> moduleCodes = new ArrayList<>(userDetails.getValue().getModules().values());
         Collections.sort(moduleCodes);
+        Log.d(LOG_TAG, "Module Codes: " + moduleCodes);
         userModules.setValue(new LinkedHashMap<String, String>());
         final Map<String, String> tempModules = new LinkedHashMap<>();
         for (final String moduleCode : moduleCodes) {
@@ -195,8 +195,10 @@ public class BeamViewModel extends ViewModel {
                     // Module, SessionID, Session
                     Map<String, Map<String, Session>> moduleSessionsMap = snapshot.getValue(t);
                     List<Session> sessions = new ArrayList<>();
-                    for (Map<String, Session> map : moduleSessionsMap.values()) {
-                        sessions.addAll(map.values());
+                    for (Map.Entry<String, Map<String,Session>> entry : moduleSessionsMap.entrySet()) {
+                        if (userDetails.getValue().getModules().values().contains(entry.getKey())) {
+                            sessions.addAll(entry.getValue().values());
+                        }
                     }
                     Collections.sort(sessions);
                     timeTable.putDailyTimetable(date, sessions);

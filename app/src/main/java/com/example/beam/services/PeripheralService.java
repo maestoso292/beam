@@ -23,7 +23,6 @@ import android.os.IBinder;
 import android.os.ParcelUuid;
 import android.widget.Toast;
 
-import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
 import androidx.annotation.RequiresApi;
 import androidx.core.app.NotificationCompat;
@@ -33,20 +32,10 @@ import com.example.beam.MainActivity;
 import com.example.beam.R;
 import com.google.firebase.auth.FirebaseAuth;
 import com.google.firebase.auth.FirebaseUser;
-import com.google.firebase.database.DataSnapshot;
-import com.google.firebase.database.DatabaseError;
 import com.google.firebase.database.DatabaseReference;
 import com.google.firebase.database.FirebaseDatabase;
-import com.google.firebase.database.GenericTypeIndicator;
-import com.google.firebase.database.ValueEventListener;
 
 import java.nio.charset.StandardCharsets;
-import java.util.ArrayList;
-import java.util.Calendar;
-import java.util.List;
-import java.util.Locale;
-import java.util.Map;
-import java.util.TimeZone;
 
 public class PeripheralService extends Service {
     private static final long ADVERTISE_PERIOD = 180000;
@@ -89,8 +78,8 @@ public class PeripheralService extends Service {
         Notification notification;
         if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
             notification = new NotificationCompat.Builder(this, MainActivity.NOTIF_CHANNEL_SERVICE_ID)
-                    .setContentTitle("Advertising Tokens")
-                    .setContentText("Sending out attendance tokens to other devices...")
+                    .setContentTitle("Advertising tokens for " + moduleId)
+                    .setContentText("Sending out tokens to other devices...")
                     .setContentIntent(pendingIntent)
                     .setSmallIcon(R.mipmap.ic_launcher_round)
                     .setPriority(NotificationCompat.PRIORITY_DEFAULT)
@@ -100,8 +89,8 @@ public class PeripheralService extends Service {
         }
         else {
             notification = new NotificationCompat.Builder(this)
-                    .setContentTitle("Advertising Tokens")
-                    .setContentText("Sending out attendance tokens to other devices...")
+                    .setContentTitle("Advertising tokens for " + moduleId)
+                    .setContentText("Sending out tokens to other devices...")
                     .setContentIntent(pendingIntent)
                     .setSmallIcon(R.mipmap.ic_launcher_round)
                     .setPriority(NotificationCompat.PRIORITY_DEFAULT)
@@ -113,50 +102,6 @@ public class PeripheralService extends Service {
 
         if (mDatabase == null) {
             Toast.makeText(getApplicationContext(), "No DATABASE", Toast.LENGTH_SHORT).show();
-        }
-
-        Calendar calendar = Calendar.getInstance(TimeZone.getTimeZone("Asia/Kuala_Lumpur"));
-        final String date = String.format(Locale.ENGLISH, "%04d%02d%02d", calendar.get(Calendar.YEAR), calendar.get(Calendar.MONTH)+1, calendar.get(Calendar.DAY_OF_MONTH));
-        mDatabase.child("timetable")
-                .child(date)
-                .child(moduleId)
-                .child(sessionId)
-                .child("status")
-                .setValue("Open");
-
-        mDatabase.child("module_session")
-                .child(moduleId)
-                .child(sessionId)
-                .child("status")
-                .setValue("Open");
-
-        if (mDatabase.child("users").child(currentUser.getUid()).child("Role").equals("Lecturer")) {
-            List<String> studentList = new ArrayList<>();
-            mDatabase.child("modules").child(moduleId).addListenerForSingleValueEvent(new ValueEventListener() {
-                @Override
-                public void onDataChange(@NonNull DataSnapshot snapshot) {
-                    GenericTypeIndicator<Map<String, String>> t = new GenericTypeIndicator<Map<String, String>>() {};
-                    Map<String, String> studentMap = snapshot.getValue(t);
-                    for (String student : studentMap.values()) {
-                        mDatabase.child("module_record")
-                                .child(moduleId)
-                                .child(sessionId)
-                                .child(student)
-                                .setValue(false);
-
-                        mDatabase.child("student_record")
-                                .child(currentUser.getUid())
-                                .child(moduleId)
-                                .child(sessionId)
-                                .setValue(false);
-                    }
-                }
-
-                @Override
-                public void onCancelled(@NonNull DatabaseError error) {
-
-                }
-            });
         }
 
         openGattServer();

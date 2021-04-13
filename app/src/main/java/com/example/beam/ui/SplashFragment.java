@@ -5,6 +5,7 @@ import android.animation.AnimatorInflater;
 import android.animation.AnimatorSet;
 import android.app.Activity;
 import android.os.Bundle;
+import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
@@ -169,6 +170,7 @@ public class SplashFragment extends Fragment {
                 }
             });
             beamViewModel.loadUser();
+            Log.d("Splash Fragment", "Loading User Details");
             beamViewModel.getUserDetails().observe(getViewLifecycleOwner(), new Observer<BeamUser>() {
                 @Override
                 public void onChanged(BeamUser beamUser) {

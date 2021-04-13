@@ -22,7 +22,8 @@ public class BeamBroadcastReceiver extends BroadcastReceiver {
     public static final int START_SERVICE = 0;
     public static final int STOP_SERVICE = 1;
 
-    public static final int CLOSE_ATTENDANCE = -1;
+    public static final int OPEN_ATTENDANCE = 2;
+    public static final int CLOSE_ATTENDANCE = 3;
 
     @Override
     public void onReceive(Context context, Intent intent) {
@@ -46,6 +47,9 @@ public class BeamBroadcastReceiver extends BroadcastReceiver {
             case CENTRAL_SERVICE:
                 serviceIntent = new Intent(context, CentralService.class);
                 break;
+            case OPEN_ATTENDANCE:
+                serviceIntent = new Intent(context, OpenAttendanceService.class);
+                break;
             case CLOSE_ATTENDANCE:
                 DatabaseReference mDatabase = FirebaseDatabase.getInstance().getReference();
                 Calendar calendar = Calendar.getInstance(TimeZone.getTimeZone("Asia/Kuala_Lumpur"));
@@ -61,7 +65,7 @@ public class BeamBroadcastReceiver extends BroadcastReceiver {
                         .child(MODULE_ID)
                         .child(SESSION_ID)
                         .child("status")
-                        .setValue("Open");
+                        .setValue("Closed");
                 return;
             default:
                 Toast.makeText(context, "broadcast failed", Toast.LENGTH_SHORT).show();
@@ -73,11 +77,9 @@ public class BeamBroadcastReceiver extends BroadcastReceiver {
         // Stop or start the service
         switch (COMMAND) {
             case START_SERVICE:
-                Toast.makeText(context, "broadcast to start service", Toast.LENGTH_SHORT).show();
                 context.startService(serviceIntent);
                 break;
             case STOP_SERVICE:
-                Toast.makeText(context, "broadcast to stop service", Toast.LENGTH_SHORT).show();
                 context.stopService(serviceIntent);
                 break;
             default:

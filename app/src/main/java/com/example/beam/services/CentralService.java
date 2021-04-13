@@ -164,7 +164,8 @@ public class CentralService extends Service {
                 if (attendanceSuccess) {
                     NotificationManagerCompat.from(CentralService.this).notify(SUCCESS_NOTIFICATION_ID, notificationSuccess);
                     Intent intent = new Intent(CentralService.this, PeripheralService.class);
-                    intent.putExtra("sessionId", attendanceToken);
+                    intent.putExtra("sessionId", sessionId);
+                    intent.putExtra("moduleId", moduleId);
                     startService(intent);
                     stopSelf();
                 }
@@ -320,7 +321,7 @@ public class CentralService extends Service {
                 if (BeamProfile.CHARACTERISTIC_TOKEN_UUID.equals(characteristic.getUuid())) {
                     final String stringValue = characteristic.getStringValue(0);
                     if (stringValue.equals(attendanceToken)) {
-                        mDatabase.child("record").child(moduleId).child(sessionId).child(currentUser.getUid()).setValue(true);
+                        mDatabase.child("module_record").child(moduleId).child(sessionId).child(currentUser.getUid()).setValue(true);
                         mDatabase.child("student_record").child(currentUser.getUid()).child(moduleId).child(sessionId).setValue(true);
                         attendanceSuccess = true;
                     }

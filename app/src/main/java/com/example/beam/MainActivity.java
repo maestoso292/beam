@@ -58,9 +58,6 @@ public class MainActivity extends AppCompatActivity {
         mAuth = FirebaseAuth.getInstance();
         currentUser = mAuth.getCurrentUser();
         beamViewModel = new ViewModelProvider(this).get(BeamViewModel.class);
-        if (currentUser != null) {
-            beamViewModel.loadUser();
-        }
     }
 
     @RequiresApi(api = Build.VERSION_CODES.O)

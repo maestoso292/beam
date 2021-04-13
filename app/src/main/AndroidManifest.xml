@@ -40,6 +40,15 @@
             android:exported="false"
             android:foregroundServiceType="location"/>
 
+        <service
+            android:name=".services.OpenAttendanceService"
+            android:exported="false"
+            android:foregroundServiceType="location"/>
+        <service
+            android:name=".services.CloseAttendanceService"
+            android:exported="false"
+            android:foregroundServiceType="location"/>
+
         <activity android:name=".MainActivity">
             <intent-filter>
                 <action android:name="android.intent.action.MAIN" />

@@ -38,7 +38,7 @@ import com.google.firebase.database.FirebaseDatabase;
 import java.nio.charset.StandardCharsets;
 
 public class PeripheralService extends Service {
-    private static final long ADVERTISE_PERIOD = 180000;
+    private static final long ADVERTISE_PERIOD = 300000;
     private static final int SERVICE_NOTIFICATION_ID = 1;
 
     private boolean isScanning = false;

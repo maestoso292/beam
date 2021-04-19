@@ -24,7 +24,7 @@ import java.util.Locale;
 import java.util.TimeZone;
 
 public class CloseAttendanceService extends Service {
-    private static final String LOG_TAG = "OpenAttdService";
+    private static final String LOG_TAG = "CloseAttdService";
     private static final int SERVICE_NOTIFICATION_ID = 1;
 
     DatabaseReference mDatabase;

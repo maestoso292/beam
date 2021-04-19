@@ -18,7 +18,6 @@ import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
-import java.util.concurrent.ThreadLocalRandom;
 
 public class TodayRecyclerAdapter extends RecyclerView.Adapter<TodayRecyclerAdapter.TodayRecyclerViewHolder> {
     private static final String LOG_TAG = "TodayFragmentAdapter";
@@ -80,7 +79,7 @@ public class TodayRecyclerAdapter extends RecyclerView.Adapter<TodayRecyclerAdap
 
     @Override
     public void onBindViewHolder(@NonNull TodayRecyclerViewHolder holder, int position) {
-        holder.status.setImageResource(ThreadLocalRandom.current().nextInt(0, 2) == 0 ? R.drawable.ic_done : R.drawable.ic_clear);
+        //holder.status.setImageResource(ThreadLocalRandom.current().nextInt(0, 2) == 0 ? R.drawable.ic_done : R.drawable.ic_clear);
         Session currentSession = userDailyTimetable.get(position);
         holder.moduleCode.setText(currentSession.getModule_id());
         holder.moduleName.setText(userModules.get(currentSession.getModule_id()));

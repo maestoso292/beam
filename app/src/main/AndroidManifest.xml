@@ -28,6 +28,7 @@
                 <action android:name="android.intent.action." />
                 <action android:name="android.intent.action.BOOT_COMPLETED" />
                 <action android:name="android.intent.action.LOCKED_BOOT_COMPLETED" />
+                <action android:name="beam.intent.action.service"/>
             </intent-filter>
         </receiver>
         <service
@@ -36,6 +37,15 @@
             android:foregroundServiceType="location"/>
         <service
             android:name=".services.CentralService"
+            android:exported="false"
+            android:foregroundServiceType="location"/>
+
+        <service
+            android:name=".services.OpenAttendanceService"
+            android:exported="false"
+            android:foregroundServiceType="location"/>
+        <service
+            android:name=".services.CloseAttendanceService"
             android:exported="false"
             android:foregroundServiceType="location"/>
 

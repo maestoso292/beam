@@ -42,4 +42,49 @@ public class StudentModuleRecord implements Comparable<StudentModuleRecord>, Rec
     public int compareTo(StudentModuleRecord studentModuleRecord) {
         return moduleID.compareTo(studentModuleRecord.getModuleID());
     }
+
+    @Override
+    public int getNumTotal() {
+        try {
+            return attendance.size();
+        }
+        catch (NullPointerException e) {
+            return 0;
+        }
+    }
+
+    @Override
+    public int getNumAttended() {
+        int num = 0;
+        try {
+            for (Boolean bool : attendance.values()) {
+                num += bool ? 1 : 0;
+            }
+        }
+        catch (NullPointerException e) {
+            num = 0;
+        }
+        return num;
+    }
+
+    @Override
+    public int getPercentageAttended() {
+        if (getNumTotal() <= 0) {
+            return -1;
+        }
+        else {
+            return (int) Math.round(getNumAttended() / ((double) getNumTotal()) * 100);
+        }
+    }
+
+    @Override
+    public String getPercentageString() {
+        int percentage = getPercentageAttended();
+        if (percentage < 0) {
+            return "N/A";
+        }
+        else {
+            return "" + percentage + "%";
+        }
+    }
 }

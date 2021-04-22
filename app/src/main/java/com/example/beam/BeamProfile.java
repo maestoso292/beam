@@ -31,4 +31,8 @@ public class BeamProfile {
         tokenDescriptor.setValue("Token to be passed between devices for attendance confirmation".getBytes());
         return tokenDescriptor;
     }
+
+    public static final String createAttendanceToken(String moduleId, String sessionId) {
+        return moduleId + " " + sessionId;
+    }
 }

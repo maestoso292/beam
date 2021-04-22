@@ -35,6 +35,8 @@ import java.util.TimeZone;
 public class BeamViewModel extends ViewModel {
     private final static String LOG_TAG = "BeamViewModel";
 
+    private boolean firstLoad = true;
+
     private FirebaseAuth mAuth;
     private FirebaseUser currentUser;
     private DatabaseReference mDatabase;
@@ -72,6 +74,14 @@ public class BeamViewModel extends ViewModel {
         }
     }
 
+    public void setFirstLoad(boolean firstLoad) {
+        this.firstLoad = firstLoad;
+    }
+
+    public boolean isFirstLoad() {
+        return firstLoad;
+    }
+
     public void loadUser() {
         currentUser = FirebaseAuth.getInstance().getCurrentUser();
     }
@@ -88,7 +98,7 @@ public class BeamViewModel extends ViewModel {
         mDatabase.child("users").child(currentUser.getUid()).addValueEventListener(new ValueEventListener() {
             @Override
             public void onDataChange(@NonNull DataSnapshot snapshot) {
-                if (snapshot.child("role").getValue(String.class).equals("Student")) {
+                if (snapshot.child("Role").getValue(String.class).equals("Student")) {
                     userDetails.setValue(snapshot.getValue(Student.class));
                 }
                 else {
@@ -114,6 +124,7 @@ public class BeamViewModel extends ViewModel {
     private void loadUserModules() {
         List<String> moduleCodes = new ArrayList<>(userDetails.getValue().getModules().values());
         Collections.sort(moduleCodes);
+        Log.d(LOG_TAG, "Module Codes: " + moduleCodes);
         userModules.setValue(new LinkedHashMap<String, String>());
         final Map<String, String> tempModules = new LinkedHashMap<>();
         for (final String moduleCode : moduleCodes) {
@@ -142,7 +153,6 @@ public class BeamViewModel extends ViewModel {
 
     private void loadUserWeeklyTimetable() {
         final TimeTable timeTable = new TimeTable(new HashMap<String, List<Session>>());
-        userWeeklyTimetable.setValue(timeTable);
 
         List<String> dates = new ArrayList<>();
         Calendar calendar = Calendar.getInstance(TimeZone.getTimeZone("Asia/Kuala_Lumpur"));
@@ -172,8 +182,10 @@ public class BeamViewModel extends ViewModel {
 
 
         for (int i = 0; i < 7; i++) {
-            dates.add(String.format("%04d%02d%02d", calendar.get(Calendar.YEAR), calendar.get(Calendar.MONTH)+1, calendar.get(Calendar.DAY_OF_MONTH)+i));
+            dates.add(String.format("%04d%02d%02d", calendar.get(Calendar.YEAR), calendar.get(Calendar.MONTH)+1, calendar.get(Calendar.DAY_OF_MONTH)));
+            calendar.add(Calendar.DAY_OF_MONTH, 1);
         }
+        Log.d(LOG_TAG, dates.toString());
 
         for (final String date : dates) {
             mDatabase.child("timetable").child(date).addValueEventListener(new ValueEventListener() {
@@ -183,13 +195,18 @@ public class BeamViewModel extends ViewModel {
                     // Module, SessionID, Session
                     Map<String, Map<String, Session>> moduleSessionsMap = snapshot.getValue(t);
                     List<Session> sessions = new ArrayList<>();
-                    for (Map<String, Session> map : moduleSessionsMap.values()) {
-                        sessions.addAll(map.values());
+                    for (Map.Entry<String, Map<String,Session>> entry : moduleSessionsMap.entrySet()) {
+                        if (userDetails.getValue().getModules().values().contains(entry.getKey())) {
+                            sessions.addAll(entry.getValue().values());
+                        }
                     }
                     Collections.sort(sessions);
                     timeTable.putDailyTimetable(date, sessions);
-                    userWeeklyTimetable.setValue(timeTable);
-                    Log.d(LOG_TAG, "User Daily Timetable " + date + ": " + userWeeklyTimetable.getValue().getDailyTimetable(date));
+                    if (timeTable.getWeeklyTimetable().size() == 7) {
+                        userWeeklyTimetable.setValue(timeTable);
+                    }
+                    Log.d(LOG_TAG, "User Daily Timetable " + date + ": " + timeTable.getDailyTimetable(date));
+                    Log.d(LOG_TAG, "Timetable Size: " + timeTable.getWeeklyTimetable().size());
                 }
 
                 @Override
@@ -244,7 +261,7 @@ public class BeamViewModel extends ViewModel {
     public MutableLiveData<List<Session>> getUserModuleSessions(String moduleCode) {
         try {
             final ArrayList<Session> list = new ArrayList<>();
-            mDatabase.child("modules_session").child(moduleCode).addListenerForSingleValueEvent(new ValueEventListener() {
+            mDatabase.child("module_session").child(moduleCode).addListenerForSingleValueEvent(new ValueEventListener() {
                 @Override
                 public void onDataChange(@NonNull DataSnapshot snapshot) {
                     GenericTypeIndicator<Map<String, Session>> t = new GenericTypeIndicator<Map<String, Session>>() {};

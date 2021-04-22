@@ -58,11 +58,11 @@ public class DetailedStatsRecyclerAdapter extends RecyclerView.Adapter<DetailedS
         try {
             Session session = userModuleSessions.get(position);
             holder.sessionType.setText(session.getSessionType());
-            String time = session.getTimeBegin().concat(" - ").concat(session.getTimeEnd());
+            String time = session.getTime_begin().concat(" - ").concat(session.getTime_end());
             holder.sessionTime.setText(time);
 
-            if (((StudentModuleRecord) userRecords).getAttendance().containsKey(session.getSessionID())) {
-                boolean bool = ((StudentModuleRecord) userRecords).getAttendance().get(session.getSessionID());
+            if (((StudentModuleRecord) userRecords).getAttendance().containsKey(session.getSession_id())) {
+                boolean bool = ((StudentModuleRecord) userRecords).getAttendance().get(session.getSession_id());
                 if (bool) {
                     holder.status.setImageResource(R.drawable.ic_done);
                     holder.status.setVisibility(View.VISIBLE);
@@ -74,7 +74,7 @@ public class DetailedStatsRecyclerAdapter extends RecyclerView.Adapter<DetailedS
             }
             else {
                 holder.status.setVisibility(View.INVISIBLE);
-                Log.d(LOG_TAG, session.getSessionID() + " : " + userRecords.toString());
+                Log.d(LOG_TAG, session.getSession_id() + " : " + userRecords.toString());
             }
         }
         catch (NullPointerException exception) {
@@ -120,7 +120,7 @@ public class DetailedStatsRecyclerAdapter extends RecyclerView.Adapter<DetailedS
         Collections.sort(this.userModuleSessions, new Comparator<Session>() {
             @Override
             public int compare(Session session, Session t1) {
-                return session.getSessionID().compareTo(t1.getSessionID());
+                return session.getSession_id().compareTo(t1.getSession_id());
             }
         });
     }

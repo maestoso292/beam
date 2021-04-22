@@ -70,18 +70,17 @@ public class LoginFragment extends Fragment {
             Toast.makeText(getContext(), "Email and password required", Toast.LENGTH_SHORT).show();
         }
         else {
-            mAuth.signInWithEmailAndPassword(username, password)
-                    .addOnCompleteListener(new OnCompleteListener<AuthResult>() {
-                        @Override
-                        public void onComplete(@NonNull Task<AuthResult> task) {
-                            if (task.isSuccessful()) {
-                                NavHostFragment.findNavController(LoginFragment.this).popBackStack();
-                            }
-                            else {
-                                Toast.makeText(getContext(), "Error: " + task.getException(),Toast.LENGTH_SHORT).show();
-                            }
-                        }
-                    });
+            mAuth.signInWithEmailAndPassword(username, password).addOnCompleteListener(new OnCompleteListener<AuthResult>() {
+                @Override
+                public void onComplete(@NonNull Task<AuthResult> task) {
+                    if (task.isSuccessful()) {
+                        NavHostFragment.findNavController(LoginFragment.this).popBackStack();
+                    }
+                    else {
+                        Toast.makeText(getContext(), "Error: " + task.getException(),Toast.LENGTH_SHORT).show();
+                    }
+                }
+            });
         }
     }
 
@@ -89,8 +88,5 @@ public class LoginFragment extends Fragment {
     public void onResume() {
         super.onResume();
         currentUser = mAuth.getCurrentUser();
-        if (currentUser!=null) {
-            NavHostFragment.findNavController(this).popBackStack();
-        }
     }
 }

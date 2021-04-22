@@ -24,9 +24,11 @@ import android.widget.Toast;
 
 import androidx.annotation.Nullable;
 import androidx.core.app.NotificationCompat;
+import androidx.core.app.NotificationManagerCompat;
 
 import com.example.beam.BeamProfile;
 import com.example.beam.MainActivity;
+import com.example.beam.R;
 import com.google.firebase.auth.FirebaseAuth;
 import com.google.firebase.auth.FirebaseUser;
 import com.google.firebase.database.DatabaseReference;
@@ -37,11 +39,15 @@ import java.util.Collections;
 import java.util.List;
 
 public class CentralService extends Service {
-    private static final long SCAN_PERIOD = 60000;
+    private static final long SCAN_PERIOD = 15000;
+    private static final long IDLE_PERIOD = 10000;
+    private static final int SERVICE_NOTIFICATION_ID = 1;
+    private static final int SUCCESS_NOTIFICATION_ID = 2;
 
     private boolean serviceStarted;
-    private boolean isScanning = false;
-    private Handler handler = new Handler();
+    private boolean isScanning;
+
+    private Handler handler;
 
     private BluetoothManager bluetoothManager;
     private BluetoothAdapter bluetoothAdapter;
@@ -49,59 +55,81 @@ public class CentralService extends Service {
     private BluetoothGattCallback gattCallback;
     private ScanCallback scanCallback;
 
-    private ArrayList<BluetoothDevice> deviceList = new ArrayList<>();
+    private BluetoothDevice serverDevice;
+    private ArrayList<BluetoothDevice> deviceBlacklist;
 
     private FirebaseUser currentUser;
     private DatabaseReference mDatabase;
 
-    private String currentSessionId;
-    private String tokenReceived;
-    private boolean attendanceSuccess;
+    private String moduleId;
+    private String sessionId;
+    private String attendanceToken;
+    private Boolean attendanceSuccess;
+
+    private Notification notificationScan;
+    private Notification notificationIdle;
+    private Notification notificationSuccess;
+
+    private Runnable runnableStopScan;
+    private Runnable runnableStartScan;
 
     @Override
     public int onStartCommand(Intent intent, int flags, int startId) {
         if (serviceStarted) {
             return START_STICKY;
         }
-        serviceStarted = true;
 
-        currentSessionId = intent.getStringExtra("sessionId");
-        Toast.makeText(this, "Service started: " + currentSessionId, Toast.LENGTH_SHORT).show();
+        serviceStarted = true;
+        attendanceSuccess = false;
+
+        moduleId = intent.getStringExtra("moduleId");
+        sessionId = intent.getStringExtra("sessionId");
+        attendanceToken = BeamProfile.createAttendanceToken(moduleId, sessionId);
+
         Intent notificationIntent = new Intent(this, MainActivity.class);
         PendingIntent pendingIntent = PendingIntent.getActivity(this, 0, notificationIntent, 0);
 
-        Notification notification;
-        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
-            notification = new NotificationCompat.Builder(this, MainActivity.NOTIFICATION_CHANNEL_ID)
-                    .setContentTitle("Central Service")
-                    .setContentInfo("Service is running")
-                    .setContentIntent(pendingIntent)
-                    .setTicker("IDK")
-                    .setPriority(NotificationCompat.PRIORITY_DEFAULT)
-                    .build();
-        }
-        else {
-            notification = new NotificationCompat.Builder(this)
-                    .setContentTitle("Central Service")
-                    .setContentInfo("Service is running")
-                    .setContentIntent(pendingIntent)
-                    .setTicker("IDK")
-                    .setPriority(NotificationCompat.PRIORITY_DEFAULT)
-                    .build();
-        }
-        startForeground(1, notification);
+        notificationScan = new NotificationCompat.Builder(this, MainActivity.NOTIF_CHANNEL_SERVICE_ID)
+                .setContentTitle("Taking Attendance")
+                .setContentText("Scanning for nearby devices...")
+                .setContentIntent(pendingIntent)
+                .setSmallIcon(R.mipmap.ic_launcher_round)
+                .setPriority(NotificationCompat.PRIORITY_DEFAULT)
+                .setOnlyAlertOnce(true)
+                .setAutoCancel(false)
+                .build();
+
+        notificationIdle = new NotificationCompat.Builder(this, MainActivity.NOTIF_CHANNEL_SERVICE_ID)
+                .setContentTitle("Taking Attendance")
+                .setContentText("Waiting to start scan...")
+                .setContentIntent(pendingIntent)
+                .setSmallIcon(R.mipmap.ic_launcher_round)
+                .setPriority(NotificationCompat.PRIORITY_DEFAULT)
+                .setOnlyAlertOnce(true)
+                .setAutoCancel(false)
+                .build();
+
+        notificationSuccess = new NotificationCompat.Builder(this, MainActivity.NOTIF_CHANNEL_MISC_ID)
+                .setContentTitle("Attendance Taken")
+                .setContentIntent(pendingIntent)
+                .setSmallIcon(R.mipmap.ic_launcher_round)
+                .setPriority(NotificationCompat.PRIORITY_DEFAULT)
+                .setOnlyAlertOnce(true)
+                .setAutoCancel(true)
+                .build();
+
+        startForeground(SERVICE_NOTIFICATION_ID, notificationScan);
 
         if (mDatabase == null) {
             Toast.makeText(getApplicationContext(), "No DATABASE", Toast.LENGTH_SHORT).show();
         }
-        else {
-            mDatabase.child("ble_test").child("central").setValue("Central On");
-        }
+
+        handler = new Handler();
 
         initialiseScanCallback();
         initialiseGattCallback();
 
-        //startLeScan();
+        startLeScan();
 
         return START_STICKY;
     }
@@ -109,13 +137,45 @@ public class CentralService extends Service {
     @Override
     public void onCreate() {
         super.onCreate();
+
         serviceStarted = false;
+        isScanning = false;
+
+        deviceBlacklist = new ArrayList<>();
 
         currentUser = FirebaseAuth.getInstance().getCurrentUser();
         mDatabase = FirebaseDatabase.getInstance().getReference();
 
         bluetoothManager = (BluetoothManager) getSystemService(BLUETOOTH_SERVICE);
         bluetoothAdapter = bluetoothManager.getAdapter();
+
+        runnableStopScan = new Runnable() {
+            @Override
+            public void run() {
+                if (isScanning) {
+                    stopLeScan();
+                }
+            }
+        };
+
+        runnableStartScan = new Runnable() {
+            @Override
+            public void run() {
+                if (attendanceSuccess) {
+                    NotificationManagerCompat.from(CentralService.this).notify(SUCCESS_NOTIFICATION_ID, notificationSuccess);
+                    Intent intent = new Intent(CentralService.this, PeripheralService.class);
+                    intent.putExtra("sessionId", sessionId);
+                    intent.putExtra("moduleId", moduleId);
+                    startService(intent);
+                    stopSelf();
+                }
+                else {
+                    if (!isScanning) {
+                        startLeScan();
+                    }
+                }
+            }
+        };
     }
 
     @Nullable
@@ -128,15 +188,19 @@ public class CentralService extends Service {
     public void onDestroy() {
         if (isScanning) {
             isScanning = false;
-            stopLeScan();
+            bluetoothAdapter.getBluetoothLeScanner().stopScan(scanCallback);
         }
         if (bluetoothGatt != null) {
             bluetoothGatt.close();
         }
+        handler.removeCallbacksAndMessages(null);
+        NotificationManagerCompat.from(this).cancel(SERVICE_NOTIFICATION_ID);
         super.onDestroy();
     }
 
     private void startLeScan() {
+        serverDevice = null;
+
         ScanFilter scanFilter = new ScanFilter.Builder()
                 .setServiceUuid(new ParcelUuid(BeamProfile.SERVICE_UUID))
                 .build();
@@ -144,86 +208,47 @@ public class CentralService extends Service {
         ScanSettings settings = new ScanSettings.Builder()
                 .setScanMode(ScanSettings.SCAN_MODE_BALANCED)
                 .build();
-        // TODO Scanning frequency should follow startLeScan18()
-        if (!isScanning) {
-            // Stops scanning after a pre-defined scan period.
-            handler.postDelayed(new Runnable() {
-                @Override
-                public void run() {
-                    if (isScanning) {
-                        isScanning = false;
-                        stopLeScan();
-                    }
-                }
-            }, SCAN_PERIOD);
 
-            isScanning = true;
-            bluetoothAdapter.getBluetoothLeScanner()
-                    .startScan(Collections.singletonList(scanFilter), settings, scanCallback);
-            Toast.makeText(getApplicationContext(), "Scan started", Toast.LENGTH_SHORT).show();
-        }
-        else {
-            isScanning = false;
-            stopLeScan();
-        }
+        // Update notification to show that device is scanning for BLE devices
+        NotificationManagerCompat.from(this).notify(SERVICE_NOTIFICATION_ID, notificationScan);
+        // Stops scanning after a pre-defined scan period.
+        handler.postDelayed(runnableStopScan, SCAN_PERIOD);
+        // Start scanning
+        isScanning = true;
+        bluetoothAdapter.getBluetoothLeScanner()
+                .startScan(Collections.singletonList(scanFilter), settings, scanCallback);
+        Toast.makeText(this, "Scan started", Toast.LENGTH_SHORT).show();
+
     }
 
     private void stopLeScan() {
-        bluetoothAdapter.getBluetoothLeScanner().stopScan(scanCallback);
-        Toast.makeText(getApplicationContext(), "Scan stopped", Toast.LENGTH_SHORT).show();
+        isScanning = false;
+        NotificationManagerCompat.from(this).notify(SERVICE_NOTIFICATION_ID, notificationIdle);
+        //scanThreadHandler.postDelayed(runnableStartScan, IDLE_PERIOD);
 
-        findSessionTokenFromDevices();
+        bluetoothAdapter.getBluetoothLeScanner().stopScan(scanCallback);
+        Toast.makeText(this, "Scan stopped", Toast.LENGTH_SHORT).show();
+        if (serverDevice != null) {
+            findSessionTokenFromDevices(serverDevice);
+        }
+        handler.postDelayed(runnableStartScan, IDLE_PERIOD);
     }
 
-    private void findSessionTokenFromDevices() {
+    private void findSessionTokenFromDevices(BluetoothDevice device) {
         try {
-            /*
-            for (BluetoothDevice device : deviceList) {
-                connectToGattServer(device);
-                if (tokenReceived != null && tokenReceived.equals(currentSessionId)) {
-                    mDatabase.child("ble_test").child("Attendance Token").setValue(currentUser.getUid()).addOnCompleteListener(new OnCompleteListener<Void>() {
-                        @Override
-                        public void onComplete(@NonNull Task<Void> task) {
-                            if (task.isSuccessful()) {
-                                attendanceSuccess = true;
-                                handler.postDelayed(new Runnable() {
-                                    @Override
-                                    public void run() {
-                                        stopSelf();
-                                    }
-                                }, 10000);
-                            }
-                        }
-                    });
-                }
-                else {
-                    mDatabase.child("ble_test").child("Failed Token").setValue(currentUser.getUid()).addOnCompleteListener(new OnCompleteListener<Void>() {
-                        @Override
-                        public void onComplete(@NonNull Task<Void> task) {
-                            if (task.isSuccessful()) {
-                                attendanceSuccess = false;
-                            }
-                        }
-                    });
-                }
+            if (bluetoothGatt != null) {
+                bluetoothGatt.close();
+                bluetoothGatt = null;
             }
-             */
-            connectToGattServer(deviceList.get(0));
-
-            handler.postDelayed(new Runnable() {
-                @Override
-                public void run() {
-                    stopSelf();
-                }
-            }, 10000);
+            deviceBlacklist.add(device);
+            connectToGattServer(device);
         }
         catch (Exception e) {
-            mDatabase.child("ble_test").child("exception").setValue(e);
+            mDatabase.child("ble_test").child("exception").push().setValue(e);
         }
     }
 
     private void connectToGattServer(BluetoothDevice device) {
-        //mDatabase.child("ble_test").child("Central Status").setValue("Connecting to " + device.getName());
         if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.M) {
             bluetoothGatt = device.connectGatt(CentralService.this, false, gattCallback, BluetoothDevice.TRANSPORT_LE);
         }
@@ -237,7 +262,6 @@ public class CentralService extends Service {
             @Override
             public void onScanResult(int callbackType, ScanResult result) {
                 processResult(result);
-                Toast.makeText(getApplicationContext(), "Scan success", Toast.LENGTH_SHORT).show();
             }
 
             @Override
@@ -245,7 +269,6 @@ public class CentralService extends Service {
                 for (ScanResult result : results) {
                     processResult(result);
                 }
-                Toast.makeText(CentralService.this, "Batch Scan success", Toast.LENGTH_SHORT).show();
             }
 
             @Override
@@ -254,12 +277,8 @@ public class CentralService extends Service {
             }
 
             private void processResult(ScanResult result) {
-                mDatabase.child("ble_test").child("devices").setValue(result.getDevice().getName());
-                if (!deviceList.contains(result.getDevice())) {
-                    Toast.makeText(CentralService.this, "Device added: "  + result.getDevice().getName(), Toast.LENGTH_SHORT).show();
-                    deviceList.add(result.getDevice());
-                }
-                if (isScanning) {
+                if (!deviceBlacklist.contains(result.getDevice())) {
+                    serverDevice = result.getDevice();
                     stopLeScan();
                 }
             }
@@ -273,7 +292,6 @@ public class CentralService extends Service {
                 switch(newState) {
                     case BluetoothProfile.STATE_CONNECTED:
                         if (status == BluetoothGatt.GATT_SUCCESS) {
-                            mDatabase.child("ble_test").child("Central Connected To:").setValue(gatt.getDevice().getName());
                             bluetoothGatt = gatt;
                             bluetoothGatt.discoverServices();
                         }
@@ -290,7 +308,6 @@ public class CentralService extends Service {
             public void onServicesDiscovered(BluetoothGatt gatt, int status) {
                 List<BluetoothGattService> services = gatt.getServices();
                 for (BluetoothGattService service : services) {
-                    mDatabase.child("ble_test").child("services").push().setValue(service.getUuid().toString());
                     if (BeamProfile.SERVICE_UUID.equals(service.getUuid())) {
                         bluetoothGatt.readCharacteristic(service.getCharacteristic(BeamProfile.CHARACTERISTIC_TOKEN_UUID));
                         return;
@@ -301,20 +318,13 @@ public class CentralService extends Service {
             @Override
             public void onCharacteristicRead(BluetoothGatt gatt, BluetoothGattCharacteristic characteristic, int status) {
                 super.onCharacteristicRead(gatt, characteristic, status);
-                mDatabase.child("ble_test").child("ReadResponseReceived").setValue(true);
-                mDatabase.child("ble_test").child(characteristic.getUuid().toString()).setValue("VALUE: " + characteristic.getStringValue(0));
                 if (BeamProfile.CHARACTERISTIC_TOKEN_UUID.equals(characteristic.getUuid())) {
                     final String stringValue = characteristic.getStringValue(0);
-                    tokenReceived = stringValue;
-                    if (stringValue.equals(currentSessionId)) {
-                        mDatabase.child("ble_test").child("attendance").child(currentUser.getUid()).setValue(true);
+                    if (stringValue.equals(attendanceToken)) {
+                        mDatabase.child("module_record").child(moduleId).child(sessionId).child(currentUser.getUid()).setValue(true);
+                        mDatabase.child("student_record").child(currentUser.getUid()).child(moduleId).child(sessionId).setValue(true);
+                        attendanceSuccess = true;
                     }
-                    else {
-                        mDatabase.child("ble_test").child("attendance").child(currentUser.getUid()).setValue(false);
-                    }
-                }
-                else {
-                    mDatabase.child("ble_test").child("NO char").setValue("No Char");
                 }
             }
         };

@@ -135,17 +135,17 @@ public class ScheduleExpandableListAdapter extends BaseExpandableListAdapter {
         try {
             final Session session = userWeeklyTimetable.getDailyTimetable(dates.get(groupPosition)).get(childPosition);
 
-            ((TextView) view.findViewById(R.id.schedule_expandable_child_code)).setText(session.getModuleID());
-            ((TextView) view.findViewById(R.id.schedule_expandable_child_name)).setText(userModules.get(session.getModuleID()));
+            ((TextView) view.findViewById(R.id.schedule_expandable_child_code)).setText(session.getModule_id());
+            ((TextView) view.findViewById(R.id.schedule_expandable_child_name)).setText(userModules.get(session.getModule_id()));
             ((TextView) view.findViewById(R.id.schedule_expandable_child_type)).setText(session.getSessionType());
-            String time = session.getTimeBegin() + " - " + session.getTimeEnd();
+            String time = session.getTime_begin() + " - " + session.getTime_end();
             ((TextView) view.findViewById(R.id.schedule_expandable_child_time)).setText(time);
             view.setOnClickListener(new View.OnClickListener() {
                 @Override
                 public void onClick(View view) {
                     MainFragmentDirections.ActionDetailedStats action = MainFragmentDirections.actionDetailedStats();
-                    action.setModuleCode(session.getModuleID());
-                    action.setModuleName(userModules.get(session.getModuleID()));
+                    action.setModuleCode(session.getModule_id());
+                    action.setModuleName(userModules.get(session.getModule_id()));
                     Navigation.findNavController(view).navigate(action);
                 }
             });

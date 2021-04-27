@@ -19,14 +19,20 @@ import java.util.Collections;
 import java.util.Comparator;
 import java.util.List;
 
+/**
+ * RecyclerViewAdapter subclass used for populating the list in DetailedStatsFragment.
+ */
 public class DetailedStatsRecyclerAdapter extends RecyclerView.Adapter<DetailedStatsRecyclerAdapter.DetailedStatsRecyclerViewHolder> {
+    /** Debug tag */
     private static final String LOG_TAG = "DStatsFragmentAdapter";
-
+    /** Whether user is Student or Lecturer */
     private String userRole;
-    private String moduleCode;
+    /** List of sessions of the specific module */
     private List<Session> userModuleSessions;
+    /** List of user attendance history */
     private Record userRecords;
 
+    /** Class for holding each row of the list */
     public static class DetailedStatsRecyclerViewHolder extends RecyclerView.ViewHolder {
 
         ImageView status;
@@ -53,6 +59,11 @@ public class DetailedStatsRecyclerAdapter extends RecyclerView.Adapter<DetailedS
         return new DetailedStatsRecyclerViewHolder(view);
     }
 
+    /**
+     * Populate row with relevant data
+     * @param holder Row container in the list
+     * @param position Position in the list
+     */
     @Override
     public void onBindViewHolder(@NonNull DetailedStatsRecyclerViewHolder holder, int position) {
         try {
@@ -61,6 +72,7 @@ public class DetailedStatsRecyclerAdapter extends RecyclerView.Adapter<DetailedS
             String time = session.getTime_begin().concat(" - ").concat(session.getTime_end());
             holder.sessionTime.setText(time);
 
+            // Check whether student has attended and display check mark, cross, or nothing
             if (((StudentModuleRecord) userRecords).getAttendance().containsKey(session.getSession_id())) {
                 boolean bool = ((StudentModuleRecord) userRecords).getAttendance().get(session.getSession_id());
                 if (bool) {
@@ -82,6 +94,10 @@ public class DetailedStatsRecyclerAdapter extends RecyclerView.Adapter<DetailedS
         }
     }
 
+    /**
+     * Get number of sessions
+     * @return Size of list, number of sessions in module
+     */
     @Override
     public int getItemCount() {
         try {
@@ -108,13 +124,12 @@ public class DetailedStatsRecyclerAdapter extends RecyclerView.Adapter<DetailedS
             Log.d(LOG_TAG, "Error getting session count: " + exception);
         }
         return 0;
-
     }
 
-    public void setModuleCode(String moduleCode) {
-        this.moduleCode = moduleCode;
-    }
-
+    /**
+     * Sort list based on session ID.
+     * @param userModuleSessions List of sessions of the specific module
+     */
     public void setUserModuleSessions(List<Session> userModuleSessions) {
         this.userModuleSessions = userModuleSessions;
         Collections.sort(this.userModuleSessions, new Comparator<Session>() {

@@ -8,22 +8,16 @@ import android.view.ViewGroup;
 import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
 import androidx.fragment.app.Fragment;
-import androidx.lifecycle.ViewModelProvider;
 import androidx.navigation.fragment.NavHostFragment;
 
-import com.example.beam.BeamViewModel;
 import com.example.beam.R;
 import com.google.android.material.button.MaterialButton;
 import com.google.firebase.auth.FirebaseAuth;
 
+/**
+ * Fragment subclass for Settings Screen with functional log out button.
+ */
 public class SettingsFragment extends Fragment {
-    BeamViewModel beamViewModel;
-
-    @Override
-    public void onCreate(@Nullable Bundle savedInstanceState) {
-        super.onCreate(savedInstanceState);
-        beamViewModel = new ViewModelProvider(getActivity()).get(BeamViewModel.class);
-    }
 
     @Nullable
     @Override
@@ -31,6 +25,11 @@ public class SettingsFragment extends Fragment {
         return inflater.inflate(R.layout.settings_fragment, container, false);
     }
 
+    /**
+     * On view created, add functionality to logout button
+     * @param view XML view of the Fragment.
+     * @param savedInstanceState Previous saved instance of the Fragment.
+     */
     @Override
     public void onViewCreated(@NonNull View view, @Nullable Bundle savedInstanceState) {
         super.onViewCreated(view, savedInstanceState);
@@ -39,12 +38,17 @@ public class SettingsFragment extends Fragment {
         logoutButton.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View view) {
+                // Sign out
                 FirebaseAuth.getInstance().signOut();
+                // Back navigate to MainFragment
                 NavHostFragment.findNavController(SettingsFragment.this).popBackStack();
             }
         });
     }
 
+    /**
+     * If no valid authentication state, back navigate to MainFragment
+     */
     @Override
     public void onResume() {
         super.onResume();

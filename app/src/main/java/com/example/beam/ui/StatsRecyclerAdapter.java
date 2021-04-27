@@ -19,6 +19,10 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
+/**
+ * RecyclerViewAdapter subclass for populating each row in the list of StatsFragment with attendance
+ * statistics of each module the user is enrolled in or teaches.
+ */
 public class StatsRecyclerAdapter extends RecyclerView.Adapter<StatsRecyclerAdapter.StatsRecyclerViewHolder> {
     private static final String LOG_TAG = "StatsFragmentAdapter";
 
@@ -33,6 +37,10 @@ public class StatsRecyclerAdapter extends RecyclerView.Adapter<StatsRecyclerAdap
         TextView moduleName;
         TextView modulePercentage;
 
+        /**
+         * Container to hold attendance statistic of one module
+         * @param itemView XML view of the container
+         */
         public StatsRecyclerViewHolder(@NonNull View itemView) {
             super(itemView);
 
@@ -67,6 +75,11 @@ public class StatsRecyclerAdapter extends RecyclerView.Adapter<StatsRecyclerAdap
         return new StatsRecyclerViewHolder(view);
     }
 
+    /**
+     * Populate each row with corresponding data
+     * @param holder Container for the row
+     * @param position Position in the list
+     */
     @Override
     public void onBindViewHolder(@NonNull StatsRecyclerViewHolder holder, int position) {
         String moduleCode = userModuleCodes.get(position);
@@ -81,7 +94,7 @@ public class StatsRecyclerAdapter extends RecyclerView.Adapter<StatsRecyclerAdap
     }
 
     private void calculateLecturerModuleStats() {
-        // TODO Implement to calculate average attendance
+        // TODO Implement to calculate average attendance. May want to move functionality to Record subclasses
     }
 
     public void setUserRole(String userRole) {
@@ -97,6 +110,8 @@ public class StatsRecyclerAdapter extends RecyclerView.Adapter<StatsRecyclerAdap
 
     public void setUserModuleRecords(List<? extends Record> userModuleRecords) {
         this.userModuleRecords = userModuleRecords;
+        // If student, obtain statistics for attendance
+        // Else, functionality not implemented so display no statistics
         if (userRole.equals("Student")) {
             for (Record record : userModuleRecords) {
                 userModuleStats.put(record.getModuleID(), record.getPercentageString());

@@ -8,53 +8,20 @@ import android.view.ViewGroup;
 import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
 import androidx.fragment.app.Fragment;
-import androidx.lifecycle.ViewModelProvider;
 
-import com.example.beam.BeamViewModel;
 import com.example.beam.R;
 import com.gauravbhola.ripplepulsebackground.RipplePulseLayout;
 
 /**
- * A simple {@link Fragment} subclass.
- * Use the {@link HomeFragment#newInstance} factory method to
- * create an instance of this fragment.
+ * Simple Fragment subclass inside Main Screen. Only for aesthetic purposes. Contains only a ripple
+ * animation available by an open source library: https://github.com/gaurav414u/android-ripple-pulse-animation
  */
 public class HomeFragment extends Fragment {
+    /** XML of ripple animation element */
     RipplePulseLayout mRipplePulseLayout;
-
-    // TODO: Rename and change types of parameters
-    private String mParam1;
-    private String mParam2;
-
-    private BeamViewModel beamViewModel;
 
     public HomeFragment() {
         // Required empty public constructor
-    }
-
-    /**
-     * Use this factory method to create a new instance of
-     * this fragment using the provided parameters.
-     *
-     * @param param1 Parameter 1.
-     * @param param2 Parameter 2.
-     * @return A new instance of fragment Home.
-     */
-    // TODO: Rename and change types and number of parameters
-    public static HomeFragment newInstance(String param1, String param2) {
-
-        HomeFragment fragment = new HomeFragment();
-        Bundle args = new Bundle();
-
-        fragment.setArguments(args);
-        return fragment;
-    }
-
-    @Override
-    public void onCreate(Bundle savedInstanceState) {
-        super.onCreate(savedInstanceState);
-
-        beamViewModel = new ViewModelProvider(getActivity()).get(BeamViewModel.class);
     }
 
     @Override
@@ -70,6 +37,9 @@ public class HomeFragment extends Fragment {
         mRipplePulseLayout = view.findViewById(R.id.layout_ripplepulse);
     }
 
+    /**
+     * On navigation to this screen, start the animation.
+     */
     @Override
     public void onResume() {
         super.onResume();

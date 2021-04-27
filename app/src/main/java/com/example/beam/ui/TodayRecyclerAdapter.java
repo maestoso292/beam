@@ -79,7 +79,6 @@ public class TodayRecyclerAdapter extends RecyclerView.Adapter<TodayRecyclerAdap
 
     @Override
     public void onBindViewHolder(@NonNull TodayRecyclerViewHolder holder, int position) {
-        //holder.status.setImageResource(ThreadLocalRandom.current().nextInt(0, 2) == 0 ? R.drawable.ic_done : R.drawable.ic_clear);
         Session currentSession = userDailyTimetable.get(position);
         holder.moduleCode.setText(currentSession.getModule_id());
         holder.moduleName.setText(userModules.get(currentSession.getModule_id()));

@@ -39,19 +39,29 @@ import java.util.Locale;
 import java.util.Map;
 import java.util.TimeZone;
 
+/**
+ * Fragment subclass for implementation of MainScreen. Contains ViewPager2 consisting of 4 Fragments.
+ * Responsible for scheduling broadcasts to start/stop services at session time.
+ */
 public class MainFragment extends Fragment {
+    /** Instance of ViewPager2 that should contain 4 Fragments that can be swiped between */
     private ViewPager2 pager;
+    // TODO Tab headings may be unnecessary.
+    /** Tab headings of each Fragment in ViewPager2 */
     private TabLayout tabLayout;
+    /** Adapter for ViewPager2. */
     private MainFragmentAdapter adapter;
-
+    /** Firebase Authentication instance for getting authentication state */
     private FirebaseAuth mAuth;
+    /** Current authentication state */
     private FirebaseUser currentUser;
-
+    /** Navigation controller to navigate to different screens */
     private NavController navController;
+    /** BeamViewModel instance for obtaining relevant data from database*/
     private BeamViewModel beamViewModel;
-
+    /** AlarmManager instance for scheduling broadcasts */
     private AlarmManager alarmManager;
-
+    /** Boolean of whether this is first load of the app */
     private boolean firstLoad;
 
     @Override
@@ -69,12 +79,19 @@ public class MainFragment extends Fragment {
         return inflater.inflate(R.layout.main_fragment, container, false);
     }
 
+    /**
+     * Add functionality to settings icon. Obtain ViewPager2 instance and sets new adapter. Attach
+     * tab headings.
+     * @param view XML view of Fragment
+     * @param savedInstanceState Previous saved state of Fragment
+     */
     @Override
     public void onViewCreated(@NonNull View view, @Nullable Bundle savedInstanceState) {
         super.onViewCreated(view, savedInstanceState);
 
         alarmManager = (AlarmManager) getContext().getSystemService(Context.ALARM_SERVICE);
 
+        // On press of settings icon, navigate to Settings Screen
         ActionMenuItemView settingsButton = view.findViewById(R.id.toolbar_settings_button);
         settingsButton.setOnClickListener(new View.OnClickListener() {
             @Override
@@ -87,6 +104,7 @@ public class MainFragment extends Fragment {
         tabLayout = view.findViewById(R.id.tab_layout);
         adapter = new MainFragmentAdapter(this);
 
+        // Set adapter and tab headings for ViewPager2
         pager.setAdapter(adapter);
         new TabLayoutMediator(tabLayout, pager, new TabLayoutMediator.TabConfigurationStrategy() {
             @Override
@@ -96,23 +114,31 @@ public class MainFragment extends Fragment {
         }).attach();
     }
 
+    /**
+     * On arrival at MainFragment, navigate to Splash Screen on first load/no authentication
+     * or schedule broadcasts at sessions start/end times.
+     */
     @Override
     public void onResume() {
         super.onResume();
         currentUser = mAuth.getCurrentUser();
+        // On first load or with no authentication state, navigate to Splash Screen
         if (beamViewModel.isFirstLoad() || currentUser == null) {
             Log.d("MainFragment", "Redirecting to Splash");
             beamViewModel.setFirstLoad(false);
             navController.navigate(R.id.splashFragment);
         }
         else {
+            // Set to display HomeFragment first
             pager.setCurrentItem(0);
 
+            // Obtain current date and time based on Malaysian time
             Calendar calendar = Calendar.getInstance(TimeZone.getTimeZone("Asia/Kuala_Lumpur"));
             final String date = String.format(Locale.ENGLISH, "%04d%02d%02d", calendar.get(Calendar.YEAR), calendar.get(Calendar.MONTH)+1, calendar.get(Calendar.DAY_OF_MONTH));
             final String currentTime = String.format(Locale.ENGLISH, "%02d%02d", calendar.get(Calendar.HOUR_OF_DAY), calendar.get(Calendar.MINUTE));
 
             Log.d("MainFragment", "Loading Timetable");
+            // Load weekly timetable
             beamViewModel.getUserWeeklyTimetable().observe(getViewLifecycleOwner(), new Observer<TimeTable>() {
                 @Override
                 public void onChanged(TimeTable timeTable) {
@@ -124,14 +150,16 @@ public class MainFragment extends Fragment {
                     }
 
                     try {
+                        // Get daily timetable
                         List<Session> sessions = timeTable.getDailyTimetable(date);
                         Log.d("MainFragment", "Sessions Size: " + sessions.size());
+                        // For each session, schedule corresponding broadcasts
                         for (Session session : sessions) {
                             if (currentTime.compareTo(session.getTime_begin()) > 0) {
                                 Log.d("MainFragment", "Current time > session time");
                                 continue;
                             }
-
+                            // Get corresponding OS time for session start and end
                             long sessionBeginMillisecond = getMillisecondForSessionTime(session.getTime_begin());
                             long sessionEndMillisecond = getMillisecondForSessionTime(session.getTime_end());
 
@@ -142,6 +170,9 @@ public class MainFragment extends Fragment {
                             PendingIntent startPIntent;
                             PendingIntent stopPIntent;
                             String userRole = beamViewModel.getUserDetails().getValue().getRole();
+                            // If student, schedule broadcasts for CentralService.
+                            // Else if lecturer, schedule broadcasts for Open and Close AttendanceService
+                            // Else, something has gone wrong.
                             if (userRole.equals("Student")) {
                                 startPIntent = getPIntentForServiceBroadcast(session.getTime_begin(), BeamBroadcastReceiver.CENTRAL_SERVICE, BeamBroadcastReceiver.START_SERVICE, extras);
                                 stopPIntent = getPIntentForServiceBroadcast(session.getTime_end(), BeamBroadcastReceiver.CENTRAL_SERVICE, BeamBroadcastReceiver.STOP_SERVICE, extras);
@@ -156,6 +187,8 @@ public class MainFragment extends Fragment {
                                 return;
                             }
 
+                            // If either intent is null, broadcast has already been scheduled for this session.
+                            // Continue to broadcast for next session.
                             if (startPIntent==null) {
                                 Log.d("MainFragment", "Start Intent Already Exists");
                                 continue;
@@ -166,6 +199,9 @@ public class MainFragment extends Fragment {
                             }
 
                             Log.d("MainFragment", "Service Alarm posted: " + sessionBeginMillisecond);
+                            // Schedule broadcasts
+                            // RTC_WAKEUP is to wake up the device on service start
+                            // .setAndAllowWhileIdle is to allow broadcasts to be sent and handled while app is closed
                             if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.M) {
                                 alarmManager.setAndAllowWhileIdle(AlarmManager.RTC_WAKEUP, sessionBeginMillisecond, startPIntent);
                                 alarmManager.setAndAllowWhileIdle(AlarmManager.RTC_WAKEUP, sessionEndMillisecond, stopPIntent);
@@ -191,11 +227,12 @@ public class MainFragment extends Fragment {
      * @return Corresponding millisecond
      */
     private long getMillisecondForSessionTime(String sessionTime) {
+        // Get current Malaysian time
         Calendar calendar = Calendar.getInstance(TimeZone.getTimeZone("Asia/Kuala_Lumpur"));
-
+        // Convert 24 hour format to digit
         int sessionBeginHour = Integer.parseInt(sessionTime.substring(0, 2),10);
         int sessionBeginMinute = Integer.parseInt(sessionTime.substring(2),10);
-
+        // Set time of day to session time
         calendar.set(Calendar.HOUR_OF_DAY, sessionBeginHour);
         calendar.set(Calendar.MINUTE, sessionBeginMinute);
         calendar.set(Calendar.SECOND, 0);
@@ -211,12 +248,14 @@ public class MainFragment extends Fragment {
      * @return PendingIntent to start a Beam background service
      */
     private PendingIntent getPIntentForServiceBroadcast(String time, int service, int command, @Nullable Map<String, String> extras) {
+        // Obtain unique request code, unique for each session (but not for each user!)
         int requestCode = Integer.parseInt("1" + time + service + command, 10);
         Log.d("MainFragment", "RequestCode: " + requestCode);
 
         Intent intent = new Intent(getContext(), BeamBroadcastReceiver.class);
         intent.setAction(BeamBroadcastReceiver.INTENT_ACTION);
 
+        // Pass module details, and service/command codes to broadcasted intent
         intent.putExtra("service", service);
         intent.putExtra("command", command);
         if (extras != null) {
@@ -224,6 +263,7 @@ public class MainFragment extends Fragment {
                 intent.putExtra(entry.getKey(), entry.getValue());
             }
         }
+        // FLAG_NO_CREATE will mean that getBroadcast returns ull if broadcast with request code already exists
         if (PendingIntent.getBroadcast(getContext(), requestCode, intent, PendingIntent.FLAG_NO_CREATE) == null) {
             return PendingIntent.getBroadcast(getContext(), requestCode, intent, 0);
         }

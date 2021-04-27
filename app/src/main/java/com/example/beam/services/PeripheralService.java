@@ -38,43 +38,66 @@ import com.google.firebase.database.FirebaseDatabase;
 import java.nio.charset.StandardCharsets;
 
 public class PeripheralService extends Service {
+    /** Maximum time allowed for service to advertise itself as a BLE device. Value of 30000ms */
     private static final long ADVERTISE_PERIOD = 300000;
+    /** Notification ID for the background service. */
     private static final int SERVICE_NOTIFICATION_ID = 1;
-
-    private boolean isScanning = false;
 
     private BluetoothManager bluetoothManager;
     private BluetoothAdapter bluetoothAdapter;
 
+    /** Instance of BLE connection */
     private BluetoothGattServer bluetoothGattServer;
+    /** Callback of what to do on BLE connections */
     private BluetoothGattServerCallback bluetoothGattServerCallback;
 
+    /** BLE advertiser */
     private BluetoothLeAdvertiser bluetoothLeAdvertiser;
+    /** Callback of what to do on successful/failed advertising */
     private AdvertiseCallback advertiseCallback;
 
+    /** Reference to root of Firebase Database */
     private DatabaseReference mDatabase;
+    /** Current authentication state */
     private FirebaseUser currentUser;
 
+    /** Boolean to check if the service has already been started */
     private boolean serviceStarted;
+    /** Boolean to check if a BLE connection has occurred. */
     private boolean hasConnected;
-
+    /** Handler to post runnables */
     private Handler handler = new Handler();
+    /** Attendance token of the current session. Should take on the value of the
+     *  concatenation of module ID and session ID.
+     */
     private String attendanceToken;
 
+    /**
+     * Starts the service. Starts advertising as a BLE capable device. May be called multiple
+     * times per instance.
+     * @param intent Intent instance passed by class that started the service.
+     * @param flags
+     * @param startId
+     * @return
+     */
     @Override
     public int onStartCommand(Intent intent, int flags, int startId) {
+        // Do nothing is service has already started
         if (serviceStarted) {
             return START_STICKY;
         }
         serviceStarted = true;
 
+        // Obtain session details and form attendance token
         String moduleId = intent.getStringExtra("moduleId");
         String sessionId = intent.getStringExtra("sessionId");
         attendanceToken = BeamProfile.createAttendanceToken(moduleId, sessionId);
 
+        // Create an Intent instance in case user taps the notification. Causes app to open.
         Intent notificationIntent = new Intent(this, MainActivity.class);
         PendingIntent pendingIntent = PendingIntent.getActivity(this, 0, notificationIntent, 0);
 
+        // Notification for BLE advertising
         Notification notification;
         if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
             notification = new NotificationCompat.Builder(this, MainActivity.NOTIF_CHANNEL_SERVICE_ID)
@@ -115,6 +138,10 @@ public class PeripheralService extends Service {
         return null;
     }
 
+    /**
+     * Creates instance of the service. Obtains current authentication state, reference to
+     * database root, and Bluetooth related classes.
+     */
     @Override
     public void onCreate() {
         super.onCreate();
@@ -127,6 +154,9 @@ public class PeripheralService extends Service {
         bluetoothAdapter = bluetoothManager.getAdapter();
     }
 
+    /**
+     * Destroys instance of service. Close any BLE connections
+     */
     @Override
     public void onDestroy() {
         stopAdvertising();
@@ -136,8 +166,12 @@ public class PeripheralService extends Service {
         super.onDestroy();
     }
 
+    /**
+     * Initialises GATT server and start advertising as a BLE capable device.
+     */
     @RequiresApi(api = Build.VERSION_CODES.LOLLIPOP)
     private void openGattServer() {
+        // TODO This might be why some devices fail to start advertising. Differing Bluetooth components?
         if (!bluetoothAdapter.isMultipleAdvertisementSupported()) {
             Toast.makeText(getApplicationContext(), "Multiple advertising not supported", Toast.LENGTH_SHORT).show();
         }
@@ -146,6 +180,10 @@ public class PeripheralService extends Service {
         startAdvertising();
     }
 
+    /**
+     * Initialises GATT server with BeamService and characteristics from BeamProfile. Writes
+     * attendance token into the characteristic.
+     */
     private void initialiseServer() {
         Toast.makeText(this, "Opening server", Toast.LENGTH_SHORT).show();
 
@@ -156,6 +194,11 @@ public class PeripheralService extends Service {
         bluetoothGattServer.addService(bluetoothGattService);
     }
 
+    /**
+     * Initialises what to do during BLE connections. On connection open, stop advertising. On
+     * connection close, start advertising. On request to read characteristic, send attendance token
+     * over to requester.
+     */
     private void initialiseGattServerCallback() {
         bluetoothGattServerCallback = new BluetoothGattServerCallback() {
             @Override
@@ -184,6 +227,9 @@ public class PeripheralService extends Service {
         };
     }
 
+    /**
+     * Initialises advertising settings and start advertising as a BLE device.
+     */
     private void startAdvertising() {
         bluetoothLeAdvertiser = bluetoothAdapter.getBluetoothLeAdvertiser();
         if (bluetoothLeAdvertiser == null) {
@@ -191,6 +237,7 @@ public class PeripheralService extends Service {
             return;
         }
 
+        // Advertise BeamService UUID as defined in BeamProfile
         AdvertiseSettings settings = new AdvertiseSettings.Builder()
                 .setAdvertiseMode(AdvertiseSettings.ADVERTISE_MODE_LOW_POWER)
                 .setConnectable(true)
@@ -208,6 +255,7 @@ public class PeripheralService extends Service {
                 .setIncludeTxPowerLevel(true)
                 .build();
 
+        // If advertising failed, continuously attempts to start advertising.
         if (advertiseCallback == null) {
             advertiseCallback = new AdvertiseCallback() {
                 @Override
@@ -225,13 +273,15 @@ public class PeripheralService extends Service {
             };
         }
 
+        // Start advertising
         bluetoothLeAdvertiser.startAdvertising(settings, advertiseData, scanResponseData, advertiseCallback);
+        // After a certain period of time, if no connections have occurred, stop the service
         Runnable runnableStartAdvertising = new Runnable() {
             @Override
             public void run() {
                 if (hasConnected) {
                     hasConnected = false;
-                    handler.postDelayed(this::run, ADVERTISE_PERIOD);
+                    handler.postDelayed(this, ADVERTISE_PERIOD);
                 }
                 else {
                     Toast.makeText(PeripheralService.this, "No connection over the past minute", Toast.LENGTH_SHORT).show();
@@ -242,6 +292,9 @@ public class PeripheralService extends Service {
         handler.postDelayed(runnableStartAdvertising,ADVERTISE_PERIOD);
     }
 
+    /**
+     * Stop advertising as a BLE device.
+     */
     private void stopAdvertising() {
         bluetoothLeAdvertiser.stopAdvertising(advertiseCallback);
         Toast.makeText(this, "Stopped Advertising", Toast.LENGTH_SHORT).show();

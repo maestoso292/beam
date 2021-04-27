@@ -61,16 +61,6 @@
             app:popUpToInclusive="false" />/>
     </fragment>
     <fragment
-        android:id="@+id/permissons"
-        android:name="com.example.beam.Permissons"
-        android:label="permissions_fragment"
-        tools:layout="@layout/permissions_fragment" />
-    <fragment
-        android:id="@+id/home_screen"
-        android:name="com.example.beam.ui.HomeFragment"
-        android:label="home_fragment"
-        tools:layout="@layout/home_fragment" />
-    <fragment
         android:id="@+id/splashFragment"
         android:name="com.example.beam.ui.SplashFragment"
         android:label="splash_fragment"

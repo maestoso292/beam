@@ -10,10 +10,8 @@ import android.widget.Toast;
 import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
 import androidx.fragment.app.Fragment;
-import androidx.lifecycle.ViewModelProvider;
 import androidx.navigation.fragment.NavHostFragment;
 
-import com.example.beam.BeamViewModel;
 import com.example.beam.R;
 import com.google.android.gms.tasks.OnCompleteListener;
 import com.google.android.gms.tasks.Task;
@@ -21,25 +19,12 @@ import com.google.android.material.button.MaterialButton;
 import com.google.android.material.textfield.TextInputEditText;
 import com.google.firebase.auth.AuthResult;
 import com.google.firebase.auth.FirebaseAuth;
-import com.google.firebase.auth.FirebaseUser;
 
 public class LoginFragment extends Fragment {
-    public static String LOGIN_SUCCESSFUL = "LOGIN_SUCCESSFUL";
-
-    private FirebaseUser currentUser;
     private FirebaseAuth mAuth;
 
     private TextInputEditText emailEditText;
     private TextInputEditText passwordEditText;
-    private MaterialButton LoginButton;
-
-    private BeamViewModel beamViewModel;
-
-    @Override
-    public void onCreate(@Nullable Bundle savedInstanceState) {
-        super.onCreate(savedInstanceState);
-        beamViewModel = new ViewModelProvider(getActivity()).get(BeamViewModel.class);
-    }
 
     @Nullable
     @Override
@@ -47,14 +32,19 @@ public class LoginFragment extends Fragment {
         return inflater.inflate(R.layout.login_fragment, container, false);
     }
 
+    /**
+     * After view is created, add functionality to button.
+     * @param view XML view of Fragment
+     * @param savedInstanceState Previous saved instance of Fragment
+     */
     @Override
     public void onViewCreated(@NonNull View view, @Nullable Bundle savedInstanceState) {
         super.onViewCreated(view, savedInstanceState);
         mAuth = FirebaseAuth.getInstance();
         emailEditText = view.findViewById(R.id.login_email);
         passwordEditText = view.findViewById(R.id.login_password);
-        LoginButton = view.findViewById(R.id.login_button);
-        LoginButton.setOnClickListener(new View.OnClickListener() {
+        MaterialButton loginButton = view.findViewById(R.id.login_button);
+        loginButton.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View view) {
                 login();
@@ -62,7 +52,11 @@ public class LoginFragment extends Fragment {
         });
     }
 
-    // TODO Authenticate user
+    /**
+     * Obtain email and password from text fields. Attempt to authenticate using Firebase
+     * Authentication. If successful, back navigate to Splash Screen. Else, notify user of
+     * error.
+     */
     private void login(){
         String username = emailEditText.getText().toString().trim();
         String password = passwordEditText.getText().toString().trim();
@@ -82,11 +76,5 @@ public class LoginFragment extends Fragment {
                 }
             });
         }
-    }
-
-    @Override
-    public void onResume() {
-        super.onResume();
-        currentUser = mAuth.getCurrentUser();
     }
 }

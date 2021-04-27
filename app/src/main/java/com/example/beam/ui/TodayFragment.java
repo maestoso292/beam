@@ -26,6 +26,11 @@ import java.util.Locale;
 import java.util.Map;
 import java.util.TimeZone;
 
+/**
+ * Fragment subclass to display daily schedule of session for modules user is enrolled in
+ * or teaches. Displays data as a list using RecyclerView and populates list using custom
+ * adapter.
+ */
 public class TodayFragment extends Fragment {
     private static final String LOG_TAG = "TodayFragment";
 
@@ -40,6 +45,12 @@ public class TodayFragment extends Fragment {
         return inflater.inflate(R.layout.today_fragment, container, false);
     }
 
+    /**
+     * On view created, obtain current date (YYYYMMDD), fetch schedule for the date and pass
+     * schedule to the adapter
+     * @param view XML view of the Fragment
+     * @param savedInstanceState Previous saved state of the Fragment
+     */
     @Override
     public void onViewCreated(@NonNull View view, @Nullable Bundle savedInstanceState) {
         super.onViewCreated(view, savedInstanceState);
@@ -51,9 +62,11 @@ public class TodayFragment extends Fragment {
         recyclerView.setAdapter(recyclerViewAdapter);
         recyclerView.setLayoutManager(new LinearLayoutManager(getContext()));
 
+        // Obtain current Malaysian date
         Calendar calendar = Calendar.getInstance(TimeZone.getTimeZone("Asia/Kuala_Lumpur"));
         final String date = String.format(Locale.ENGLISH, "%04d%02d%02d", calendar.get(Calendar.YEAR), calendar.get(Calendar.MONTH)+1, calendar.get(Calendar.DAY_OF_MONTH));
         Log.d(LOG_TAG, "Date today: " + date);
+        // Obtain details, modules, and weekly timetable.
         beamViewModel = new ViewModelProvider(getActivity()).get(BeamViewModel.class);
         beamViewModel.getUserDetails().observe(getViewLifecycleOwner(), new Observer<BeamUser>() {
             @Override
@@ -68,6 +81,7 @@ public class TodayFragment extends Fragment {
                     @Override
                     public void onChanged(TimeTable timeTable) {
                         try {
+                            // Pass daily timetable of the current date to the adapter
                             recyclerViewAdapter.setUserDailyTimetable(timeTable.getDailyTimetable(date));
                             Log.d(LOG_TAG, timeTable.getDailyTimetable(date).toString());
                         }

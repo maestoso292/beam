@@ -7,10 +7,20 @@ import androidx.viewpager2.adapter.FragmentStateAdapter;
 import java.util.ArrayList;
 import java.util.List;
 
+/**
+ * FragmentStateAdapter subclass for populating ViewPager2 in MainFragment with 4 Fragments:
+ * Home, Today, Schedule, and Stats.
+ */
 public class MainFragmentAdapter extends FragmentStateAdapter {
+    /** List of tab headings */
     private List<String> tabHeadings;
+    /** List of fragments */
     private List<Fragment> fragmentList;
 
+    /**
+     * Create the 4 fragments.
+     * @param fragment Fragment adapter is attached to.
+     */
     MainFragmentAdapter(Fragment fragment) {
         super(fragment);
 

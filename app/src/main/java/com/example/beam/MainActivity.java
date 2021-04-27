@@ -20,7 +20,10 @@ import com.google.firebase.auth.FirebaseUser;
 import java.util.Arrays;
 
 
-// TODO DON'T TOUCH ANYTHING HERE FOR NOW
+/**
+ * AppCompatActivity subclass that starts the application lifecycle. Responsible for hosting the
+ * Fragment destinations. Responsible for initialising a notification channel.
+ */
 public class MainActivity extends AppCompatActivity {
     public static final String NOTIF_CHANNEL_SERVICE_ID = "BEAM_SERVICE";
     public static final String NOTIF_CHANNEL_MISC_ID = "BEAM_MISC";
@@ -60,6 +63,10 @@ public class MainActivity extends AppCompatActivity {
         beamViewModel = new ViewModelProvider(this).get(BeamViewModel.class);
     }
 
+    /**
+     * Create a valid notification channel for Android to pos notifications to user. Notifications in
+     * newer versions of Android reqiure a valid notification channel
+     */
     @RequiresApi(api = Build.VERSION_CODES.O)
     private void createNotificationChannel() {
         int importance = NotificationManager.IMPORTANCE_DEFAULT;

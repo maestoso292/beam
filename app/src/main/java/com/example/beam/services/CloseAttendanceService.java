@@ -23,21 +23,38 @@ import java.util.Calendar;
 import java.util.Locale;
 import java.util.TimeZone;
 
+/**
+ * Background service to update status of session in database to "Closed"
+ */
 public class CloseAttendanceService extends Service {
+    /** Debug tag */
     private static final String LOG_TAG = "CloseAttdService";
+    /** Notification ID for the background service. */
     private static final int SERVICE_NOTIFICATION_ID = 1;
-
+    /** Reference to root of Firebase Database. Used for updating database */
     DatabaseReference mDatabase;
+    /** Current signed in user. Used for updating database */
     FirebaseUser currentUser;
 
+    /**
+     * Starts the background service and posts a notification to the user. Updates session status
+     * in the database.
+     * @param intent Intent instance passed by class that started the service
+     * @param flags
+     * @param startId
+     * @return
+     */
     @Override
     public int onStartCommand(Intent intent, int flags, int startId) {
+        // Obtain session details
         String moduleId = intent.getStringExtra("moduleId");
         String sessionId = intent.getStringExtra("sessionId");
 
+        // Create Intent in the case the user taps the notification. Causes app to start on tap.
         Intent notificationIntent = new Intent(this, MainActivity.class);
         PendingIntent pendingIntent = PendingIntent.getActivity(this, 0, notificationIntent, 0);
 
+        // Notification for closing attendance
         Notification notification;
         if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
             notification = new NotificationCompat.Builder(this, MainActivity.NOTIF_CHANNEL_SERVICE_ID)
@@ -61,11 +78,15 @@ public class CloseAttendanceService extends Service {
                     .setAutoCancel(false)
                     .build();
         }
+        // Ensure Android does not stop the background service after some time has passed.
+        // Notification is necessary
         startForeground(SERVICE_NOTIFICATION_ID, notification);
 
+        // Obtain current date according to Malaysian time
         Calendar calendar = Calendar.getInstance(TimeZone.getTimeZone("Asia/Kuala_Lumpur"));
         final String date = String.format(Locale.ENGLISH, "%04d%02d%02d", calendar.get(Calendar.YEAR), calendar.get(Calendar.MONTH)+1, calendar.get(Calendar.DAY_OF_MONTH));
 
+        // Update session status in database
         mDatabase.child("timetable")
                 .child(date)
                 .child(moduleId)
@@ -79,6 +100,7 @@ public class CloseAttendanceService extends Service {
                 .child("status")
                 .setValue("Closed");
 
+        // After 2s has passed, stop the service. Database updates should be finished by this point
         new Handler().postDelayed(new Runnable() {
             @Override
             public void run() {
@@ -89,6 +111,10 @@ public class CloseAttendanceService extends Service {
         return START_STICKY;
     }
 
+    /**
+     * Creates instance of the service. Obtains current user authentication state and
+     * reference to database root.
+     */
     @Override
     public void onCreate() {
         super.onCreate();
@@ -97,6 +123,9 @@ public class CloseAttendanceService extends Service {
         mDatabase = FirebaseDatabase.getInstance().getReference();
     }
 
+    /**
+     * Destroys instance of service and removes service notification.
+     */
     @Override
     public void onDestroy() {
         NotificationManagerCompat.from(this).cancel(SERVICE_NOTIFICATION_ID);

@@ -23,14 +23,23 @@ import com.google.firebase.database.FirebaseDatabase;
 import java.util.HashMap;
 import java.util.Map;
 
+/**
+ * Fragment subclass to display weekly schedule using an ExpandableListView.
+ */
 public class ScheduleFragment extends Fragment {
+    /** Multi-level list. Level 1: Day of week. Level 2: Sessions in the day */
     private ExpandableListView expandableListView;
+    /** Adapter for multi-level list. Populates the list */
     private ScheduleExpandableListAdapter expandableListAdapter;
+    /** BeamViewModel instance to obtain relevant data */
     private BeamViewModel beamViewModel;
+    /** Reference to database root */
     private DatabaseReference mDatabase;
+    /** Map of module ID to Name containing modules user teaches or is enrolled in. */
     private Map<String, String> modules;
+    /** Weekly timetable instance */
     private TimeTable timeTable;
-
+    /** Current authentication state */
     private FirebaseUser currentUser;
 
     @Nullable
@@ -39,6 +48,11 @@ public class ScheduleFragment extends Fragment {
         return inflater.inflate(R.layout.schedule_fragment, container, false);
     }
 
+    /**
+     * Instantiates multi-level list, fetch relevant data and pass to corresponding adapter.
+     * @param view XML view of Fragment.
+     * @param savedInstanceState Previous saved instance of the Fragment.
+     */
     @Override
     public void onViewCreated(@NonNull View view, @Nullable Bundle savedInstanceState) {
         super.onViewCreated(view, savedInstanceState);
@@ -50,6 +64,7 @@ public class ScheduleFragment extends Fragment {
         expandableListAdapter.setUserModules(new HashMap<>());
         expandableListView.setAdapter(expandableListAdapter);
 
+        // Obtain weekly timetable and pass to list adapter
         beamViewModel = new ViewModelProvider(getActivity()).get(BeamViewModel.class);
         beamViewModel.getUserWeeklyTimetable().observe(getViewLifecycleOwner(), new Observer<TimeTable>() {
             @Override

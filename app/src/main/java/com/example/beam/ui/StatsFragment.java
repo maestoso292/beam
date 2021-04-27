@@ -21,6 +21,10 @@ import com.example.beam.models.Record;
 import java.util.List;
 import java.util.Map;
 
+/**
+ * Fragment subclass to display general attendance statistics (using RecyclerView) of each module
+ * user is enrolled in or teaches.
+ */
 public class StatsFragment extends Fragment {
     private static final String LOG_TAG = "StatsFragment";
 
@@ -36,6 +40,11 @@ public class StatsFragment extends Fragment {
         return inflater.inflate(R.layout.stats_fragment, container, false);
     }
 
+    /**
+     * On view created, fetch relevant data and pass to RecyclerView adapter to populate each row
+     * @param view XML view of the Fragment
+     * @param savedInstanceState Previous saved state of the Fragment
+     */
     @Override
     public void onViewCreated(@NonNull View view, @Nullable Bundle savedInstanceState) {
         super.onViewCreated(view, savedInstanceState);
@@ -57,6 +66,7 @@ public class StatsFragment extends Fragment {
 
     }
 
+    // Load attendance history
     private void loadRecords() {
         beamViewModel.getUserModules().observe(getViewLifecycleOwner(), new Observer<Map<String, String>>() {
             @Override

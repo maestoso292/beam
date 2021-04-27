@@ -38,15 +38,25 @@ import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
 
+/**
+ * Background service for taking attendance. Starts a BLE scan, finds the attendance token in
+ * other BLE devices, update the database, and start PeripheralService.
+ */
 public class CentralService extends Service {
+    /** Maximum time allowed for a continuous BLE device scan. Value of 15000ms. */
     private static final long SCAN_PERIOD = 15000;
+    /** Idle period between BLE device scans. Value of 10000ms. */
     private static final long IDLE_PERIOD = 10000;
+
+    /** Notification ID for the background service. */
     private static final int SERVICE_NOTIFICATION_ID = 1;
+    /** Notification ID for successful attendance taking. */
     private static final int SUCCESS_NOTIFICATION_ID = 2;
-
+    /** Boolean to check if the service has already been started */
     private boolean serviceStarted;
+    /** Boolean to check if a BLE device scan is occurring. */
     private boolean isScanning;
-
+    /** Handler to post runnables */
     private Handler handler;
 
     private BluetoothManager bluetoothManager;
@@ -70,11 +80,22 @@ public class CentralService extends Service {
     private Notification notificationIdle;
     private Notification notificationSuccess;
 
+    /** Runnable to stop a BLE scan */
     private Runnable runnableStopScan;
+    /** Runnable to start a BLE scan or start PeripheralService if attendance is successful */
     private Runnable runnableStartScan;
 
+    /**
+     * Starts the background service and posts a notification to the user. Initialises scan and Gatt
+     * callbacks and starts a BLE device scan. May be called several times per instance.
+     * @param intent Intent instance passed by class that started the service
+     * @param flags
+     * @param startId
+     * @return
+     */
     @Override
     public int onStartCommand(Intent intent, int flags, int startId) {
+        // Do nothing if service was already started
         if (serviceStarted) {
             return START_STICKY;
         }
@@ -82,13 +103,16 @@ public class CentralService extends Service {
         serviceStarted = true;
         attendanceSuccess = false;
 
+        // Obtain session details and form the attendance token
         moduleId = intent.getStringExtra("moduleId");
         sessionId = intent.getStringExtra("sessionId");
         attendanceToken = BeamProfile.createAttendanceToken(moduleId, sessionId);
 
+        // Create an Intent instance in case user taps the notification. Causes app to open.
         Intent notificationIntent = new Intent(this, MainActivity.class);
         PendingIntent pendingIntent = PendingIntent.getActivity(this, 0, notificationIntent, 0);
 
+        // Notification for BLE scan initialised
         notificationScan = new NotificationCompat.Builder(this, MainActivity.NOTIF_CHANNEL_SERVICE_ID)
                 .setContentTitle("Taking Attendance")
                 .setContentText("Scanning for nearby devices...")
@@ -98,7 +122,7 @@ public class CentralService extends Service {
                 .setOnlyAlertOnce(true)
                 .setAutoCancel(false)
                 .build();
-
+        // Notification for period when no scan is occuring
         notificationIdle = new NotificationCompat.Builder(this, MainActivity.NOTIF_CHANNEL_SERVICE_ID)
                 .setContentTitle("Taking Attendance")
                 .setContentText("Waiting to start scan...")
@@ -108,7 +132,7 @@ public class CentralService extends Service {
                 .setOnlyAlertOnce(true)
                 .setAutoCancel(false)
                 .build();
-
+        // Notification for attendance success
         notificationSuccess = new NotificationCompat.Builder(this, MainActivity.NOTIF_CHANNEL_MISC_ID)
                 .setContentTitle("Attendance Taken")
                 .setContentIntent(pendingIntent)
@@ -118,6 +142,8 @@ public class CentralService extends Service {
                 .setAutoCancel(true)
                 .build();
 
+        // Ensure Android does not stop the background service after some time has passed.
+        // Notification is necessary
         startForeground(SERVICE_NOTIFICATION_ID, notificationScan);
 
         if (mDatabase == null) {
@@ -126,14 +152,18 @@ public class CentralService extends Service {
 
         handler = new Handler();
 
+        // Initialise callbacks and start a BLE device scan
         initialiseScanCallback();
         initialiseGattCallback();
-
         startLeScan();
 
         return START_STICKY;
     }
 
+    /**
+     * Creates an instance of the service. Finds current user, database reference, and Bluetooth related instances.
+     * Initialises runnables for starting and stopping scans periodically
+     */
     @Override
     public void onCreate() {
         super.onCreate();
@@ -149,6 +179,7 @@ public class CentralService extends Service {
         bluetoothManager = (BluetoothManager) getSystemService(BLUETOOTH_SERVICE);
         bluetoothAdapter = bluetoothManager.getAdapter();
 
+        // Stop scan if currently scanning
         runnableStopScan = new Runnable() {
             @Override
             public void run() {
@@ -158,6 +189,8 @@ public class CentralService extends Service {
             }
         };
 
+        // If attendance is successful, start PeripheralService (Advertise attendance tokens)
+        // Else, start BLE device scan
         runnableStartScan = new Runnable() {
             @Override
             public void run() {
@@ -184,6 +217,10 @@ public class CentralService extends Service {
         return null;
     }
 
+    /**
+     * Destroys current instance of the service. Stops BLE device scans and closes any connections
+     * to BLE devices. Remove service notification (Keep the one for attendance success).
+     */
     @Override
     public void onDestroy() {
         if (isScanning) {
@@ -198,9 +235,13 @@ public class CentralService extends Service {
         super.onDestroy();
     }
 
+    /**
+     * Starts BLE scans for BLE devices that advertise BeamService UUID as defined in BeamProfile
+     */
     private void startLeScan() {
         serverDevice = null;
 
+        // Build scan filters to only filter devices that advertise BeamService UUID
         ScanFilter scanFilter = new ScanFilter.Builder()
                 .setServiceUuid(new ParcelUuid(BeamProfile.SERVICE_UUID))
                 .build();
@@ -218,9 +259,12 @@ public class CentralService extends Service {
         bluetoothAdapter.getBluetoothLeScanner()
                 .startScan(Collections.singletonList(scanFilter), settings, scanCallback);
         Toast.makeText(this, "Scan started", Toast.LENGTH_SHORT).show();
-
     }
 
+    /**
+     * Stops BLE scans. If any devices are available, connect and try find the attendance token for
+     * current session
+     */
     private void stopLeScan() {
         isScanning = false;
         NotificationManagerCompat.from(this).notify(SERVICE_NOTIFICATION_ID, notificationIdle);
@@ -234,6 +278,11 @@ public class CentralService extends Service {
         handler.postDelayed(runnableStartScan, IDLE_PERIOD);
     }
 
+    /**
+     * Closes any open connections. Add the device to the blacklist (so it's not connected
+     * to again). Open a connection to the BLE device.
+     * @param device BLE device to connect to and find the attendance token from
+     */
     private void findSessionTokenFromDevices(BluetoothDevice device) {
         try {
             if (bluetoothGatt != null) {
@@ -244,10 +293,15 @@ public class CentralService extends Service {
             connectToGattServer(device);
         }
         catch (Exception e) {
+            // Debug statement to see if something went wrong in the connection phase
             mDatabase.child("ble_test").child("exception").push().setValue(e);
         }
     }
 
+    /**
+     * Connects to the BLE device with gattCallback. Location permission required.
+     * @param device BLE device to connect to and find the attendance token from
+     */
     private void connectToGattServer(BluetoothDevice device) {
         if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.M) {
             bluetoothGatt = device.connectGatt(CentralService.this, false, gattCallback, BluetoothDevice.TRANSPORT_LE);
@@ -257,6 +311,10 @@ public class CentralService extends Service {
         }
     }
 
+    /**
+     * Initialises what to do when detecting a BLE device that advertises BeamService UUID. Stops
+     * scan and add device to a list.
+     */
     private void initialiseScanCallback() {
         scanCallback = new ScanCallback() {
             @Override
@@ -285,6 +343,12 @@ public class CentralService extends Service {
         };
     }
 
+    /**
+     * Initialises what to do during BLE connections. After successful connection, discover services
+     * advertised by BLE device. On discovering services, find characteristic that matches
+     * characteristic defined by BeamProfile. On read of characteristic, if value matches attendance
+     * token, update database (taking attendance) and set attendanceSuccess to true.
+     */
     private void initialiseGattCallback() {
         gattCallback = new BluetoothGattCallback() {
             @Override

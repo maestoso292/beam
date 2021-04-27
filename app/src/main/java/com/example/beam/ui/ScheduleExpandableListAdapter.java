@@ -22,22 +22,37 @@ import java.util.Locale;
 import java.util.Map;
 import java.util.TimeZone;
 
+/**
+ * BaseExpandableListAdapter subclass used to populate the multi-level expandable list in
+ * ScheduleFragment.
+ */
 public class ScheduleExpandableListAdapter extends BaseExpandableListAdapter {
+    /** Debug tag */
     private static final String LOG_TAG = "ScheduleFragmentAdapter";
+    /** List of days of the week */
     private static final String[] DAYS = {"Monday", "Tuesday", "Wednesday", "Thursday", "Friday", "Saturday", "Sunday"};
-
+    /** List of dates corresponding to each day of the week (in the current week). Format: YYYYMMDD */
     private final List<String> dates;
+    /** Context of adapter */
     private final Context context;
-
+    /** Weekly timetable of sessions in the week for modules user is enrolled in or teaches */
     private TimeTable userWeeklyTimetable;
+    /** Map of module ID to Name for modules user is enrolled in or teaches */
     private Map<String, String> userModules;
 
+    /**
+     * Creates adapter, determine date offset for the week, and creates the list of dates for the
+     * current week.
+     * @param context
+     */
     ScheduleExpandableListAdapter(Context context) {
         this.context = context;
         userWeeklyTimetable = new TimeTable();
         userModules = new HashMap<>();
 
         Calendar calendar = Calendar.getInstance(TimeZone.getTimeZone("Asia/Kuala_Lumpur"));
+        // Offset is required as Java Calendar week begins on Sunday.
+        // Offset ensures week starts on Monday.
         int calendarOffset = 0;
         switch (calendar.get(Calendar.DAY_OF_WEEK)) {
             case Calendar.TUESDAY:

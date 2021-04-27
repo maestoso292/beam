@@ -32,6 +32,11 @@ import java.util.List;
 import java.util.Map;
 import java.util.TimeZone;
 
+/**
+ * Android ViewModel subclass responsible for fetching data from the database using current user UID.
+ * Store fetched data in instances of classes from the models package. Contains MutableLiveData instances
+ * that can be observed by other classes. Unique to each Android Activity instance.
+ */
 public class BeamViewModel extends ViewModel {
     private final static String LOG_TAG = "BeamViewModel";
 
@@ -41,12 +46,11 @@ public class BeamViewModel extends ViewModel {
     private FirebaseUser currentUser;
     private DatabaseReference mDatabase;
 
+
     private MutableLiveData<BeamUser> userDetails;
     private MutableLiveData<Map<String, String>> userModules;
     private MutableLiveData<TimeTable> userWeeklyTimetable;
-
     private MutableLiveData<List<Session>> userModuleSessions;
-
     private MutableLiveData<List<? extends Record>> userRecord;
 
     public BeamViewModel() {
@@ -54,6 +58,9 @@ public class BeamViewModel extends ViewModel {
         mDatabase = FirebaseDatabase.getInstance().getReference();
     }
 
+    /**
+     * Load user details. Load modules, timetable, sessions, and attendance history.
+     */
     public void initialLoad() {
         loadUser();
 
@@ -94,6 +101,9 @@ public class BeamViewModel extends ViewModel {
         return userDetails;
     }
 
+    /**
+     * Fetch and store data from database branch: ~/users/[user uid]
+     */
     private void loadUserDetails() {
         mDatabase.child("users").child(currentUser.getUid()).addValueEventListener(new ValueEventListener() {
             @Override
@@ -121,10 +131,14 @@ public class BeamViewModel extends ViewModel {
         return userModules;
     }
 
+    /**
+     * Fetch and store data from database branch: ~/modules/[module ID]/name
+     */
     private void loadUserModules() {
         List<String> moduleCodes = new ArrayList<>(userDetails.getValue().getModules().values());
         Collections.sort(moduleCodes);
         Log.d(LOG_TAG, "Module Codes: " + moduleCodes);
+        // Hash map of module ID to name
         userModules.setValue(new LinkedHashMap<String, String>());
         final Map<String, String> tempModules = new LinkedHashMap<>();
         for (final String moduleCode : moduleCodes) {
@@ -151,9 +165,12 @@ public class BeamViewModel extends ViewModel {
         return userWeeklyTimetable;
     }
 
+    /**
+     * Fetch user weekly schedule from database branch: ~\timetable\date\[module ID(s)]
+     */
     private void loadUserWeeklyTimetable() {
         final TimeTable timeTable = new TimeTable(new HashMap<String, List<Session>>());
-
+        // TODO Duplicate code that appears in ScheduleExpandableListAdapter? Can refactor?
         List<String> dates = new ArrayList<>();
         Calendar calendar = Calendar.getInstance(TimeZone.getTimeZone("Asia/Kuala_Lumpur"));
 
@@ -187,6 +204,7 @@ public class BeamViewModel extends ViewModel {
         }
         Log.d(LOG_TAG, dates.toString());
 
+        // Fetch all the sessions for each date corresponding to each day of the current week
         for (final String date : dates) {
             mDatabase.child("timetable").child(date).addValueEventListener(new ValueEventListener() {
                 @Override
@@ -203,6 +221,7 @@ public class BeamViewModel extends ViewModel {
                     Collections.sort(sessions);
                     timeTable.putDailyTimetable(date, sessions);
                     if (timeTable.getWeeklyTimetable().size() == 7) {
+                        // Once timetable is fully loaded, update mutable live data instance
                         userWeeklyTimetable.setValue(timeTable);
                     }
                     Log.d(LOG_TAG, "User Daily Timetable " + date + ": " + timeTable.getDailyTimetable(date));
@@ -232,6 +251,9 @@ public class BeamViewModel extends ViewModel {
         return userRecord;
     }
 
+    /**
+     * Fetch user attendance history
+     */
     private void loadStudentRecord() {
         final List<StudentModuleRecord> tempList = new ArrayList<>();
         userRecord.setValue(tempList);
@@ -258,6 +280,11 @@ public class BeamViewModel extends ViewModel {
         // TODO Implement to fetch data from /record/
     }
 
+    /**
+     * Obtain list of sessions of specified module
+     * @param moduleCode Specified module
+     * @return List of all sessions (past and upcoming) for the specified module
+     */
     public MutableLiveData<List<Session>> getUserModuleSessions(String moduleCode) {
         try {
             final ArrayList<Session> list = new ArrayList<>();
